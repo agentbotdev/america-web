@@ -42,7 +42,7 @@ function Logo() {
       aria-label={AGENCIA.nombre}
       className="group flex items-center"
     >
-      <span className="wordmark wordmark-rule ml-3 text-[15px] uppercase tracking-[0.16em] transition-opacity group-hover:opacity-90 sm:text-base">
+      <span className="wordmark text-[15px] uppercase tracking-[0.16em] transition-opacity group-hover:opacity-90 sm:text-base">
         {AGENCIA.logoTexto}
       </span>
     </Link>
@@ -98,8 +98,8 @@ export function SiteHeader() {
               <Menu className="size-5" />
             </SheetTrigger>
             <SheetContent side="left" className="w-80 max-w-[85vw] gap-0 p-0">
-              <SheetHeader className="border-b border-border px-5 py-4 pl-7">
-                <SheetTitle className="wordmark wordmark-rule text-base uppercase tracking-[0.16em]">
+              <SheetHeader className="border-b border-border px-5 py-4">
+                <SheetTitle className="wordmark text-base uppercase tracking-[0.16em]">
                   {AGENCIA.logoTexto}
                 </SheetTitle>
                 <SheetDescription className="sr-only">

@@ -1,13 +1,11 @@
 "use client";
 
-import { ReactLenis } from "lenis/react";
 import type { ReactNode } from "react";
 
-// Smooth scroll cinemático (Lenis). Envuelve toda la app desde el root layout.
+// Scroll NATIVO (sin smooth-scroll). Se quitó Lenis a propósito: su inercia
+// (lerp) hacía que el scroll "se moviera solo" tras soltar y que el contenido
+// se percibiera borroso durante el desplazamiento. El scroll nativo responde
+// 1:1, es nítido y predecible.
 export function LenisProvider({ children }: { children: ReactNode }) {
-  return (
-    <ReactLenis root options={{ lerp: 0.09, smoothWheel: true }}>
-      {children}
-    </ReactLenis>
-  );
+  return <>{children}</>;
 }

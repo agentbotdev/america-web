@@ -42,7 +42,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-12 lg:px-8">
         {/* Marca + tagline + redes */}
         <div className="md:col-span-5">
-          <span className="wordmark wordmark-rule ml-3 inline-block text-lg uppercase tracking-[0.16em]">
+          <span className="wordmark inline-block text-lg uppercase tracking-[0.16em]">
             {a.logoTexto}
           </span>
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
