@@ -1,0 +1,4 @@
+# El catalogo scrapeado (80 fotos full-res) es material fuente para la carga inicial.
+# Las fotos viven en Supabase Storage, NO se suben al deploy de Vercel.
+# OJO: anclar con / inicial+final para NO excluir src/app/catalogo (la RUTA del catalogo).
+/CATALOGO/

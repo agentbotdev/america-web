@@ -1,0 +1,260 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-accent-warm: var(--accent-warm);
+  --color-electric: var(--electric);
+  --color-whatsapp: var(--whatsapp);
+  --color-success: var(--success);
+
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-heading);
+  --font-mono: var(--font-mono);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-aurora: aurora 18s ease-in-out infinite;
+}
+
+/* DARK-FIRST: la web es oscura por defecto (gris azulado, estilo iOS clean) */
+:root {
+  --radius: 0.9rem;
+
+  --background: oklch(0.135 0 0);
+  --foreground: oklch(0.975 0 0);
+
+  --card: oklch(0.185 0 0);
+  --card-foreground: oklch(0.975 0 0);
+  --popover: oklch(0.17 0 0);
+  --popover-foreground: oklch(0.975 0 0);
+
+  /* PRESS: base NEGRA + grises opacos. UN acento: el ROJO del logo. Verde SOLO WhatsApp.
+     La jerarquía la dan negro + glass + el rojo puntual (CTAs/badges). */
+  --brand: oklch(0.585 0.215 26);
+  --brand-foreground: oklch(0.99 0 0);
+  --electric: oklch(0.645 0.205 26);
+  --accent-warm: oklch(0.80 0.02 70);
+  --whatsapp: oklch(0.63 0.115 150);
+  --success: oklch(0.68 0.12 152);
+
+  --primary: var(--brand);
+  --primary-foreground: var(--brand-foreground);
+
+  --secondary: oklch(0.215 0 0);
+  --secondary-foreground: oklch(0.975 0 0);
+  --muted: oklch(0.215 0 0);
+  --muted-foreground: oklch(0.66 0 0);
+  --accent: oklch(0.24 0 0);
+  --accent-foreground: oklch(0.975 0 0);
+
+  --destructive: oklch(0.62 0.21 18);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: var(--brand);
+
+  --chart-1: #4f7cff;
+  --chart-2: #22d3ee;
+  --chart-3: #f5b740;
+  --chart-4: #22c35e;
+  --chart-5: #8b93a7;
+
+  --sidebar: oklch(0.205 0.014 264);
+  --sidebar-foreground: oklch(0.96 0.004 264);
+  --sidebar-primary: #4f7cff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: oklch(0.27 0.016 264);
+  --sidebar-accent-foreground: oklch(0.96 0.004 264);
+  --sidebar-border: oklch(1 0 0 / 9%);
+  --sidebar-ring: #4f7cff;
+
+  --glass-bg: rgba(255, 255, 255, 0.075);
+  --glass-border: rgba(255, 255, 255, 0.12);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    background-image:
+      radial-gradient(1000px 700px at 50% -12%, color-mix(in oklch, var(--brand) 9%, transparent), transparent 62%);
+  }
+  html {
+    @apply font-sans antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-heading font-bold;
+    letter-spacing: -0.03em;
+  }
+}
+
+/* ---------- Capa épica: glass, glow, profundidad (CSS plano) ---------- */
+
+/* Glass premium: el secreto NO es solo blur, es el HIGHLIGHT del borde superior +
+   un gradiente sutil top→bottom + saturate. Así no se ve "grisáceo/barato". */
+.glass,
+.glass-dark {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.045));
+  backdrop-filter: blur(26px) saturate(150%);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  border: 1px solid var(--glass-border);
+  border-top-color: rgba(255, 255, 255, 0.24);
+  box-shadow:
+    0 16px 48px -16px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.16);
+}
+/* Panel sólido premium (para contenido sobre el dark: ficha, cotizador, filtros) */
+.panel-glass {
+  background: linear-gradient(180deg, color-mix(in oklch, var(--card) 88%, white 12%), var(--card));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top-color: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
+    0 18px 50px -28px rgba(0, 0, 0, 0.85);
+}
+
+/* Sección con un plus de profundidad (más oscura que el fondo) */
+.section-dark {
+  background:
+    radial-gradient(1100px 700px at 50% -14%, color-mix(in oklch, var(--brand) 16%, transparent), transparent 58%),
+    linear-gradient(180deg, oklch(0.095 0 0), oklch(0.155 0 0));
+  color: oklch(0.975 0 0);
+}
+
+.glow-brand {
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--brand) 28%, transparent),
+    0 10px 30px -14px color-mix(in oklch, var(--brand) 32%, transparent);
+}
+/* iOS-clean: texto SÓLIDO (sin gradiente de color). La tipografía manda, no el color. */
+.text-gradient {
+  color: var(--foreground);
+}
+
+/* Tarjeta premium dark con borde sutil */
+.card-premium {
+  background: linear-gradient(180deg, color-mix(in oklch, var(--card) 78%, white 7%), var(--card));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-top-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    0 22px 52px -26px rgba(0, 0, 0, 0.9);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.bg-grid-dark {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+/* ---------- Documento exportable a PDF (brochure de favoritos) ----------
+   El documento es CLARO a propósito: un PDF se imprime / comparte y los
+   navegadores NO imprimen fondos oscuros por defecto. print-color-adjust
+   fuerza que los acentos azul marino SÍ se impriman. */
+.doc-print {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+@media print {
+  /* Fuera todo el chrome del sitio: header, footer, chatbot, toolbars */
+  header,
+  footer,
+  [data-no-print] { display: none !important; }
+
+  html, body {
+    background: #fff !important;
+    background-image: none !important;
+  }
+  main { flex: none !important; }
+
+  /* El documento ocupa la hoja sin caja/sombra/padding extra (usa @page margin) */
+  .doc-shell { padding: 0 !important; max-width: none !important; }
+  .doc-print {
+    padding: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Un vehículo por hoja */
+  .doc-page { break-before: page; }
+  .doc-page:first-of-type { break-before: auto; }
+  .doc-page { margin-bottom: 0 !important; }
+
+  /* Bloques que NO deben partirse a la mitad */
+  .doc-avoid { break-inside: avoid; }
+  /* Títulos no quedan huérfanos al pie de página */
+  .doc-print h1, .doc-print h2, .doc-print h3 { break-after: avoid; }
+  /* La foto nunca empuja todo a otra hoja */
+  .doc-print img { max-height: 8.5cm; }
+
+  @page { margin: 12mm; }
+}
+
+/* ---------- Marquee infinito (rueda de logos / garantías) ----------
+   Patrón canónico: el contenido se renderiza 2 veces y se traslada -50%
+   → loop perfecto sin cortes, con gap uniforme. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee var(--marquee-duration, 34s) linear infinite;
+}
+/* Difumina los bordes para un loop limpio y suave */
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(-0.4deg); }
+  50% { transform: translateY(-22px) rotate(0.4deg); }
+}
+@keyframes aurora {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+  50% { transform: translate(-3%, 3%) scale(1.08); opacity: 0.95; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  /* Movimientos decorativos SUAVES y continuos que SÍ deben seguir (decisión de marca):
+     cinta de marcas/beneficios, glow rojo del fondo y flote del hero. Son lentos y sutiles. */
+  .animate-marquee { animation-duration: var(--marquee-duration, 34s) !important; animation-iteration-count: infinite !important; }
+  .animate-aurora { animation-duration: 22s !important; animation-iteration-count: infinite !important; }
+  .animate-float { animation-duration: 6s !important; animation-iteration-count: infinite !important; }
+}
