@@ -19,6 +19,11 @@ export type FichaCategoria = {
 
 const m2 = (v: number | null | undefined) => formatM2(v); // null si vacío/≤0
 
+/** Metros LINEALES (frente/fondo de un lote): "10 m" — no son superficie. */
+function metrosLineales(v: number | null | undefined): string | null {
+  return v != null && v > 0 ? `${formatNumero(v)} m` : null;
+}
+
 /** Empuja un item solo si tiene valor (string no vacío). */
 function push(items: FichaItem[], label: string, value: string | null | undefined) {
   if (value != null && value !== "") items.push({ label, value });
@@ -48,8 +53,8 @@ export function fichaTecnica(p: Propiedad): FichaCategoria[] {
   push(superficies, "Superficie cubierta", m2(p.superficie_cubierta));
   push(superficies, "Superficie semicubierta", m2(p.superficie_semicubierta));
   push(superficies, "Superficie descubierta", m2(p.superficie_descubierta));
-  push(superficies, "Frente", m2(p.frente));
-  push(superficies, "Fondo", m2(p.fondo));
+  push(superficies, "Frente", metrosLineales(p.frente));
+  push(superficies, "Fondo", metrosLineales(p.fondo));
   if (superficies.length) cats.push({ titulo: "Superficies", icon: "superficies", items: superficies });
 
   // 3. Características
@@ -66,7 +71,12 @@ export function fichaTecnica(p: Propiedad): FichaCategoria[] {
         : null,
   );
   push(caracteristicas, "Orientación", p.orientacion);
-  push(caracteristicas, "Apto crédito", p.apto_credito);
+  // "No especificado" es ruido: solo mostramos el dato cuando es accionable.
+  push(
+    caracteristicas,
+    "Apto crédito",
+    p.apto_credito && p.apto_credito !== "No especificado" ? p.apto_credito : null,
+  );
   push(
     caracteristicas,
     "Expensas",

@@ -129,19 +129,39 @@ export default async function PropiedadPage({
             tieneVideo={p.tiene_video}
           />
 
-          {/* Título + badges (visible también en mobile, donde el aside va abajo) */}
+          {/* Título + precio + CTA (mobile): justo bajo la galería, así el usuario
+              puede consultar sin scrollear toda la ficha. El aside sticky cubre desktop. */}
           <div className="mt-6 lg:hidden">
             <div className="flex flex-wrap gap-1.5">
               <Badge>{labelOperacion(p.tipo_operacion)}</Badge>
               {p.destacada_web && <Badge variant="secondary">Destacada</Badge>}
+              {p.reference_code && <Badge variant="secondary">Ref. {p.reference_code}</Badge>}
             </div>
+            {/* <h1> semántico ÚNICO de la página (visible en mobile, presente en el
+                DOM en desktop). El aside repite el título como <p> para no duplicar h1. */}
             <h1 className="font-heading mt-3 text-2xl font-bold leading-tight">{titulo}</h1>
             {ubicacion && (
               <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                <MapPin className="size-3.5" /> {ubicacion}
+                <MapPin className="size-3.5 shrink-0" aria-hidden="true" /> {ubicacion}
               </p>
             )}
             <p className="mt-3 font-mono text-3xl font-semibold tracking-tight text-brand">{precio}</p>
+            {p.expensas != null && p.expensas > 0 && (
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Building2 className="size-3.5 shrink-0" aria-hidden="true" />
+                Expensas {formatPrecio(p.expensas, "ARS")}/mes
+              </p>
+            )}
+            <div className="mt-4 flex items-center gap-2">
+              <WhatsappButton
+                numero={AGENCIA.whatsapp}
+                mensaje={mensajePropiedad(AGENCIA, p)}
+                label="Consultar por WhatsApp"
+                size="lg"
+                fullWidth
+              />
+              <FavoriteButton id={p.id} variant="inline" />
+            </div>
           </div>
 
           {p.descripcion?.trim() && (
@@ -167,11 +187,12 @@ export default async function PropiedadPage({
               {p.reference_code && <Badge variant="secondary">Ref. {p.reference_code}</Badge>}
             </div>
 
-            <h1 className="font-heading mt-3 text-2xl font-semibold leading-tight">{titulo}</h1>
+            {/* Título repetido como <p> (el <h1> de la página está en el bloque mobile). */}
+            <p className="font-heading mt-3 text-2xl font-semibold leading-tight">{titulo}</p>
 
             {ubicacion && (
               <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                <MapPin className="size-3.5 shrink-0" /> {ubicacion}
+                <MapPin className="size-3.5 shrink-0" aria-hidden="true" /> {ubicacion}
               </p>
             )}
 
@@ -185,28 +206,6 @@ export default async function PropiedadPage({
             )}
 
             <div className="mt-5 flex items-center gap-2">
-              <WhatsappButton
-                numero={AGENCIA.whatsapp}
-                mensaje={mensajePropiedad(AGENCIA, p)}
-                label="Consultar por WhatsApp"
-                size="lg"
-                fullWidth
-              />
-              <FavoriteButton id={p.id} variant="inline" />
-            </div>
-          </div>
-        </aside>
-
-        {/* Aside compacto para mobile (CTA fijo al final del contenido) */}
-        <aside className="lg:hidden">
-          <div className="panel-glass rounded-2xl p-5">
-            {p.expensas != null && p.expensas > 0 && (
-              <p className="mb-3 flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Building2 className="size-3.5 shrink-0" />
-                Expensas {formatPrecio(p.expensas, "ARS")}/mes
-              </p>
-            )}
-            <div className="flex items-center gap-2">
               <WhatsappButton
                 numero={AGENCIA.whatsapp}
                 mensaje={mensajePropiedad(AGENCIA, p)}

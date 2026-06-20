@@ -178,12 +178,21 @@ export function FavoritosDoc() {
   // Lee el catálogo REAL (DB en vivo / mock en local) — NO el mock importado.
   // Así los IDs guardados (tokko_id) matchean con los datos correctos.
   const [todos, setTodos] = useState<Propiedad[] | null>(null);
+  const [error, setError] = useState(false);
   useEffect(() => {
     let activo = true;
     fetch("/api/propiedades")
-      .then((r) => r.json())
-      .then((d: Propiedad[]) => activo && setTodos(d))
-      .catch(() => activo && setTodos([]));
+      .then((r) => {
+        if (!r.ok) throw new Error("fetch favoritos");
+        return r.json();
+      })
+      .then((d: Propiedad[]) => activo && setTodos(Array.isArray(d) ? d : []))
+      .catch(() => {
+        if (activo) {
+          setTodos([]);
+          setError(true);
+        }
+      });
     return () => {
       activo = false;
     };
@@ -212,6 +221,27 @@ export function FavoritosDoc() {
     );
   }
 
+  // Error de carga teniendo favoritos guardados (o pidiendo una ficha puntual):
+  // no es que "no elegiste nada", es que no se pudieron traer los datos.
+  if (lista.length === 0 && error && (solo || ids.length > 0)) {
+    return (
+      <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-4 px-4 text-center">
+        <Heart className="size-12 text-muted-foreground/40" />
+        <h1 className="text-xl font-bold">No pudimos cargar tus propiedades</h1>
+        <p className="text-sm text-muted-foreground">
+          Hubo un problema al traer los datos. Recargá la página o probá de nuevo
+          en un momento.
+        </p>
+        <Link
+          href="/propiedades"
+          className="glow-brand rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white transition hover:brightness-110"
+        >
+          Ver propiedades
+        </Link>
+      </div>
+    );
+  }
+
   if (lista.length === 0) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-4 px-4 text-center">
@@ -221,10 +251,10 @@ export function FavoritosDoc() {
           Guardá las que te gusten con el corazón y volvé acá para exportarlas en PDF.
         </p>
         <Link
-          href="/catalogo"
+          href="/propiedades"
           className="glow-brand rounded-full bg-brand px-6 py-2.5 text-sm font-medium text-white transition hover:brightness-110"
         >
-          Ver catálogo
+          Ver propiedades
         </Link>
       </div>
     );
@@ -235,10 +265,10 @@ export function FavoritosDoc() {
       {/* Barra de acciones — NO se imprime */}
       <div data-no-print className="mb-6 flex flex-wrap items-center gap-3">
         <Link
-          href="/catalogo"
+          href="/propiedades"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition hover:text-foreground"
         >
-          <ArrowLeft className="size-4" /> Volver al catálogo
+          <ArrowLeft className="size-4" /> Volver a propiedades
         </Link>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {!solo && lista.length > 0 && (

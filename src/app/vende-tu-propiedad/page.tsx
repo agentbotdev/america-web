@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Home, Tag, MapPin, User, Phone, MessageSquare, Sparkles, ShieldCheck, Clock } from "lucide-react";
+import { Home, Tag, MapPin, User, Phone, MessageSquare, Sparkles, ShieldCheck, Clock, CheckCircle2 } from "lucide-react";
 import { waLink } from "@/lib/whatsapp";
 import { AGENCIA } from "@/data/agencia";
 import type { TipoPropiedad, TipoOperacion } from "@/types";
@@ -75,11 +75,18 @@ export default function VendeTuPropiedadPage() {
   const [telefono, setTelefono] = useState("");
   const [comentario, setComentario] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [enviado, setEnviado] = useState(false);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!nombre.trim() || !telefono.trim()) {
-      setError("Completá tu nombre y teléfono para que podamos contactarte.");
+    if (!nombre.trim()) {
+      setError("Decinos tu nombre para poder contactarte.");
+      return;
+    }
+    // Validación básica de teléfono: al menos 6 dígitos.
+    const digitos = telefono.replace(/\D/g, "");
+    if (digitos.length < 6) {
+      setError("Dejanos un teléfono válido (con tu característica) para escribirte.");
       return;
     }
     setError(null);
@@ -92,6 +99,7 @@ export default function VendeTuPropiedadPage() {
       comentario,
     });
     window.open(waLink(AGENCIA.whatsapp, mensaje), "_blank", "noopener,noreferrer");
+    setEnviado(true);
   }
 
   const inputBase =
@@ -243,12 +251,22 @@ export default function VendeTuPropiedadPage() {
           </p>
         )}
 
+        {enviado && !error && (
+          <p
+            role="status"
+            className="mt-4 flex items-center gap-2 rounded-xl border border-whatsapp/30 bg-whatsapp/10 px-3.5 py-2.5 text-sm text-foreground"
+          >
+            <CheckCircle2 className="size-4 shrink-0 text-whatsapp" />
+            Abrimos WhatsApp con tus datos. Si no se abrió, tocá el botón otra vez.
+          </p>
+        )}
+
         <button
           type="submit"
           className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-whatsapp px-7 text-base font-medium text-white transition-all hover:brightness-95 active:scale-[0.98]"
         >
           <MessageSquare className="size-5" />
-          Enviar por WhatsApp
+          {enviado ? "Reenviar por WhatsApp" : "Enviar por WhatsApp"}
         </button>
         <p className="mt-3 text-center text-xs text-muted-foreground">
           Se abre WhatsApp con tus datos cargados. No guardamos nada hasta que vos

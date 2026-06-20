@@ -31,12 +31,21 @@ export function FavoritesSheet() {
 
   // Lee el catálogo REAL (endpoint) para resolver los favoritos con datos correctos.
   const [todos, setTodos] = useState<Propiedad[] | null>(null);
+  const [error, setError] = useState(false);
   useEffect(() => {
     let activo = true;
     fetch("/api/propiedades")
-      .then((r) => r.json())
-      .then((d: Propiedad[]) => activo && setTodos(d))
-      .catch(() => activo && setTodos([]));
+      .then((r) => {
+        if (!r.ok) throw new Error("fetch favoritos");
+        return r.json();
+      })
+      .then((d: Propiedad[]) => activo && setTodos(Array.isArray(d) ? d : []))
+      .catch(() => {
+        if (activo) {
+          setTodos([]);
+          setError(true);
+        }
+      });
     return () => {
       activo = false;
     };
@@ -71,17 +80,34 @@ export function FavoritesSheet() {
 
         <div className="flex-1 overflow-y-auto p-4">
           {count === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center gap-3 py-16 text-center">
-              <Heart className="size-10 text-muted-foreground/40" />
+            <div className="flex h-full flex-col items-center justify-center gap-4 py-16 text-center">
+              <span className="flex size-16 items-center justify-center rounded-full bg-brand/10">
+                <Heart className="size-8 text-brand/70" />
+              </span>
               <p className="text-sm text-muted-foreground">
                 Todavía no guardaste ninguna propiedad.
                 <br />
-                Tocá el corazón en las que te gusten.
+                Tocá el <Heart className="inline size-3.5 -translate-y-px fill-red-500 text-red-500" /> en las que te gusten.
               </p>
+              <Link
+                href="/propiedades"
+                className="glow-brand inline-flex items-center justify-center rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-white transition hover:brightness-110"
+              >
+                Explorar propiedades
+              </Link>
             </div>
           ) : cargando ? (
             <div className="flex h-full items-center justify-center py-16">
               <Loader2 className="size-6 animate-spin text-brand" />
+            </div>
+          ) : error && favs.length === 0 ? (
+            <div className="flex h-full flex-col items-center justify-center gap-2 py-16 text-center">
+              <Heart className="size-9 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">
+                No pudimos cargar tus favoritos ahora.
+                <br />
+                Probá de nuevo en un momento.
+              </p>
             </div>
           ) : (
             <ul className="flex flex-col gap-3">

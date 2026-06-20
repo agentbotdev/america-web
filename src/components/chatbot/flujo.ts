@@ -27,6 +27,12 @@ export type Opcion = {
   /** Id del próximo paso. "reco" dispara recomendaciones; "input" pide texto libre. */
   next: string;
   emoji?: string;
+  /**
+   * Datos extra que esta opción fija de una (además del `key` del paso). Sirve
+   * para saltar pasos puente: ej. "Quiero comprar" ya deja operación = venta y
+   * va directo a elegir el tipo, sin un "Continuar" intermedio.
+   */
+  set?: Partial<Record<RespKey, string>>;
 };
 
 export type Paso = {
@@ -46,29 +52,14 @@ export type Respuestas = Partial<Record<RespKey, string>>;
 
 export const FLUJO: Record<string, Paso> = {
   inicio: {
-    bot: "¡Hola! 👋 Soy el asesor de Inmobiliaria América Cardozo. Te ayudo a encontrar tu próxima propiedad en 1 minuto. ¿Con qué arrancamos?",
+    bot: "¡Hola! 👋 Soy el asesor de Inmobiliaria América Cardozo. En un minuto te ayudo a encontrar tu próxima propiedad. ¿Con qué arrancamos?",
     key: "intencion",
     opciones: [
-      { label: "Quiero comprar", value: "comprar una propiedad", next: "operacionComprar", emoji: "🏡" },
-      { label: "Quiero alquilar", value: "alquilar una propiedad", next: "operacionAlquilar", emoji: "🔑" },
+      // `set` fija la operación de una → saltamos el paso puente "Continuar".
+      { label: "Quiero comprar", value: "comprar una propiedad", next: "tipo", emoji: "🏡", set: { operacion: "venta" } },
+      { label: "Quiero alquilar", value: "alquilar una propiedad", next: "tipo", emoji: "🔑", set: { operacion: "alquiler" } },
       { label: "Que me asesoren", value: "que me asesoren para elegir", next: "tipo", emoji: "🧭" },
       { label: "Hablar con una persona", value: "hablar con un asesor", next: "cierre", emoji: "💬" },
-    ],
-  },
-
-  // Pasos puente: fijan la operación y siguen al tipo de propiedad.
-  operacionComprar: {
-    bot: "¡Buenísimo! Buscás en venta. ¿Qué tipo de propiedad tenés en mente?",
-    key: "operacion",
-    opciones: [
-      { label: "Continuar", value: "venta", next: "tipo", emoji: "➡️" },
-    ],
-  },
-  operacionAlquilar: {
-    bot: "¡Dale! Buscás en alquiler. ¿Qué tipo de propiedad tenés en mente?",
-    key: "operacion",
-    opciones: [
-      { label: "Continuar", value: "alquiler", next: "tipo", emoji: "➡️" },
     ],
   },
 
@@ -80,7 +71,8 @@ export const FLUJO: Record<string, Paso> = {
       { label: "Departamento", value: "Departamento", next: "zona", emoji: "🏢" },
       { label: "PH", value: "PH", next: "zona", emoji: "🏘️" },
       { label: "Terreno / Lote", value: "Terreno", next: "zona", emoji: "🌳" },
-      { label: "Local / Oficina", value: "Local", next: "zona", emoji: "🏬" },
+      // value con "|" → matchea cualquiera de los tipos (ver matchTipo).
+      { label: "Local / Oficina", value: "Local|Oficina", next: "zona", emoji: "🏬" },
       { label: "No sé, asesorame", value: "abierto a recomendación", next: "zona", emoji: "🤔" },
     ],
   },
@@ -164,7 +156,12 @@ function matchOperacion(p: Propiedad, operacion?: string): boolean {
 
 function matchTipo(p: Propiedad, tipo?: string): boolean {
   if (!tipo || tipo === "abierto a recomendación") return true;
-  return p.tipo_propiedad.toLowerCase().includes(tipo.toLowerCase());
+  const objetivo = p.tipo_propiedad.toLowerCase();
+  // "Local|Oficina" → matchea si la propiedad es cualquiera de los dos.
+  return tipo
+    .toLowerCase()
+    .split("|")
+    .some((t) => objetivo.includes(t.trim()));
 }
 
 function matchZona(p: Propiedad, zona?: string): boolean {
@@ -254,6 +251,7 @@ const LABEL_KEY: Record<RespKey, string> = {
 
 function valorLegible(key: RespKey, valor: string): string {
   if (key === "operacion") return valor === "alquiler" ? "Alquiler" : "Venta";
+  if (key === "tipo") return valor.split("|").join(" / "); // "Local|Oficina" → "Local / Oficina"
   if (key === "dormitorios") {
     if (valor === "monoambiente") return "Monoambiente";
     if (valor === "4+") return "4 o más";

@@ -193,10 +193,33 @@ export function CatalogoBrowser({
     f.superficie_min !== "all" ||
     f.orden !== "destacadas";
 
+  // Chips de filtros ACTIVOS: label legible + cómo se resetea cada uno.
+  // El orden no entra como chip (no "restringe" resultados, solo los reordena).
+  const chips = useMemo(() => {
+    const out: { key: keyof Filters; label: string; reset: string }[] = [];
+    if (f.q) out.push({ key: "q", label: `"${f.q}"`, reset: "" });
+    if (f.operacion !== "all")
+      out.push({ key: "operacion", label: labelOperacion(f.operacion as "venta" | "alquiler"), reset: "all" });
+    if (f.tipo !== "all") out.push({ key: "tipo", label: f.tipo, reset: "all" });
+    if (f.barrio !== "all") out.push({ key: "barrio", label: f.barrio, reset: "all" });
+    if (f.dormitorios !== "all")
+      out.push({ key: "dormitorios", label: DORMITORIOS.find((d) => d.value === f.dormitorios)?.label ?? f.dormitorios, reset: "all" });
+    if (f.banos !== "all")
+      out.push({ key: "banos", label: BANOS.find((b) => b.value === f.banos)?.label ?? f.banos, reset: "all" });
+    if (f.precio_max !== "all")
+      out.push({ key: "precio_max", label: PRECIOS.find((p) => p.value === f.precio_max)?.label ?? f.precio_max, reset: "all" });
+    if (f.superficie_min !== "all")
+      out.push({ key: "superficie_min", label: SUPERFICIES.find((s) => s.value === f.superficie_min)?.label ?? f.superficie_min, reset: "all" });
+    return out;
+  }, [f]);
+
   return (
     <>
       <p className="mb-6 text-muted-foreground">
-        {items.length} {items.length === 1 ? "propiedad disponible" : "propiedades disponibles"}
+        <span className="font-semibold text-foreground">{items.length}</span>{" "}
+        {items.length === 1 ? "propiedad" : "propiedades"}
+        {/* "según tu búsqueda" solo si hay filtros que REDUCEN el set (el orden no cuenta). */}
+        {chips.length > 0 ? " según tu búsqueda" : " disponibles"}
       </p>
 
       {/* Filtros (instantáneos) */}
@@ -279,19 +302,54 @@ export function CatalogoBrowser({
           <button
             type="button"
             onClick={limpiar}
-            className="inline-flex h-9 items-center gap-1 rounded-lg px-3 text-sm text-muted-foreground hover:bg-secondary"
+            aria-label="Limpiar todos los filtros"
+            className="inline-flex h-9 items-center gap-1 rounded-lg px-3 text-sm font-medium text-brand transition-colors hover:bg-brand/10"
           >
-            <X className="size-4" /> Limpiar
+            <X className="size-4" aria-hidden="true" /> Limpiar
           </button>
         )}
       </div>
 
+      {/* Chips de filtros activos: cada uno se quita individualmente. */}
+      {chips.length > 0 && (
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-medium text-muted-foreground">Filtros activos:</span>
+          {chips.map((c) => (
+            <button
+              key={c.key}
+              type="button"
+              onClick={() => set(c.key, c.reset)}
+              aria-label={`Quitar filtro ${c.label}`}
+              className="inline-flex items-center gap-1 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand transition-colors hover:bg-brand/20"
+            >
+              {c.label}
+              <X className="size-3" aria-hidden="true" />
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Grid (instantáneo, sin recargar) */}
       {items.length === 0 ? (
-        <div className="mt-16 flex flex-col items-center gap-3 text-center">
-          <SearchX className="size-12 text-muted-foreground/40" />
-          <p className="text-lg font-medium">No encontramos propiedades con esos filtros</p>
-          <p className="text-sm text-muted-foreground">Probá ampliando la búsqueda o limpiando los filtros.</p>
+        <div className="mt-16 flex flex-col items-center gap-4 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-16 text-center">
+          <span className="flex size-16 items-center justify-center rounded-full bg-brand/10 text-brand">
+            <SearchX className="size-8" aria-hidden="true" />
+          </span>
+          <div className="space-y-1.5">
+            <p className="text-lg font-semibold">No encontramos propiedades con esos filtros</p>
+            <p className="mx-auto max-w-sm text-sm text-muted-foreground">
+              Probá ampliando la búsqueda o limpiando los filtros para ver todo el stock disponible.
+            </p>
+          </div>
+          {hasFilters && (
+            <button
+              type="button"
+              onClick={limpiar}
+              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-brand px-5 text-sm font-medium text-brand-foreground transition-all hover:brightness-110 active:scale-[0.98]"
+            >
+              <X className="size-4" aria-hidden="true" /> Limpiar filtros
+            </button>
+          )}
         </div>
       ) : (
         <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

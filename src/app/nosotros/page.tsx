@@ -8,6 +8,9 @@ import {
   MapPin,
   ArrowRight,
   Mail,
+  ShieldCheck,
+  HeartHandshake,
+  Sparkles,
 } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
@@ -18,6 +21,13 @@ export const metadata: Metadata = {
   title: "Nosotros",
   description:
     "Inmobiliaria América Cardozo: venta, alquiler, tasaciones y asesoría en GBA Zona Oeste. Conocé cómo trabajamos.",
+  alternates: { canonical: "/nosotros" },
+  openGraph: {
+    title: "Nosotros | América Cardozo",
+    description:
+      "Venta, alquiler, tasaciones y asesoría legal en GBA Zona Oeste. Conocé cómo trabajamos.",
+    url: "/nosotros",
+  },
 };
 
 const SERVICIOS = [
@@ -43,6 +53,25 @@ const SERVICIOS = [
   },
 ];
 
+// Pilares de trabajo: por qué elegirnos (genérico sólido, sin inventar métricas).
+const VALORES = [
+  {
+    icon: ShieldCheck,
+    title: "Transparencia",
+    desc: "Información clara en cada operación: precios, condiciones y documentación sin letra chica.",
+  },
+  {
+    icon: HeartHandshake,
+    title: "Trato cercano",
+    desc: "Un asesor que te acompaña de principio a fin, atento a lo que realmente necesitás.",
+  },
+  {
+    icon: Sparkles,
+    title: "Conocimiento de la zona",
+    desc: "Conocemos el mercado de Zona Oeste barrio por barrio para asesorarte con datos reales.",
+  },
+];
+
 // Zona de trabajo declarada (GBA Zona Oeste). No es dato de contacto: es cobertura.
 const ZONAS = [
   "Moreno",
@@ -51,6 +80,8 @@ const ZONAS = [
   "Pilar",
   "La Reja",
   "Francisco Álvarez",
+  "Ituzaingó",
+  "Merlo",
 ];
 
 export default function NosotrosPage() {
@@ -107,8 +138,27 @@ export default function NosotrosPage() {
         </Reveal>
       </section>
 
+      {/* Valores / por qué elegirnos */}
+      <section className="mx-auto max-w-6xl px-4 pb-4 sm:px-6 lg:px-8">
+        <div className="grid gap-4 sm:grid-cols-3">
+          {VALORES.map((v, i) => (
+            <Reveal key={v.title} delay={i * 0.06}>
+              <div className="card-premium flex h-full items-start gap-4 rounded-2xl p-5">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
+                  <v.icon className="size-5" />
+                </span>
+                <div>
+                  <h3 className="text-base font-semibold">{v.title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{v.desc}</p>
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
       {/* Servicios */}
-      <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <Reveal>
           <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
             Nuestros servicios

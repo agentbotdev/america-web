@@ -73,6 +73,7 @@ function CampoNumero({
   value,
   onChange,
   min = 0,
+  max,
   step = 1,
   suffix,
 }: {
@@ -81,6 +82,7 @@ function CampoNumero({
   value: number;
   onChange: (n: number) => void;
   min?: number;
+  max?: number;
   step?: number;
   suffix?: string;
 }) {
@@ -95,9 +97,13 @@ function CampoNumero({
           type="number"
           inputMode="decimal"
           min={min}
+          max={max}
           step={step}
           value={value}
-          onChange={(e) => onChange(Math.max(min, Number(e.target.value)))}
+          onChange={(e) => {
+            const n = Math.max(min, Number(e.target.value));
+            onChange(max != null ? Math.min(max, n) : n);
+          }}
           className="h-11 w-full rounded-xl border border-input bg-transparent px-3.5 pr-12 text-base outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
         />
         {suffix && (
@@ -156,6 +162,7 @@ export default function CalculadoraAlquilerPage() {
               value={mesesDeposito}
               onChange={setMesesDeposito}
               step={1}
+              max={12}
               suffix="meses"
             />
             <CampoNumero
@@ -164,6 +171,7 @@ export default function CalculadoraAlquilerPage() {
               value={comisionPct}
               onChange={setComisionPct}
               step={0.05}
+              max={100}
               suffix="%"
             />
             <CampoNumero
@@ -172,6 +180,7 @@ export default function CalculadoraAlquilerPage() {
               value={selladoPct}
               onChange={setSelladoPct}
               step={0.1}
+              max={100}
               suffix="%"
             />
           </div>

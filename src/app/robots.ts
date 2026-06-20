@@ -5,7 +5,13 @@ const BASE =
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/" },
+    rules: {
+      userAgent: "*",
+      allow: "/",
+      // /favoritos es estado local del usuario y /api devuelve JSON: no indexar.
+      disallow: ["/api/", "/favoritos"],
+    },
     sitemap: `${BASE}/sitemap.xml`,
+    host: BASE,
   };
 }

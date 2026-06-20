@@ -85,23 +85,26 @@ export function AsesorChat() {
     }, delay);
   }
 
-  function avanzar(next: string) {
+  // `respFinal` son las respuestas YA actualizadas con la última elección
+  // (los setState son async, así que se las pasamos explícitas en vez de leer
+  //  el estado stale del closure). Sin side-effects dentro de updaters → seguro
+  //  en StrictMode.
+  function avanzar(next: string, respFinal: Respuestas) {
     if (next === "reco") {
       setPasoId("reco");
       setTimeout(() => {
-        setRespuestas((r) => {
-          const recos = recomendar(r, catalogo);
-          setRecomendados(recos);
-          setInteresados(recos);
-          empujarBot(
-            recos.length
-              ? "¡Tengo opciones para vos! 👇 Mirá estas propiedades que encajan con lo que buscás:"
-              : "Con esto ya puedo asesorarte. Te paso con un asesor 🙌",
-          );
-          if (!recos.length) setTimeout(() => setFinalizado(true), reduce ? 250 : 900);
-          else setTimeout(() => setFinalizado(true), reduce ? 350 : 1400);
-          return r;
-        });
+        const recos = recomendar(respFinal, catalogo);
+        setRecomendados(recos);
+        setInteresados(recos);
+        empujarBot(
+          recos.length
+            ? "¡Tengo opciones para vos! 👇 Mirá estas propiedades que encajan con lo que buscás:"
+            : "Con esto ya puedo asesorarte. Te paso con un asesor 🙌",
+        );
+        setTimeout(
+          () => setFinalizado(true),
+          recos.length ? (reduce ? 350 : 1400) : reduce ? 250 : 900,
+        );
       }, 250);
       return;
     }
@@ -119,17 +122,24 @@ export function AsesorChat() {
 
   function elegir(paso: Paso, op: Opcion) {
     setBurbujas((b) => [...b, { de: "user", texto: op.label }]);
-    if (paso.key) setRespuestas((r) => ({ ...r, [paso.key as string]: op.value }));
-    avanzar(op.next);
+    // Mezcla: la key del paso + cualquier dato extra que fije la opción (op.set).
+    const respFinal: Respuestas = {
+      ...respuestas,
+      ...(paso.key ? { [paso.key]: op.value } : {}),
+      ...(op.set ?? {}),
+    };
+    setRespuestas(respFinal);
+    avanzar(op.next, respFinal);
   }
 
   function enviarTexto(paso: Paso) {
     const valor = textoInput.trim();
     if (!valor || !paso.input) return;
     setBurbujas((b) => [...b, { de: "user", texto: valor }]);
-    setRespuestas((r) => ({ ...r, [paso.input!.key]: valor }));
+    const respFinal = { ...respuestas, [paso.input.key]: valor };
+    setRespuestas(respFinal);
     setTextoInput("");
-    avanzar(paso.input.next);
+    avanzar(paso.input.next, respFinal);
   }
 
   // Click en miniatura → NO cierra: navega a la ficha y minimiza a PIP.
@@ -281,7 +291,7 @@ export function AsesorChat() {
             transition={{ type: "spring", stiffness: 420, damping: 32 }}
             onClick={() => setModo("abierto")}
             aria-label="Agrandar el asesor"
-            className="glass-dark flex w-[min(82vw,17rem)] items-center gap-2.5 rounded-2xl border border-white/12 px-3 py-2.5 text-left shadow-2xl shadow-black/70"
+            className="glass-dark flex w-[min(68vw,17rem)] items-center gap-2.5 rounded-2xl border border-white/12 px-3 py-2.5 text-left shadow-2xl shadow-black/70"
           >
             <span className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-brand text-white">
               <Sparkles className="size-3.5" />

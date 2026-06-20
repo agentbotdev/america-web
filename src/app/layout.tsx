@@ -5,6 +5,7 @@ import { LenisProvider } from "@/components/providers/lenis-provider";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AsesorChat } from "@/components/chatbot/asesor-chat";
+import { WhatsappFloat } from "@/components/whatsapp/whatsapp-float";
 import { brandStyle } from "@/lib/brand";
 import { AGENCIA } from "@/data/agencia";
 
@@ -41,15 +42,37 @@ export const metadata: Metadata = {
     "alquiler",
     "comprar casa",
   ],
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "es_AR",
+    url: "/",
     siteName: AGENCIA.nombre,
     title: `${AGENCIA.nombre} — ${AGENCIA.tagline}`,
     description:
       "Propiedades en venta y alquiler en GBA Zona Oeste. Encontrá tu próximo hogar con asesoría real.",
+    images: [
+      {
+        url: "/hero-casa.webp",
+        width: 1200,
+        height: 630,
+        alt: `${AGENCIA.nombre} — Propiedades en ${AGENCIA.zona_operacion}`,
+      },
+    ],
   },
-  twitter: { card: "summary_large_image" },
+  twitter: {
+    card: "summary_large_image",
+    title: `${AGENCIA.nombre} — ${AGENCIA.tagline}`,
+    description:
+      "Propiedades en venta y alquiler en GBA Zona Oeste. Encontrá tu próximo hogar con asesoría real.",
+    images: ["/hero-casa.webp"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
+  formatDetection: { telephone: false },
 };
 
 export default function RootLayout({
@@ -66,6 +89,7 @@ export default function RootLayout({
           <SiteHeader />
           <main className="flex-1">{children}</main>
           <SiteFooter />
+          <WhatsappFloat />
           <AsesorChat />
         </LenisProvider>
       </body>
