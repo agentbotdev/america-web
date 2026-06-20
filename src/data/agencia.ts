@@ -1,32 +1,35 @@
-// Branding de INMOBILIARIA AMÉRICA CARDOZO (mono-tenant: vive en código).
+// Branding de AMÉRICA CARDOZO — inmobiliaria (mono-tenant: vive en código).
+// Datos reales del negocio (web americacardozo.com.ar + portales Zonaprop/MercadoLibre).
+// Operan a NIVEL NACIONAL; la oficina central está en Paso del Rey, Moreno (Bs As).
 //
-// ⚠️ PLACEHOLDERS A CONFIRMAR CON NACHO: WhatsApp real, email, dirección, horario,
-// Instagram/Facebook, colores de marca definitivos + logo, años de experiencia y
-// propiedades vendidas. Hasta entonces, branding tipográfico + paleta tentativa.
+// ⚠️ PENDIENTE de confirmar con el cliente: email, horario exacto, Facebook,
+// logo gráfico definitivo, cantidad de propiedades vendidas.
 
 import type { Agencia } from "@/types";
 
 export const AGENCIA: Agencia = {
   id: "america-cardozo",
   slug: "america-cardozo",
-  nombre: "Inmobiliaria América Cardozo",
-  tagline: "Tu próxima propiedad en Zona Oeste",
+  nombre: "América Cardozo",
+  tagline: "Tu próxima propiedad te está esperando",
   logoTexto: "AMÉRICA CARDOZO",
   colores: {
-    // PLACEHOLDER sobrio inmobiliario (azul profundo + dorado). Confirmar marca real.
-    brand: "#0f2e4a",
+    // Marca real (del logo): ROJO + negro. Acento ámbar (el amarillo del logo).
+    brand: "#dc2626",
     brandForeground: "#ffffff",
-    accent: "#c9a227",
+    accent: "#f59e0b",
   },
-  // WhatsApp público real de América Cardozo.
   whatsapp: "5491159307526",
   email: "",
-  direccion: "",
-  ciudad: "Buenos Aires, Argentina",
-  zona_operacion: "GBA Zona Oeste",
+  direccion: "Bartolomé Mitre 1300, Paso del Rey, Moreno, Buenos Aires",
+  ciudad: "Argentina",
+  // Operación nacional: NO geo-específico, para no limitar el mensaje de marketing.
+  zona_operacion: "todo el país",
   horario: "Coordiná tu visita por WhatsApp",
-  redes: {},
-  anios_experiencia: 0,
+  redes: {
+    instagram: "https://www.instagram.com/americacardozovende/",
+  },
+  anios_experiencia: 20,
   propiedades_vendidas: 0,
 };
 

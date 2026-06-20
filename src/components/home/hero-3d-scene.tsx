@@ -7,12 +7,13 @@ import { Float, Sparkles, MeshDistortMaterial, AdaptiveDpr } from "@react-three/
 import { useReducedMotion } from "motion/react";
 
 // Blob de ambiente: icosaedro distorsionado (menos vértices que una esfera 64x64).
+// COLOR DE MARCA: rojo (#dc2626) — antes era azul (#2f4d86), discrepancia que el cliente notó.
 function Blob() {
   return (
     <Float speed={1.1} rotationIntensity={0.85} floatIntensity={1.2}>
       <mesh scale={2.2} position={[1.4, 0.2, 0]}>
         <icosahedronGeometry args={[1, 6]} />
-        <MeshDistortMaterial color="#2f4d86" distort={0.38} speed={1.1} roughness={0.25} metalness={0.6} />
+        <MeshDistortMaterial color="#b91c1c" distort={0.38} speed={1.1} roughness={0.28} metalness={0.55} />
       </mesh>
     </Float>
   );
@@ -52,10 +53,11 @@ export default function Hero3DScene() {
         >
           <AdaptiveDpr pixelated />
           <ambientLight intensity={0.5} />
-          <directionalLight position={[5, 5, 5]} intensity={1.3} color="#c3cbe0" />
-          <directionalLight position={[-5, -2, 2]} intensity={0.7} color="#5e6f93" />
+          {/* Luces cálidas de marca: rosa-rojo cálido + ámbar tenue (antes azuladas). */}
+          <directionalLight position={[5, 5, 5]} intensity={1.3} color="#ffd9c2" />
+          <directionalLight position={[-5, -2, 2]} intensity={0.7} color="#f59e0b" />
           <Blob />
-          <Sparkles count={26} scale={[12, 8, 4]} size={2} speed={0.22} color="#c9d2e6" opacity={0.38} />
+          <Sparkles count={26} scale={[12, 8, 4]} size={2} speed={0.22} color="#fca5a5" opacity={0.34} />
         </Canvas>
       )}
     </div>

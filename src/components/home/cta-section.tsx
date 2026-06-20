@@ -28,12 +28,19 @@ export function CtaSection() {
             alquilar en {a.zona_operacion}. Sin compromiso.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <WhatsappButton numero={a.whatsapp} mensaje={mensajeGeneral(a)} label="Hablar con un asesor" size="lg" />
+            <WhatsappButton
+              numero={a.whatsapp}
+              mensaje={mensajeGeneral(a)}
+              label="Hablar con un asesor"
+              size="lg"
+              className="cta-shine hover:-translate-y-0.5"
+            />
             <Link
               href="/propiedades"
-              className="glass-dark inline-flex h-13 items-center gap-1.5 rounded-full px-7 text-base font-medium text-white transition hover:bg-white/10"
+              className="cta-shine group/cta glass-dark inline-flex h-13 items-center gap-1.5 rounded-full px-7 text-base font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-white/10"
             >
-              Ver propiedades <ArrowRight className="size-4" />
+              Ver propiedades
+              <ArrowRight className="size-4 transition-transform group-hover/cta:translate-x-1" />
             </Link>
           </div>
         </div>

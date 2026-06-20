@@ -7,10 +7,17 @@ import { CatalogoBrowser, FILTROS_VACIOS } from "@/components/propiedades/catalo
 export const revalidate = 120;
 
 export const metadata: Metadata = {
-  title: "Propiedades en venta y alquiler en GBA Zona Oeste",
+  title: "Propiedades en venta y alquiler en Argentina — América Cardozo",
   description:
-    "Casas, departamentos, PH, terrenos y locales en venta y alquiler en GBA Zona Oeste. Filtrá por operación, tipo, barrio, dormitorios y precio. Consultá por WhatsApp al instante.",
+    "Casas, departamentos, PH, terrenos y locales en venta y alquiler en todo el país. Filtrá por operación, tipo, zona, dormitorios y precio, y consultá por WhatsApp al instante con América Cardozo.",
   alternates: { canonical: "/propiedades" },
+  openGraph: {
+    title: "Propiedades en venta y alquiler en Argentina — América Cardozo",
+    description:
+      "Casas, departamentos, PH, terrenos y locales en venta y alquiler en todo el país. Encontrá tu próxima propiedad y consultá al instante por WhatsApp.",
+    url: "/propiedades",
+    type: "website",
+  },
 };
 
 type SP = Promise<Record<string, string | undefined>>;
@@ -37,7 +44,8 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
     barrio: sp.barrio ?? "all",
     dormitorios: sp.dormitorios ?? "all",
     banos: sp.banos ?? "all",
-    precio_max: sp.precio_max ?? "all",
+    precio_min: sp.precio_min ?? "",
+    precio_max: sp.precio_max ?? "",
     superficie_min: sp.superficie_min ?? "all",
     orden: sp.orden ?? "destacadas",
   };
@@ -46,11 +54,14 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
     <>
       <div className="section-dark border-b border-white/5">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <p className="text-sm font-medium text-brand">Stock disponible</p>
-          <h1 className="mt-1 text-4xl font-bold tracking-tight sm:text-5xl">Propiedades</h1>
-          <p className="mt-2 max-w-prose text-muted-foreground">
-            Casas, departamentos, PH, terrenos y locales en venta y alquiler en GBA Zona Oeste.
-            Filtrá por operación, tipo, barrio o precio y consultá al instante por WhatsApp.
+          <p className="text-sm font-medium text-brand">Catálogo · Todo el país</p>
+          <h1 className="mt-1 text-4xl font-bold tracking-tight sm:text-5xl">
+            Encontrá tu próxima propiedad
+          </h1>
+          <p className="mt-3 max-w-prose text-muted-foreground">
+            Casas, departamentos, PH, terrenos y locales en venta y alquiler en toda la Argentina.
+            Filtrá por operación, tipo, zona, dormitorios o precio, y consultá al instante por
+            WhatsApp. El equipo de América Cardozo te acompaña en cada paso.
           </p>
         </div>
       </div>

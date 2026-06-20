@@ -32,16 +32,17 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-// Logo tipográfico: el activo /press-logo.png es de la web de autos y no sirve.
-// Usamos el wordmark de la agencia hasta tener el logo definitivo.
+// Logo wordmark: "AMÉRICA CARDOZO" en serif bold BLANCO con una raya ROJA a la
+// izquierda (evoca el logo real: serif sobre amarillo con líneas rojas).
+// Mientras no tengamos el logo gráfico definitivo, este wordmark ES la marca.
 function Logo() {
   return (
     <Link
       href="/"
       aria-label={AGENCIA.nombre}
-      className="flex items-center gap-2"
+      className="group flex items-center"
     >
-      <span className="text-base font-bold uppercase tracking-[0.2em] text-foreground sm:text-lg">
+      <span className="wordmark wordmark-rule ml-3 text-[15px] uppercase tracking-[0.16em] transition-opacity group-hover:opacity-90 sm:text-base">
         {AGENCIA.logoTexto}
       </span>
     </Link>
@@ -57,7 +58,7 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Logo />
 
-        <nav className="hidden items-center gap-7 md:flex">
+        <nav className="hidden items-center gap-8 md:flex">
           {NAV.map((item) => {
             const active = isActive(pathname, item.href);
             return (
@@ -65,8 +66,9 @@ export function SiteHeader() {
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
+                data-active={active ? "true" : undefined}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-foreground",
+                  "nav-underline text-sm font-medium transition-colors hover:text-foreground",
                   active ? "text-foreground" : "text-muted-foreground",
                 )}
               >
@@ -96,8 +98,8 @@ export function SiteHeader() {
               <Menu className="size-5" />
             </SheetTrigger>
             <SheetContent side="left" className="w-80 max-w-[85vw] gap-0 p-0">
-              <SheetHeader className="border-b border-border px-5 py-4">
-                <SheetTitle className="text-base font-bold uppercase tracking-[0.2em] text-foreground">
+              <SheetHeader className="border-b border-border px-5 py-4 pl-7">
+                <SheetTitle className="wordmark wordmark-rule text-base uppercase tracking-[0.16em]">
                   {AGENCIA.logoTexto}
                 </SheetTitle>
                 <SheetDescription className="sr-only">

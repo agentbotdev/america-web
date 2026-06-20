@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Sora } from "next/font/google";
 import "./globals.css";
 import { LenisProvider } from "@/components/providers/lenis-provider";
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: `%s | América Cardozo`,
   },
   description:
-    "Propiedades en venta y alquiler en GBA Zona Oeste. Casas, departamentos, terrenos y locales. Tasaciones sin cargo, visitas coordinadas y asesoría legal. Consultá por WhatsApp.",
+    "Propiedades en venta y alquiler en toda Argentina. Casas, departamentos, terrenos y locales. Tasaciones sin cargo, visitas coordinadas y asesoría real. Consultá por WhatsApp.",
   keywords: [
     "inmobiliaria",
     "propiedades en venta",
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
     "casas",
     "departamentos",
     "terrenos",
-    "GBA Zona Oeste",
-    "Buenos Aires",
+    "inmobiliaria Argentina",
+    "propiedades Argentina",
     "tasaciones",
     "alquiler",
     "comprar casa",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     siteName: AGENCIA.nombre,
     title: `${AGENCIA.nombre} — ${AGENCIA.tagline}`,
     description:
-      "Propiedades en venta y alquiler en GBA Zona Oeste. Encontrá tu próximo hogar con asesoría real.",
+      "Propiedades en venta y alquiler en toda Argentina. Encontrá tu próxima propiedad con asesoría real.",
     images: [
       {
         url: "/hero-casa.webp",
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${AGENCIA.nombre} — ${AGENCIA.tagline}`,
     description:
-      "Propiedades en venta y alquiler en GBA Zona Oeste. Encontrá tu próximo hogar con asesoría real.",
+      "Propiedades en venta y alquiler en toda Argentina. Encontrá tu próxima propiedad con asesoría real.",
     images: ["/hero-casa.webp"],
   },
   robots: {
@@ -73,6 +73,12 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large" },
   },
   formatDetection: { telephone: false },
+};
+
+// Web dark-first: la barra del navegador (mobile) acompaña con el negro de marca.
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({

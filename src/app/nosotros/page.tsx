@@ -10,7 +10,7 @@ import {
   Mail,
   ShieldCheck,
   HeartHandshake,
-  Sparkles,
+  Award,
 } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
@@ -20,12 +20,12 @@ import { mensajeGeneral } from "@/lib/whatsapp";
 export const metadata: Metadata = {
   title: "Nosotros",
   description:
-    "Inmobiliaria América Cardozo: venta, alquiler, tasaciones y asesoría en GBA Zona Oeste. Conocé cómo trabajamos.",
+    "América Cardozo: venta, alquiler, tasaciones y asesoría inmobiliaria en todo el país, con más de 20 años de experiencia. Conocé cómo trabajamos.",
   alternates: { canonical: "/nosotros" },
   openGraph: {
     title: "Nosotros | América Cardozo",
     description:
-      "Venta, alquiler, tasaciones y asesoría legal en GBA Zona Oeste. Conocé cómo trabajamos.",
+      "Más de 20 años en el mercado inmobiliario. Venta, alquiler, tasaciones y asesoría en todo el país.",
     url: "/nosotros",
   },
 };
@@ -53,8 +53,13 @@ const SERVICIOS = [
   },
 ];
 
-// Pilares de trabajo: por qué elegirnos (genérico sólido, sin inventar métricas).
+// Pilares de trabajo: por qué elegirnos (sólido, sin inventar métricas).
 const VALORES = [
+  {
+    icon: Award,
+    title: "+20 años de experiencia",
+    desc: "Dos décadas en el mercado inmobiliario nos avalan para asesorarte con criterio y datos reales.",
+  },
   {
     icon: ShieldCheck,
     title: "Transparencia",
@@ -65,23 +70,6 @@ const VALORES = [
     title: "Trato cercano",
     desc: "Un asesor que te acompaña de principio a fin, atento a lo que realmente necesitás.",
   },
-  {
-    icon: Sparkles,
-    title: "Conocimiento de la zona",
-    desc: "Conocemos el mercado de Zona Oeste barrio por barrio para asesorarte con datos reales.",
-  },
-];
-
-// Zona de trabajo declarada (GBA Zona Oeste). No es dato de contacto: es cobertura.
-const ZONAS = [
-  "Moreno",
-  "Paso del Rey",
-  "General Rodríguez",
-  "Pilar",
-  "La Reja",
-  "Francisco Álvarez",
-  "Ituzaingó",
-  "Merlo",
 ];
 
 export default function NosotrosPage() {
@@ -95,8 +83,8 @@ export default function NosotrosPage() {
         <div className="relative mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 lg:px-8 lg:py-28">
           <Reveal>
             <span className="glass-dark inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium text-slate-200">
-              <MapPin className="size-3.5 text-electric" />
-              {a.zona_operacion}
+              <Award className="size-3.5 text-brand" />
+              +{a.anios_experiencia} años · Operamos en todo el país
             </span>
           </Reveal>
           <Reveal delay={0.08}>
@@ -106,8 +94,8 @@ export default function NosotrosPage() {
           </Reveal>
           <Reveal delay={0.16}>
             <p className="mx-auto mt-5 max-w-2xl text-balance text-lg text-slate-300">
-              {a.tagline}. Compra, venta y alquiler de propiedades con
-              asesoramiento real y cercano.
+              {a.tagline}. Compra, venta y alquiler de propiedades en todo el
+              país, con asesoramiento real y cercano.
             </p>
           </Reveal>
         </div>
@@ -123,16 +111,17 @@ export default function NosotrosPage() {
         <Reveal delay={0.08}>
           <div className="mt-5 space-y-4 text-balance text-muted-foreground">
             <p>
-              En {a.nombre} ayudamos a las familias y a los inversores de{" "}
-              {a.zona_operacion} a encontrar la propiedad indicada y a concretar
-              cada operación con tranquilidad. Trabajamos con un trato directo,
-              honesto y orientado a resultados.
+              {a.nombre} es un estudio inmobiliario integral con más de{" "}
+              {a.anios_experiencia} años en el mercado de venta, alquiler y
+              administración de propiedades. Ayudamos a familias e inversores de
+              todo el país a encontrar la propiedad indicada y a concretar cada
+              operación con tranquilidad.
             </p>
             <p>
-              Conocemos la zona, su mercado y sus barrios. Esa cercanía nos
-              permite tasar con criterio, asesorar con datos reales y acompañar
-              cada compra, venta o alquiler de principio a fin. Sin vueltas y a
-              un mensaje de distancia.
+              Trabajamos con un trato directo, honesto y orientado a resultados.
+              Esa experiencia nos permite tasar con criterio, asesorar con datos
+              reales y acompañar cada compra, venta o alquiler de principio a
+              fin. Sin vueltas y a un mensaje de distancia.
             </p>
           </div>
         </Reveal>
@@ -179,7 +168,7 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      {/* Zona de trabajo */}
+      {/* Cobertura */}
       <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
         <div className="panel-glass rounded-3xl p-6 sm:p-8">
           <Reveal>
@@ -188,22 +177,12 @@ export default function NosotrosPage() {
             </h2>
           </Reveal>
           <Reveal delay={0.08}>
-            <p className="mt-3 text-muted-foreground">
-              Operamos en toda la {a.zona_operacion}, con foco en estas
-              localidades:
+            <p className="mt-3 max-w-2xl text-muted-foreground">
+              Operamos en <strong className="text-foreground">toda la Argentina</strong>.
+              Vendas o busques donde sea, te asesoramos a distancia con la misma
+              cercanía. Nuestra oficina central está en{" "}
+              <strong className="text-foreground">{a.direccion}</strong>.
             </p>
-          </Reveal>
-          <Reveal delay={0.14}>
-            <ul className="mt-5 flex flex-wrap gap-2.5">
-              {ZONAS.map((z) => (
-                <li
-                  key={z}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary/40 px-3.5 py-1.5 text-sm font-medium"
-                >
-                  <MapPin className="size-3.5 text-brand" /> {z}
-                </li>
-              ))}
-            </ul>
           </Reveal>
         </div>
       </section>
@@ -224,8 +203,8 @@ export default function NosotrosPage() {
               Hablemos de tu próxima operación
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-balance text-slate-200">
-              Comprá, vendé o alquilá con un equipo que conoce {a.zona_operacion}.
-              Escribinos y te asesoramos sin compromiso.
+              Comprá, vendé o alquilá con un equipo con más de {a.anios_experiencia}{" "}
+              años de experiencia. Escribinos y te asesoramos sin compromiso.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <WhatsappButton

@@ -6,7 +6,7 @@ const ITEMS: { icon: LucideIcon; title: string; desc: string }[] = [
   { icon: Calculator, title: "Tasaciones sin cargo", desc: "Valuamos tu propiedad gratis." },
   { icon: CalendarCheck, title: "Visitas coordinadas", desc: "A tu ritmo y agenda." },
   { icon: Scale, title: "Asesoría legal", desc: "Papeles en regla de punta a punta." },
-  { icon: MapPin, title: "Zona Oeste", desc: "Conocemos cada barrio del GBA." },
+  { icon: MapPin, title: "Cobertura nacional", desc: "Operamos en todo el país." },
   { icon: Handshake, title: "Acompañamiento real", desc: "Un asesor con vos en todo el proceso." },
   { icon: FileCheck2, title: "Operaciones seguras", desc: "Reserva, boleto y escritura claros." },
 ];

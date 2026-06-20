@@ -76,6 +76,7 @@ export function PropertyImage({
       fill
       sizes={sizes}
       priority={priority}
+      unoptimized
       onError={() => setFailed(true)}
       className={cn("object-cover", className)}
     />

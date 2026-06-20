@@ -42,10 +42,10 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-12 lg:px-8">
         {/* Marca + tagline + redes */}
         <div className="md:col-span-5">
-          <span className="text-lg font-bold uppercase tracking-[0.2em] text-foreground">
+          <span className="wordmark wordmark-rule ml-3 inline-block text-lg uppercase tracking-[0.16em]">
             {a.logoTexto}
           </span>
-          <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
             {a.tagline}. Te acompañamos a encontrar tu próxima propiedad en{" "}
             {a.zona_operacion} con transparencia y asesoría real.
           </p>

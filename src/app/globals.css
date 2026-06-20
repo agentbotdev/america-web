@@ -58,12 +58,16 @@
   --popover: oklch(0.17 0 0);
   --popover-foreground: oklch(0.975 0 0);
 
-  /* PRESS: base NEGRA + grises opacos. UN acento: el ROJO del logo. Verde SOLO WhatsApp.
-     La jerarquía la dan negro + glass + el rojo puntual (CTAs/badges). */
-  --brand: oklch(0.585 0.215 26);
+  /* MARCA AMÉRICA CARDOZO: base NEGRA + grises opacos. UN acento: el ROJO del logo (#dc2626).
+     Toque cálido puntual: ÁMBAR (#f59e0b, el amarillo del logo). Verde SOLO WhatsApp.
+     La jerarquía la dan negro + glass + el rojo puntual (CTAs/badges).
+     OJO: --brand / --brand-foreground / --accent-warm / --primary / --ring se SOBREESCRIBEN
+     en runtime desde data/agencia.ts vía brandStyle() (HEX exactos #dc2626 / #ffffff / #f59e0b).
+     Estos oklch son el fallback fiel a esos HEX para evitar cualquier flash de color distinto. */
+  --brand: oklch(0.585 0.218 27);            /* ≈ #dc2626 rojo de marca */
   --brand-foreground: oklch(0.99 0 0);
-  --electric: oklch(0.645 0.205 26);
-  --accent-warm: oklch(0.80 0.02 70);
+  --electric: oklch(0.637 0.208 26);         /* rojo levemente más vivo (hover/glow) */
+  --accent-warm: oklch(0.77 0.16 70);        /* ≈ #f59e0b ámbar del logo */
   --whatsapp: oklch(0.63 0.115 150);
   --success: oklch(0.68 0.12 152);
 
@@ -82,20 +86,21 @@
   --input: oklch(1 0 0 / 12%);
   --ring: var(--brand);
 
-  --chart-1: #4f7cff;
-  --chart-2: #22d3ee;
-  --chart-3: #f5b740;
-  --chart-4: #22c35e;
-  --chart-5: #8b93a7;
+  /* Paleta de datos alineada a la marca: rojo → ámbar → grises neutros (cero azul/cian). */
+  --chart-1: oklch(0.585 0.218 27);   /* rojo de marca */
+  --chart-2: oklch(0.70 0.17 45);     /* rojo-naranja */
+  --chart-3: oklch(0.77 0.16 70);     /* ámbar */
+  --chart-4: oklch(0.68 0.12 152);    /* verde (solo data positiva) */
+  --chart-5: oklch(0.62 0.01 30);     /* gris neutro cálido */
 
-  --sidebar: oklch(0.205 0.014 264);
-  --sidebar-foreground: oklch(0.96 0.004 264);
-  --sidebar-primary: #4f7cff;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: oklch(0.27 0.016 264);
-  --sidebar-accent-foreground: oklch(0.96 0.004 264);
+  --sidebar: oklch(0.165 0 0);
+  --sidebar-foreground: oklch(0.96 0 0);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: var(--brand-foreground);
+  --sidebar-accent: oklch(0.24 0 0);
+  --sidebar-accent-foreground: oklch(0.96 0 0);
   --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: #4f7cff;
+  --sidebar-ring: var(--brand);
 
   --glass-bg: rgba(255, 255, 255, 0.075);
   --glass-border: rgba(255, 255, 255, 0.12);
@@ -184,7 +189,7 @@
 /* ---------- Documento exportable a PDF (brochure de favoritos) ----------
    El documento es CLARO a propósito: un PDF se imprime / comparte y los
    navegadores NO imprimen fondos oscuros por defecto. print-color-adjust
-   fuerza que los acentos azul marino SÍ se impriman. */
+   fuerza que los acentos rojos de marca SÍ se impriman. */
 .doc-print {
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
@@ -257,4 +262,140 @@
   .animate-marquee { animation-duration: var(--marquee-duration, 34s) !important; animation-iteration-count: infinite !important; }
   .animate-aurora { animation-duration: 22s !important; animation-iteration-count: infinite !important; }
   .animate-float { animation-duration: 6s !important; animation-iteration-count: infinite !important; }
+}
+
+/* ---------- Wordmark de marca (header / footer / menú mobile) ----------
+   "AMÉRICA CARDOZO" en serif bold BLANCO con una RAYA ROJA debajo (evoca el logo
+   real: serif negro sobre amarillo con líneas rojas + "VENDE" en rojo).
+   El detalle rojo es la firma visual; el blanco da elegancia sobre el dark. */
+.wordmark {
+  font-family: Georgia, "Times New Roman", "Playfair Display", serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: oklch(0.985 0 0);
+}
+.wordmark-rule {
+  position: relative;
+}
+/* Raya roja: a la izquierda del wordmark (acento vertical, como el logo) */
+.wordmark-rule::before {
+  content: "";
+  position: absolute;
+  left: -0.7rem;
+  top: 50%;
+  height: 1.15em;
+  width: 3px;
+  transform: translateY(-50%);
+  border-radius: 9999px;
+  background: var(--brand);
+  box-shadow: 0 0 12px -2px color-mix(in oklch, var(--brand) 70%, transparent);
+}
+
+/* Underline rojo animado para nav links (microinteracción premium) */
+.nav-underline {
+  position: relative;
+}
+.nav-underline::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.4rem;
+  height: 2px;
+  width: 100%;
+  border-radius: 9999px;
+  background: var(--brand);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-underline:hover::after,
+.nav-underline[data-active="true"]::after {
+  transform: scaleX(1);
+}
+
+/* Glow rojo difuso para el bloque visual del hero (detrás de la casa) */
+.hero-spotlight {
+  background:
+    radial-gradient(60% 60% at 50% 40%, color-mix(in oklch, var(--brand) 38%, transparent), transparent 70%);
+}
+
+/* ---------- Microinteracciones premium (cards / CTAs) ----------
+   Todo CSS plano: sin JS, sin libs. Se activa al hover del .group contenedor.
+   Respeta reduced-motion (las transiciones casi se anulan, sin movimiento brusco). */
+
+/* Glow rojo de marca que "respira" desde el interior de la card al hover. La
+   card es overflow-hidden (zoom de imagen + radio), así que el resplandor vive
+   DENTRO con un radial top→bottom que tiñe sutilmente el borde superior. No toca
+   el layout (pointer-events:none) ni roba clicks. */
+.card-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    120% 80% at 50% -10%,
+    color-mix(in oklch, var(--brand) 30%, transparent),
+    transparent 55%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.group:hover .card-glow::before,
+.card-glow:hover::before {
+  opacity: 1;
+}
+
+/* Línea de luz superior que se "ilumina" al hover (top highlight animado). */
+.card-topline::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklch, var(--brand) 65%, white 10%),
+    transparent
+  );
+  opacity: 0;
+  transform: scaleX(0.4);
+  transform-origin: center;
+  transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.group:hover .card-topline::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+/* Shine: una banda diagonal que CRUZA el botón al hover (sensación premium). */
+.cta-shine {
+  position: relative;
+  overflow: hidden;
+}
+.cta-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 75%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.cta-shine:hover::after {
+  transform: translateX(130%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-glow::before,
+  .card-topline::after { transition: opacity 0.2s ease; }
+  .cta-shine::after { display: none; }
 }

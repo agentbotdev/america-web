@@ -7,10 +7,9 @@ import { AGENCIA } from "@/data/agencia";
 import { PropertyGallery } from "@/components/propiedades/property-gallery";
 import { FichaTecnica } from "@/components/propiedades/ficha-tecnica";
 import { PropertyMap } from "@/components/propiedades/property-map";
-import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
 import { FavoriteButton } from "@/components/favoritos/favorite-button";
+import { PropertyBrochure } from "@/components/propiedades/property-brochure";
 import { Badge } from "@/components/ui/badge";
-import { mensajePropiedad } from "@/lib/whatsapp";
 import { formatPrecio, labelOperacion, tituloPropiedad } from "@/lib/format";
 
 // ISR: cookieless + prerender por slug → click a una propiedad = instantáneo.
@@ -152,15 +151,11 @@ export default async function PropiedadPage({
                 Expensas {formatPrecio(p.expensas, "ARS")}/mes
               </p>
             )}
-            <div className="mt-4 flex items-center gap-2">
-              <WhatsappButton
-                numero={AGENCIA.whatsapp}
-                mensaje={mensajePropiedad(AGENCIA, p)}
-                label="Consultar por WhatsApp"
-                size="lg"
-                fullWidth
-              />
-              <FavoriteButton id={p.id} variant="inline" />
+            <div className="mt-4 flex items-start gap-2">
+              <div className="flex-1">
+                <PropertyBrochure propiedad={p} />
+              </div>
+              <FavoriteButton id={p.id} variant="inline" className="h-12 w-12" />
             </div>
           </div>
 
@@ -205,15 +200,11 @@ export default async function PropiedadPage({
               </p>
             )}
 
-            <div className="mt-5 flex items-center gap-2">
-              <WhatsappButton
-                numero={AGENCIA.whatsapp}
-                mensaje={mensajePropiedad(AGENCIA, p)}
-                label="Consultar por WhatsApp"
-                size="lg"
-                fullWidth
-              />
-              <FavoriteButton id={p.id} variant="inline" />
+            <div className="mt-5 flex items-start gap-2">
+              <div className="flex-1">
+                <PropertyBrochure propiedad={p} />
+              </div>
+              <FavoriteButton id={p.id} variant="inline" className="h-12 w-12" />
             </div>
           </div>
         </aside>

@@ -1,5 +1,6 @@
 import { Hero } from "@/components/home/hero";
 import { TrustStrip } from "@/components/home/trust-strip";
+import { StatsSection } from "@/components/home/stats-section";
 import { FeaturedProperties } from "@/components/home/featured-properties";
 import { ProcessSection } from "@/components/home/process-section";
 import { CtaSection } from "@/components/home/cta-section";
@@ -13,6 +14,7 @@ export default function HomePage() {
     <>
       <Hero />
       <TrustStrip />
+      <StatsSection />
       <FeaturedProperties />
       <ProcessSection />
       <CtaSection />
