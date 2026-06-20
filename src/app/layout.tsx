@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Sora } from "next/font/google";
 import "./globals.css";
-import { LenisProvider } from "@/components/providers/lenis-provider";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AsesorChat } from "@/components/chatbot/asesor-chat";
@@ -91,13 +90,11 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-screen flex-col" style={brandStyle(AGENCIA)}>
-        <LenisProvider>
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
-          <WhatsappFloat />
-          <AsesorChat />
-        </LenisProvider>
+        <SiteHeader />
+        <main className="flex-1">{children}</main>
+        <SiteFooter />
+        <WhatsappFloat />
+        <AsesorChat />
       </body>
     </html>
   );
