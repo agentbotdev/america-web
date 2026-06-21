@@ -28,14 +28,13 @@ function buildVariants(
   }
   const axis = direction === "left" || direction === "right" ? "x" : "y";
   const sign = direction === "right" || direction === "down" ? 1 : -1;
+  // SIN blur-in: el filtro dependía de que la animación corriera para quitarse.
+  // Con prefers-reduced-motion el navegador NO anima el filtro → el contenido
+  // quedaba BORROSO de forma PERMANENTE. Fade + slide es robusto y siempre legible.
+  void blur;
   return {
-    hidden: { opacity: 0, filter: `blur(${blur}px)`, [axis]: distance * sign },
-    visible: {
-      opacity: 1,
-      filter: "blur(0px)",
-      x: 0,
-      y: 0,
-    },
+    hidden: { opacity: 0, [axis]: distance * sign },
+    visible: { opacity: 1, x: 0, y: 0 },
   };
 }
 
