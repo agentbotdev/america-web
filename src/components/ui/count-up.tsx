@@ -36,11 +36,13 @@ export function CountUp({
   const [display, setDisplay] = useState(() => format(from, decimals));
 
   useEffect(() => {
-    if (!inView) return;
+    // Reduced-motion: mostrar el valor final SIEMPRE, sin depender de inView.
+    // (Si el IntersectionObserver no dispara, el número quedaba pegado en 0.)
     if (reduced) {
       setDisplay(format(to, decimals));
       return;
     }
+    if (!inView) return;
     const controls = animate(motionValue, to, {
       duration,
       ease: [0.22, 1, 0.36, 1],
