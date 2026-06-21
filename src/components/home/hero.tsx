@@ -1,15 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Search, ShieldCheck, ArrowRight, MapPin, Award, Handshake } from "lucide-react";
 import { motion } from "motion/react";
 import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
 import { AGENCIA } from "@/data/agencia";
 import { mensajeGeneral } from "@/lib/whatsapp";
-
-const Hero3DScene = dynamic(() => import("./hero-3d-scene"), { ssr: false });
 
 const fadeUp = {
   hidden: { opacity: 0, y: 26 },
@@ -62,10 +59,6 @@ export function Hero() {
           className="animate-aurora absolute -right-[10%] bottom-[-14%] size-[52vw] max-w-[640px] rounded-full blur-3xl"
           style={{ background: glow(0.24), animationDelay: "-9s", animationDuration: "26s" }}
         />
-      </div>
-
-      <div className="pointer-events-none absolute inset-0 opacity-70">
-        <Hero3DScene />
       </div>
 
       <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-28">
