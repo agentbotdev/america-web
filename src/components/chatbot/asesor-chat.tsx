@@ -168,7 +168,24 @@ export function AsesorChat() {
   const ultimoTexto = burbujas.at(-1)?.texto ?? "¿Te ayudo a encontrar tu próxima propiedad?";
 
   return (
-    <div data-no-print className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+    <>
+      {/* Overlay: oscurece y BLUREA el fondo cuando el chat está abierto.
+          Click afuera → minimiza (no se pierde la conversación). */}
+      <AnimatePresence>
+        {modo === "abierto" && (
+          <motion.div
+            key="chat-overlay"
+            data-no-print
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            onClick={() => setModo("minimizado")}
+            className="fixed inset-0 z-[55] bg-black/55 backdrop-blur-md"
+          />
+        )}
+      </AnimatePresence>
+      <div data-no-print className="fixed bottom-5 right-5 z-[60] flex flex-col items-end gap-3">
       <AnimatePresence mode="popLayout">
         {/* -------------------- PANEL COMPLETO -------------------- */}
         {modo === "abierto" && (
@@ -371,6 +388,7 @@ export function AsesorChat() {
           </motion.button>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </>
   );
 }
