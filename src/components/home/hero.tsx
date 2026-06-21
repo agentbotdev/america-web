@@ -34,7 +34,7 @@ const TRUST = [
 ];
 
 // La casa del hero (WEBP transparente) vive en public/ → se sirve y deploya con la web.
-const HERO_CASA = "/hero-casa.webp";
+const HERO_CASA = "/hero-casa-moderna.webp";
 
 // Glow de marca reutilizable (radial sutil, color del tenant via CSS var).
 const glow = (alpha: number) =>
