@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { Search, MapPin, FileSignature, KeyRound, BadgeCheck } from "lucide-react";
 
 // Proceso de compra/alquiler contado como roadmap: 4 etapas tangibles, conectadas y animadas.
@@ -32,12 +32,13 @@ const PASOS = [
 ];
 
 export function ProcessSection() {
+  const reduced = useReducedMotion() ?? false;
   return (
     <section id="proceso" className="section-dark relative overflow-hidden border-y border-white/5">
       <div className="bg-grid-dark pointer-events-none absolute inset-0 opacity-40" />
       <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -61,7 +62,7 @@ export function ProcessSection() {
           <div className="pointer-events-none absolute left-0 right-0 top-7 hidden h-px lg:block">
             <div className="h-full w-full bg-white/10" />
             <motion.div
-              initial={{ scaleX: 0 }}
+              initial={reduced ? { scaleX: 1 } : { scaleX: 0 }}
               whileInView={{ scaleX: 1 }}
               viewport={{ once: true, margin: "-120px" }}
               transition={{ duration: 1.3, ease: [0.22, 1, 0.36, 1] }}
@@ -74,7 +75,7 @@ export function ProcessSection() {
             {PASOS.map((p, i) => (
               <motion.div
                 key={p.title}
-                initial={{ opacity: 0, y: 28 }}
+                initial={reduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.55, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}

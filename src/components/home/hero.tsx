@@ -3,18 +3,23 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Search, ShieldCheck, ArrowRight, MapPin, Award, Handshake } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
 import { AGENCIA } from "@/data/agencia";
 import { mensajeGeneral } from "@/lib/whatsapp";
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 26 },
+// Reduced-motion: el contenido arranca VISIBLE (opacity 1, sin desplazamiento) →
+// nunca queda invisible si la animación no corre. Normal: fade + subida en cascada.
+const makeFadeUp = (reduced: boolean) => ({
+  hidden: { opacity: reduced ? 1 : 0, y: reduced ? 0 : 26 },
   show: (i: number) => ({
-    opacity: 1, y: 0,
-    transition: { duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] as const },
+    opacity: 1,
+    y: 0,
+    transition: reduced
+      ? { duration: 0 }
+      : { duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] as const },
   }),
-};
+});
 
 // Tags rápidos del hero: deep-link a /propiedades con filtros por OPERACIÓN / TIPO.
 // Nada geo-específico (mensaje nacional): NO barrios.
@@ -44,6 +49,8 @@ const glow = (alpha: number) =>
 
 export function Hero() {
   const a = AGENCIA;
+  const reduced = useReducedMotion() ?? false;
+  const fadeUp = makeFadeUp(reduced);
   return (
     <section className="section-dark relative overflow-hidden">
       <div className="bg-grid-dark pointer-events-none absolute inset-0 opacity-50" />
@@ -167,7 +174,7 @@ export function Hero() {
 
         {/* Visual: la casa de América sobre un spotlight rojo de marca. */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.94 }}
+          initial={reduced ? false : { opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           className="relative hidden lg:block"
@@ -187,7 +194,7 @@ export function Hero() {
 
           {/* Chip flotante de cobertura nacional (microdetalle premium) */}
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={reduced ? false : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="glass-dark absolute bottom-6 left-2 inline-flex items-center gap-2.5 rounded-2xl px-4 py-3"

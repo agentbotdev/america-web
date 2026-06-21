@@ -18,9 +18,12 @@ function buildVariants(
   reduced: boolean,
 ): Variants {
   if (reduced) {
+    // Reduced-motion: el contenido SIEMPRE visible. NO lo ocultamos en `hidden`
+    // (antes era opacity:0 → si whileInView no disparaba, quedaba invisible/desvaído).
+    // Accesible y robusto: nada del contenido depende de que corra una animación.
     return {
-      hidden: { opacity: 0 },
-      visible: { opacity: 1, transition: { duration: 0.3 } },
+      hidden: { opacity: 1 },
+      visible: { opacity: 1 },
     };
   }
   const axis = direction === "left" || direction === "right" ? "x" : "y";
