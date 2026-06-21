@@ -109,21 +109,41 @@ function mapRow(r: Record<string, unknown>, fotos: FotoPropiedad[]): Propiedad {
 
 type SB = ReturnType<typeof createPublicClient>;
 
-// Segunda query: trae las fotos de las propiedades dadas y las pega a cada una.
+// Segunda query: pega a cada propiedad SU FOTO DE PORTADA. Para los listados
+// (catálogo, destacadas) con la portada alcanza → 1 foto por propiedad, muy por
+// debajo del límite de filas de PostgREST (~1000). El bug que tenía: traer TODAS
+// las fotos de las 109 propiedades de una (2400+) chocaba con ese límite y dejaba
+// a la mayoría de las cards sin imagen. La ficha (getPropiedadBySlug) sí trae todas.
 async function attachFotos(sb: SB, props: Record<string, unknown>[]): Promise<Propiedad[]> {
   if (!props.length) return [];
   const ids = props.map((p) => String(p.tokko_id));
-  const { data: fotosRows } = await sb
-    .from("fotos_publicas")
-    .select(FOTO_COLS)
-    .in("propiedad_id", ids);
 
   const byProp = new Map<string, Array<Record<string, unknown>>>();
-  for (const f of (fotosRows as unknown as Array<Record<string, unknown>> | null) ?? []) {
-    const k = String(f.propiedad_id);
-    if (!byProp.has(k)) byProp.set(k, []);
-    byProp.get(k)!.push(f);
+
+  // 1) Portada de cada propiedad (es_portada = true). ~1 foto por propiedad.
+  const { data: portadas } = await sb
+    .from("fotos_publicas")
+    .select(FOTO_COLS)
+    .in("propiedad_id", ids)
+    .eq("es_portada", true);
+  for (const f of (portadas as unknown as Array<Record<string, unknown>> | null) ?? []) {
+    byProp.set(String(f.propiedad_id), [f]);
   }
+
+  // 2) Para las propiedades SIN es_portada marcada, su primera foto (orden asc).
+  const sinPortada = ids.filter((id) => !byProp.has(id));
+  if (sinPortada.length) {
+    const { data: extras } = await sb
+      .from("fotos_publicas")
+      .select(FOTO_COLS)
+      .in("propiedad_id", sinPortada)
+      .order("orden", { ascending: true });
+    for (const f of (extras as unknown as Array<Record<string, unknown>> | null) ?? []) {
+      const k = String(f.propiedad_id);
+      if (!byProp.has(k)) byProp.set(k, [f]); // primera por orden asc
+    }
+  }
+
   return props.map((p) => mapRow(p, mapFotos(byProp.get(String(p.tokko_id)) ?? [])));
 }
 
