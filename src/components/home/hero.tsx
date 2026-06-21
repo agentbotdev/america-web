@@ -33,8 +33,9 @@ const TRUST = [
   { icon: Handshake, value: "Asesoría real", label: "te acompañamos de punta a punta" },
 ];
 
-// La casa del hero (WEBP transparente) vive en public/ → se sirve y deploya con la web.
-const HERO_CASA = "/hero-casa.webp";
+// Foto de la casa (WEBP) que se FUNDE con el fondo oscuro del hero (NO flota como sticker).
+// Su fondo negro empalma con el dark del hero; un mask difumina izquierda (texto) e inferior.
+const HERO_HOUSE = "/hero-house.webp";
 
 // Glow de marca reutilizable (radial sutil, color del tenant via CSS var).
 const glow = (alpha: number) =>
@@ -60,6 +61,42 @@ export function Hero() {
           style={{ background: glow(0.24), animationDelay: "-9s", animationDuration: "26s" }}
         />
       </div>
+
+      {/* Foto de la casa INTEGRADA al fondo (no flota): su negro empalma con el dark
+          del hero. Mask: oscurece la izquierda (legibilidad del texto) y funde el
+          borde inferior con la sección siguiente, usando el negro EXACTO del hero.
+          Movimiento "piola": Ken Burns lento (zoom), nunca translateY. Solo desktop. */}
+      <motion.div
+        aria-hidden
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        className="pointer-events-none absolute inset-y-0 right-0 hidden w-[64%] lg:block"
+      >
+        <motion.div
+          initial={{ scale: 1.12 }}
+          animate={{ scale: [1.05, 1.11, 1.05] }}
+          transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
+          className="relative h-full w-full"
+        >
+          <Image
+            src={HERO_HOUSE}
+            alt=""
+            fill
+            priority
+            sizes="(max-width: 1024px) 0px, 64vw"
+            className="object-cover object-[62%_center]"
+          />
+        </motion.div>
+        {/* Blend con el negro EXACTO del hero (.section-dark va 0.095 → 0.155) */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(90deg, oklch(0.115 0 0) 0%, oklch(0.115 0 0 / 0.88) 24%, oklch(0.115 0 0 / 0.4) 50%, transparent 76%), linear-gradient(0deg, oklch(0.155 0 0) 0%, transparent 26%)",
+          }}
+        />
+      </motion.div>
 
       <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-28">
         {/* Texto */}
@@ -165,42 +202,8 @@ export function Hero() {
           </motion.dl>
         </div>
 
-        {/* Visual: la casa de América sobre un spotlight rojo de marca. */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.94 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="relative hidden lg:block"
-        >
-          {/* Spotlight rojo difuso detrás de la casa */}
-          <div className="hero-spotlight pointer-events-none absolute left-1/2 top-1/2 size-[92%] -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl" />
-          <div className="animate-float relative mx-auto aspect-square w-full max-w-lg">
-            <Image
-              src={HERO_CASA}
-              alt="Propiedades en venta y alquiler en toda Argentina — América Cardozo"
-              fill
-              priority
-              sizes="(max-width: 1024px) 0px, 32rem"
-              className="object-contain drop-shadow-2xl"
-            />
-          </div>
-
-          {/* Chip flotante de cobertura nacional (microdetalle premium) */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="glass-dark absolute bottom-6 left-2 inline-flex items-center gap-2.5 rounded-2xl px-4 py-3"
-          >
-            <span className="flex size-9 items-center justify-center rounded-xl bg-brand/15 text-brand">
-              <MapPin className="size-4" />
-            </span>
-            <span className="leading-tight">
-              <span className="block text-sm font-semibold text-white">Cobertura nacional</span>
-              <span className="block text-xs text-slate-400">Operamos en toda Argentina</span>
-            </span>
-          </motion.div>
-        </motion.div>
+        {/* La columna derecha la ocupa la FOTO integrada al fondo del hero
+            (capa absolute de arriba). Por eso acá no va un visual flotante. */}
       </div>
     </section>
   );
