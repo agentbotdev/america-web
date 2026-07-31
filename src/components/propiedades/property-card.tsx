@@ -24,10 +24,13 @@ function precioCard(p: Propiedad) {
 function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
   const href = `/propiedad/${p.slug}`;
   const portada = p.fotos.find((f) => f.es_portada) ?? p.fotos[0];
-  // En el catálogo (scroll infinito + grid) usamos el `thumbnail` como portada:
-  // mucho más liviano → menos bytes por card y scroll más fluido. Caemos a `url`
-  // cuando no hay thumb (mismo patrón que la galería de la ficha).
-  const portadaSrc = portada?.thumbnail ?? portada?.url;
+  // Portada en RESOLUCIÓN COMPLETA (`url`), no el `thumbnail`.
+  // Los thumbs de Tokko son de 260×195 y la card mide ~475px en desktop (~950
+  // en pantalla retina): se estiraban casi 4× y las fotos se veían pixeladas.
+  // En una inmobiliaria la foto ES el producto, así que prima la nitidez.
+  // El peso (≈125 KB vs ≈10 KB) lo contiene el lazy-loading: sólo bajan las
+  // cards que entran en pantalla, no las 109 del catálogo.
+  const portadaSrc = portada?.url ?? portada?.thumbnail;
   const ubicacion = [p.barrio, p.ciudad].filter(Boolean).join(", ");
   const m2 = formatM2(p.superficie_total ?? p.superficie_cubierta ?? p.metros_cubiertos);
   // Título LINDO (no el crudo de Tokko en mayúsculas con barras).
@@ -36,12 +39,12 @@ function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
   const aptoCredito = p.apto_credito === "Apto crédito";
 
   return (
-    <article className="card-glow card-topline group relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.045] shadow-[0_18px_50px_-28px_rgba(0,0,0,0.85)] transition-all duration-500 [border-top-color:rgba(255,255,255,0.16)] hover:-translate-y-2 hover:border-brand/45 hover:shadow-[0_28px_70px_-20px_rgba(220,38,38,0.4)]">
+    <article className="card-glow card-topline card-premium group relative flex h-full flex-col overflow-hidden rounded-3xl hover:-translate-y-2 hover:border-brand/45 hover:shadow-[0_28px_60px_-26px_color-mix(in_oklch,var(--brand)_45%,transparent)]">
       {/* Link-overlay: cubre TODA la card por encima del contenido → 1 click
           desde cualquier punto. Los CTAs lo "perforan" con z-20. */}
       <Link href={href} className="absolute inset-0 z-10" aria-label={`Ver ${titulo}`} />
 
-      <div className="relative block aspect-[4/3] overflow-hidden bg-gradient-to-b from-white/[0.05] to-transparent">
+      <div className="relative block aspect-[4/3] overflow-hidden bg-muted">
         <PropertyImage
           foto={portada}
           src={portadaSrc}
@@ -57,8 +60,8 @@ function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
             {labelOperacion(p.tipo_operacion)}
           </span>
           {p.destacada_web && (
-            <span className="glass inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium text-brand">
-              <Star className="size-3 fill-brand" aria-hidden="true" />
+            <span className="glass inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium text-brand-text">
+              <Star className="size-3 fill-brand text-brand" aria-hidden="true" />
               Destacada
             </span>
           )}
@@ -71,7 +74,7 @@ function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
       {/* `pointer-events-none`: el contenido no roba el click → toda la card
           navega vía el overlay. El CTA de WhatsApp reactiva los eventos. */}
       <div className="pointer-events-none relative z-20 flex flex-1 flex-col p-4">
-        <h3 className="font-heading line-clamp-2 text-base font-semibold leading-snug transition-colors group-hover:text-brand">
+        <h3 className="font-heading line-clamp-2 text-base font-semibold leading-snug transition-colors group-hover:text-brand-text">
           {titulo}
         </h3>
         {ubicacion && (
@@ -113,7 +116,7 @@ function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
           <div className="flex items-end justify-between gap-2">
             <p className="font-mono text-xl font-semibold tracking-tight">{precio}</p>
             {aptoCredito && (
-              <span className="rounded-full bg-brand/15 px-2 py-0.5 text-xs font-medium text-brand">
+              <span className="rounded-full bg-brand/12 px-2 py-0.5 text-xs font-medium text-brand-text">
                 Apto crédito
               </span>
             )}

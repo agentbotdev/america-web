@@ -46,16 +46,15 @@ export function FichaTecnica({ propiedad }: { propiedad: Propiedad }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.5, delay: (i % 2) * 0.06, ease: [0.22, 1, 0.36, 1] }}
-              className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] transition-colors duration-300 hover:border-brand/40"
-              style={{ borderTopColor: "rgba(255,255,255,0.16)" }}
+              className="card-premium group overflow-hidden rounded-2xl transition-colors duration-300 hover:border-brand/40"
             >
               {/* Encabezado de la categoría */}
-              <div className="flex items-center gap-3 border-b border-white/[0.07] bg-gradient-to-r from-brand/[0.12] to-transparent px-5 py-3.5">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand/20 text-brand ring-1 ring-brand/30">
+              <div className="flex items-center gap-3 border-b border-border bg-gradient-to-r from-brand/[0.08] to-transparent px-5 py-3.5">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand/12 text-brand ring-1 ring-brand/30">
                   <Icon className="size-5" />
                 </span>
                 <h3 className="font-semibold">{c.titulo}</h3>
-                <span className="ml-auto rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                   {count}
                 </span>
               </div>
@@ -66,7 +65,7 @@ export function FichaTecnica({ propiedad }: { propiedad: Propiedad }) {
                   {c.chips!.map((chip) => (
                     <li
                       key={chip}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-sm text-foreground"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1.5 text-sm text-foreground"
                     >
                       <Check className="size-3.5 shrink-0 text-brand" />
                       {chip}

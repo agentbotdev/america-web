@@ -47,12 +47,12 @@ const STATS: Stat[] = [
 
 export function StatsSection() {
   return (
-    <section className="section-dark relative overflow-hidden border-y border-white/[0.06]">
-      <div className="bg-grid-dark pointer-events-none absolute inset-0 opacity-30" />
+    <section className="relative overflow-hidden">
+      {/* (sin grilla de fondo: el fondo de la página es un solo color liso) */}
       <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <Reveal className="mx-auto max-w-2xl text-center" blur={10}>
-          <span className="text-sm font-medium text-brand">Por qué confiar en nosotros</span>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+          <span className="text-sm font-medium text-brand-text">Por qué confiar en nosotros</span>
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             Trayectoria que se traduce en resultados
           </h2>
         </Reveal>
@@ -63,17 +63,17 @@ export function StatsSection() {
         >
           {STATS.map((s) => (
             <RevealItem key={s.label}>
-              <div className="card-glow card-topline group relative h-full overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-6 text-center transition-all duration-500 [border-top-color:rgba(255,255,255,0.16)] hover:-translate-y-1.5 hover:border-brand/40 hover:bg-white/[0.06]">
-                <span className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-brand/15 text-brand ring-1 ring-brand/25 transition-transform duration-500 group-hover:scale-110">
+              <div className="card-glow card-topline card-premium group relative h-full overflow-hidden rounded-3xl p-6 text-center hover:-translate-y-1.5 hover:border-brand/40">
+                <span className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-brand/12 text-brand ring-1 ring-brand/25 transition-transform duration-500 group-hover:scale-110">
                   <s.icon className="size-6" />
                 </span>
-                <p className="font-heading text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                <p className="font-heading text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
                   <CountUp to={s.to} prefix={s.prefix} suffix={s.suffix} />
                 </p>
-                <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-brand">
+                <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-brand-text">
                   {s.label}
                 </p>
-                <p className="mt-2 text-xs leading-relaxed text-slate-400">{s.sub}</p>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{s.sub}</p>
               </div>
             </RevealItem>
           ))}

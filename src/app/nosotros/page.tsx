@@ -78,22 +78,22 @@ export default function NosotrosPage() {
   return (
     <div>
       {/* Hero */}
-      <section className="section-dark relative overflow-hidden">
-        <div className="bg-grid-dark pointer-events-none absolute inset-0 opacity-50" />
+      <section className="section-band relative overflow-hidden">
+        <div className="bg-grid pointer-events-none absolute inset-0 opacity-50" />
         <div className="relative mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 lg:px-8 lg:py-28">
           <Reveal>
-            <span className="glass-dark inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium text-slate-200">
+            <span className="glass inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
               <Award className="size-3.5 text-brand" />
               +{a.anios_experiencia} años · Operamos en todo el país
             </span>
           </Reveal>
           <Reveal delay={0.08}>
-            <h1 className="mt-6 text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="mt-6 text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               {a.nombre}
             </h1>
           </Reveal>
           <Reveal delay={0.16}>
-            <p className="mx-auto mt-5 max-w-2xl text-balance text-lg text-slate-300">
+            <p className="mx-auto mt-5 max-w-2xl text-balance text-lg text-muted-foreground">
               {a.tagline}. Compra, venta y alquiler de propiedades en todo el
               país, con asesoramiento real y cercano.
             </p>
@@ -190,19 +190,20 @@ export default function NosotrosPage() {
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-4 py-12 pb-20 sm:px-6 lg:px-8">
         <div
-          className="relative overflow-hidden rounded-3xl border border-white/10 px-6 py-14 text-center sm:px-12 sm:py-16"
+          className="relative overflow-hidden rounded-3xl px-6 py-14 text-center shadow-[0_28px_70px_-32px_color-mix(in_oklch,var(--brand)_70%,transparent)] sm:px-12 sm:py-16"
           style={{
             background:
-              "linear-gradient(135deg, color-mix(in oklch, var(--brand) 78%, black 6%) 0%, color-mix(in oklch, var(--brand) 28%, black 40%) 100%)",
+              // Los porcentajes DEBEN sumar 100 (si no, queda alpha < 1).
+              "linear-gradient(135deg, var(--brand) 0%, color-mix(in oklch, var(--brand) 78%, black 22%) 100%)",
           }}
         >
-          <div className="bg-grid-dark pointer-events-none absolute inset-0 opacity-25" />
+          <div className="bg-grid-invert pointer-events-none absolute inset-0 opacity-40" />
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
           <div className="relative mx-auto max-w-2xl">
             <h2 className="text-balance text-3xl font-bold tracking-tight text-white sm:text-4xl">
               Hablemos de tu próxima operación
             </h2>
-            <p className="mx-auto mt-4 max-w-lg text-balance text-slate-200">
+            <p className="mx-auto mt-4 max-w-lg text-balance text-white">
               Comprá, vendé o alquilá con un equipo con más de {a.anios_experiencia}{" "}
               años de experiencia. Escribinos y te asesoramos sin compromiso.
             </p>
@@ -215,13 +216,13 @@ export default function NosotrosPage() {
               />
               <Link
                 href="/propiedades"
-                className="glass-dark inline-flex h-13 items-center gap-1.5 rounded-full px-7 text-base font-medium text-white transition hover:bg-white/10"
+                className="inline-flex h-13 items-center gap-1.5 rounded-full border border-white/45 px-7 text-base font-medium text-white transition hover:border-white hover:bg-white/15"
               >
                 Ver propiedades <ArrowRight className="size-4" />
               </Link>
             </div>
             {a.email && (
-              <p className="mt-6 flex items-center justify-center gap-2 text-sm text-slate-200">
+              <p className="mt-6 flex items-center justify-center gap-2 text-sm text-white">
                 <Mail className="size-4" />
                 <a href={`mailto:${a.email}`} className="hover:underline">
                   {a.email}

@@ -93,8 +93,16 @@ export interface Propiedad {
 }
 
 export interface BrandColors {
+  /** Rojo de marca. Uso: rellenos, íconos, bordes, badges, títulos grandes. */
   brand: string;
+  /** Color del texto SOBRE `brand` (blanco). */
   brandForeground: string;
+  /**
+   * Variante oscurecida de `brand` para TEXTO y links sobre fondo claro.
+   * El rojo de marca puro no alcanza 4.5:1 sobre crema/blanco (WCAG AA).
+   */
+  brandText: string;
+  /** Crema pastel de marca. Uso: fondo de banda de sección. */
   accent: string;
 }
 

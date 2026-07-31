@@ -196,29 +196,29 @@ export function AsesorChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.92 }}
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
-            className="glass-dark flex h-[32rem] w-[min(90vw,23rem)] flex-col overflow-hidden rounded-3xl border border-white/12 shadow-2xl shadow-black/70"
+            className="flex h-[32rem] w-[min(90vw,23rem)] flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl shadow-[rgba(60,50,25,0.35)]"
           >
-            {/* Header */}
-            <div className="glow-brand flex items-center gap-3 border-b border-white/10 bg-brand/15 px-4 py-3">
-              <span className="relative flex size-9 items-center justify-center rounded-full bg-brand text-white">
+            {/* Header: barra ROJA sólida — el chat es el CTA más fuerte de la web. */}
+            <div className="flex items-center gap-3 border-b border-black/10 bg-brand px-4 py-3">
+              <span className="relative flex size-9 items-center justify-center rounded-full bg-white/20 text-white">
                 <Sparkles className="size-4" />
-                <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-[#0a0e1a] bg-emerald-400" />
+                <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-brand bg-emerald-400" />
               </span>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-white">Asesor América Cardozo</p>
-                <p className="text-[11px] text-emerald-300">en línea · responde al instante</p>
+                <p className="text-[11px] text-white/80">en línea · responde al instante</p>
               </div>
               <button
                 onClick={() => setModo("minimizado")}
                 aria-label="Minimizar"
-                className="ml-auto rounded-full p-1.5 text-slate-300 transition hover:bg-white/10 hover:text-white"
+                className="ml-auto rounded-full p-1.5 text-white/80 transition hover:bg-white/20 hover:text-white"
               >
                 <Minus className="size-4" />
               </button>
               <button
                 onClick={() => setModo("cerrado")}
                 aria-label="Cerrar"
-                className="rounded-full p-1.5 text-slate-300 transition hover:bg-white/10 hover:text-white"
+                className="rounded-full p-1.5 text-white/80 transition hover:bg-white/20 hover:text-white"
               >
                 <X className="size-4" />
               </button>
@@ -243,7 +243,7 @@ export function AsesorChat() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="flex flex-wrap gap-2 border-t border-white/10 bg-black/20 p-3"
+                  className="flex flex-wrap gap-2 border-t border-border bg-muted p-3"
                 >
                   {pasoActual.opciones.map((op, i) => (
                     <motion.button
@@ -252,7 +252,7 @@ export function AsesorChat() {
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: i * 0.05 }}
                       onClick={() => elegir(pasoActual, op)}
-                      className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-100 transition hover:border-brand hover:bg-brand/20 hover:text-white active:scale-95"
+                      className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand hover:bg-brand/10 hover:text-brand-text active:scale-95"
                     >
                       {op.emoji ? `${op.emoji} ` : ""}
                       {op.label}
@@ -273,7 +273,7 @@ export function AsesorChat() {
                     e.preventDefault();
                     enviarTexto(pasoActual);
                   }}
-                  className="flex items-center gap-2 border-t border-white/10 bg-black/20 p-3"
+                  className="flex items-center gap-2 border-t border-border bg-muted p-3"
                 >
                   <input
                     value={textoInput}
@@ -281,7 +281,7 @@ export function AsesorChat() {
                     placeholder={pasoActual.input.placeholder}
                     aria-label={pasoActual.input.placeholder}
                     autoComplete="off"
-                    className="min-w-0 flex-1 rounded-full border border-white/15 bg-white/5 px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                    className="min-w-0 flex-1 rounded-full border border-border bg-card px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                   />
                   <button
                     type="submit"
@@ -308,15 +308,15 @@ export function AsesorChat() {
             transition={{ type: "spring", stiffness: 420, damping: 32 }}
             onClick={() => setModo("abierto")}
             aria-label="Agrandar el asesor"
-            className="glass-dark flex w-[min(68vw,17rem)] items-center gap-2.5 rounded-2xl border border-white/12 px-3 py-2.5 text-left shadow-2xl shadow-black/70"
+            className="flex w-[min(68vw,17rem)] items-center gap-2.5 rounded-2xl border border-border bg-card px-3 py-2.5 text-left shadow-2xl shadow-[rgba(60,50,25,0.3)]"
           >
             <span className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-brand text-white">
               <Sparkles className="size-3.5" />
-              <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-[#0a0e1a] bg-emerald-400" />
+              <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-card bg-emerald-500" />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-[11px] font-semibold text-white">Asesor América Cardozo</span>
-              <span className="block truncate text-[11px] text-slate-300">{ultimoTexto}</span>
+              <span className="block text-[11px] font-semibold text-foreground">Asesor América Cardozo</span>
+              <span className="block truncate text-[11px] text-muted-foreground">{ultimoTexto}</span>
             </span>
             <span
               role="button"
@@ -332,11 +332,11 @@ export function AsesorChat() {
                 }
               }}
               aria-label="Cerrar asesor"
-              className="flex size-6 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-white/10 hover:text-white"
+              className="flex size-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
             >
               <X className="size-3.5" />
             </span>
-            <ChevronUp className="size-4 shrink-0 text-slate-400" />
+            <ChevronUp className="size-4 shrink-0 text-muted-foreground" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -352,7 +352,7 @@ export function AsesorChat() {
               setModo("abierto");
               setTip(false);
             }}
-            className="glass-dark hidden max-w-[14rem] rounded-2xl rounded-br-md border border-white/10 px-3.5 py-2 text-left text-xs text-slate-100 shadow-xl lg:block"
+            className="hidden max-w-[14rem] rounded-2xl rounded-br-md border border-border bg-card px-3.5 py-2 text-left text-xs text-foreground shadow-xl lg:block"
           >
             👋 ¿Te ayudo a encontrar tu próxima propiedad?
           </motion.button>
@@ -374,7 +374,7 @@ export function AsesorChat() {
             }}
             aria-label="Abrir asesor"
             whileTap={{ scale: 0.92 }}
-            className="glow-brand relative flex size-14 items-center justify-center rounded-full bg-brand text-white shadow-xl shadow-black/40"
+            className="glow-brand relative flex size-14 items-center justify-center rounded-full bg-brand text-white shadow-xl shadow-[rgba(60,50,25,0.35)]"
           >
             {mounted && !reduce && (
               <motion.span

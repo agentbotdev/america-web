@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import {
@@ -32,9 +33,9 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-// Logo wordmark: "AMÉRICA CARDOZO" en serif bold BLANCO con una raya ROJA a la
-// izquierda (evoca el logo real: serif sobre amarillo con líneas rojas).
-// Mientras no tengamos el logo gráfico definitivo, este wordmark ES la marca.
+// Logo REAL de la marca, SOLO el círculo (pedido del cliente: sin el wordmark
+// de texto al lado — el badge ya dice "AMERICA CARDOZO VENDE"). Un poco más
+// grande para que el texto interno se lea.
 function Logo() {
   return (
     <Link
@@ -42,9 +43,17 @@ function Logo() {
       aria-label={AGENCIA.nombre}
       className="group flex items-center"
     >
-      <span className="wordmark text-[15px] uppercase tracking-[0.16em] transition-opacity group-hover:opacity-90 sm:text-base">
-        {AGENCIA.logoTexto}
-      </span>
+      {/* Versión FLAT (sin el círculo crema): el fondo de la página ES el crema
+          del logo, así que el texto se apoya directo — fusión perfecta, sin
+          borde visible sea cual sea el tono de pantalla. */}
+      <Image
+        src="/marca/america-cardozo-flat.png"
+        alt=""
+        width={329}
+        height={204}
+        priority
+        className="h-12 w-auto shrink-0 transition-transform duration-300 group-hover:scale-105"
+      />
     </Link>
   );
 }
@@ -54,7 +63,15 @@ export function SiteHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-[oklch(0.11_0_0)]/95 backdrop-blur-xl">
+    // Header SÓLIDO, sin `backdrop-filter` — por dos razones que ya se pagaron:
+    // 1) Un fondo translúcido dejaba ver el contenido sangrando por debajo al
+    //    scrollear (se corrigió en el commit m6jUQbY con fondo sólido).
+    // 2) Al ser sticky, su backdrop-filter obligaba a recomponer todo lo que
+    //    pasa por detrás en CADA frame: era el mayor costo de scroll de la web.
+    // Sólido resuelve las dos de una: se ve mejor y no cuesta nada.
+    // Mismo color que la página, SIN línea de borde: el header se funde con el
+    // fondo uniforme (el usuario marcó los "cortes" horizontales de la página).
+    <header className="sticky top-0 z-50 bg-background">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Logo />
 
@@ -99,8 +116,17 @@ export function SiteHeader() {
             </SheetTrigger>
             <SheetContent side="left" className="w-80 max-w-[85vw] gap-0 p-0">
               <SheetHeader className="border-b border-border px-5 py-4">
-                <SheetTitle className="wordmark text-base uppercase tracking-[0.16em]">
-                  {AGENCIA.logoTexto}
+                <SheetTitle className="flex items-center gap-2.5">
+                  <Image
+                    src="/marca/america-cardozo-flat.png"
+                    alt=""
+                    width={329}
+                    height={204}
+                    className="h-9 w-auto shrink-0"
+                  />
+                  <span className="wordmark text-sm uppercase leading-none tracking-[0.14em]">
+                    {AGENCIA.logoTexto}
+                  </span>
                 </SheetTitle>
                 <SheetDescription className="sr-only">
                   Menú de navegación de {AGENCIA.nombre}
@@ -113,6 +139,9 @@ export function SiteHeader() {
                   return (
                     <SheetClose
                       key={item.href}
+                      // El close es un <Link> (<a>), no un <button>: hay que
+                      // declararlo o Base UI loguea un error de semántica.
+                      nativeButton={false}
                       render={
                         <Link
                           href={item.href}

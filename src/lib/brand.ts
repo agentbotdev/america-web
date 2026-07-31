@@ -9,6 +9,8 @@ export function brandStyle(agencia: Agencia): CSSProperties {
   return {
     "--brand": agencia.colores.brand,
     "--brand-foreground": agencia.colores.brandForeground,
+    // Texto/links en rojo: variante accesible (ver BrandColors.brandText).
+    "--brand-text": agencia.colores.brandText,
     "--accent-warm": agencia.colores.accent,
     "--primary": agencia.colores.brand,
     "--primary-foreground": agencia.colores.brandForeground,

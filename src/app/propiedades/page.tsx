@@ -52,9 +52,9 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
 
   return (
     <>
-      <div className="section-dark border-b border-white/5">
+      <div className="section-band border-b border-border">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <p className="text-sm font-medium text-brand">Catálogo · Todo el país</p>
+          <p className="text-sm font-medium text-brand-text">Catálogo · Todo el país</p>
           <h1 className="mt-1 text-4xl font-bold tracking-tight sm:text-5xl">
             Encontrá tu próxima propiedad
           </h1>

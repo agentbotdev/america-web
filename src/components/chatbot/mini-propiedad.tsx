@@ -40,7 +40,7 @@ export function MiniPropiedad({
       whileTap={{ scale: 0.97 }}
       onClick={() => onSeleccionar(p)}
       aria-label={`Ver ${p.titulo}`}
-      className="group flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05] p-2 text-left transition hover:border-brand/45 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+      className="group flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-border bg-card p-2 text-left transition hover:border-brand/45 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
     >
       <span className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-gradient-to-b from-white/10 to-transparent">
         <PropertyImage
@@ -53,15 +53,15 @@ export function MiniPropiedad({
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold text-white">
+        <span className="block truncate text-sm font-semibold text-foreground">
           {p.tipo_propiedad}
           {p.dormitorios ? ` · ${p.dormitorios} dorm.` : ""}
         </span>
         {ubicacion && (
-          <span className="mt-0.5 block truncate text-[11px] text-slate-400">{ubicacion}</span>
+          <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">{ubicacion}</span>
         )}
         <span className="mt-1 flex items-center gap-2">
-          <span className="font-mono text-sm font-semibold text-white">{precioMini(p)}</span>
+          <span className="font-mono text-sm font-semibold text-foreground">{precioMini(p)}</span>
           {m2 && (
             <span className="inline-flex items-center gap-0.5 rounded-full bg-brand/20 px-1.5 py-0.5 text-[10px] font-medium text-electric">
               <Ruler className="size-2.5" />
@@ -77,7 +77,7 @@ export function MiniPropiedad({
         </span>
       </span>
 
-      <ArrowUpRight className="size-4 shrink-0 text-slate-500 transition group-hover:text-brand group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+      <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition group-hover:text-brand group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
     </motion.button>
   );
 }

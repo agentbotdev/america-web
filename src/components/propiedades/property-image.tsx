@@ -48,7 +48,11 @@ export function PropertyImage({
 }: PropertyImageProps) {
   const [failed, setFailed] = useState(false);
   const url = src ?? foto?.url;
-  const altText = alt ?? foto?.alt ?? titulo ?? "Propiedad";
+  // OJO: `??` NO descarta el string vacío. La mayoría de las fotos de Tokko
+  // vienen sin descripción → `foto.alt` es "" y ganaba, dejando `alt=""` (foto
+  // decorativa para un lector de pantalla). Buscamos el primer texto REAL.
+  const altText =
+    [alt, foto?.alt, titulo].find((t) => t && t.trim().length > 0) ?? "Propiedad";
 
   if (!url || failed) {
     return (
@@ -76,7 +80,13 @@ export function PropertyImage({
       fill
       sizes={sizes}
       priority={priority}
-      unoptimized
+      // SIN `unoptimized`: Next redimensiona la foto al ancho real de la card y
+      // la sirve en AVIF — 48 KB contra los 123 KB del JPG original, y encima se
+      // ve mejor. `unoptimized` fue un parche puesto cuando las cards salían sin
+      // foto, pero la causa real era otra (la query chocaba con el límite de
+      // 1000 filas de PostgREST, arreglado en el commit m6jUQbY). El parche
+      // quedó y hoy sólo agrega peso. Verificado: /_next/image devuelve 200
+      // image/avif para las URLs de static.tokkobroker.com.
       onError={() => setFailed(true)}
       className={cn("object-cover", className)}
     />

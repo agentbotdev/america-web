@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Clock, Mail } from "lucide-react";
 import { AGENCIA } from "@/data/agencia";
 import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
@@ -42,9 +43,15 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-12 lg:px-8">
         {/* Marca + tagline + redes */}
         <div className="md:col-span-5">
-          <span className="wordmark inline-block text-lg uppercase tracking-[0.16em]">
-            {a.logoTexto}
-          </span>
+          {/* En el footer hay aire: el logo va grande y solo, sin wordmark al
+              lado — a este tamaño su propio texto ya se lee. */}
+          <Image
+            src="/marca/america-cardozo-flat.png"
+            alt={a.nombre}
+            width={329}
+            height={204}
+            className="h-16 w-auto"
+          />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
             {a.tagline}. Te acompañamos a encontrar tu próxima propiedad en{" "}
             {a.zona_operacion} con transparencia y asesoría real.

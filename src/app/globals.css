@@ -10,6 +10,8 @@
 
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
+  /* Rojo accesible para TEXTO/links sobre fondo claro → `text-brand-text`. */
+  --color-brand-text: var(--brand-text);
   --color-accent-warm: var(--accent-warm);
   --color-electric: var(--electric);
   --color-whatsapp: var(--whatsapp);
@@ -18,6 +20,13 @@
   --font-sans: var(--font-sans);
   --font-heading: var(--font-heading);
   --font-mono: var(--font-mono);
+
+  /* Paleta de datos como utilidades (`bg-chart-3`, `text-chart-2`, …). */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -46,64 +55,81 @@
   --animate-aurora: aurora 18s ease-in-out infinite;
 }
 
-/* DARK-FIRST: la web es oscura por defecto (gris azulado, estilo iOS clean) */
+/* LIGHT: la web es CLARA, fiel al branding real de América Cardozo.
+   Paleta verificada en el CSS de americacardozo.com.ar (sitio Tokko):
+   rojo #f02e19 + crema pastel #f7e6a6 + negro #000 + blanco #fff. */
 :root {
   --radius: 0.9rem;
 
-  --background: oklch(0.135 0 0);
-  --foreground: oklch(0.975 0 0);
+  /* Fondo: EL CREMA EXACTO DEL LOGO (#f6e7a5, sampleado del PNG real).
+     Decisión del cliente: el círculo del logo debe FUNDIRSE con la página sin
+     que se note la diferencia — la marca ES el fondo. Contrastes verificados
+     sobre este crema: foreground 14.0, muted-foreground 5.5, brand-text 4.76,
+     brand 3.31 (íconos) → todos pasan WCAG AA.
+     Las fotos de propiedades no se tiñen: viven dentro de cards BLANCAS. */
+  --background: oklch(0.9247 0.0854 96.9);   /* = #f6e7a5 crema del logo */
+  --foreground: oklch(0.218 0 0);            /* ≈ #1a1a1a — negro suave: el
+                                                negro puro sobre crema vibra */
 
-  --card: oklch(0.185 0 0);
-  --card-foreground: oklch(0.975 0 0);
-  --popover: oklch(0.17 0 0);
-  --popover-foreground: oklch(0.975 0 0);
+  /* Card BLANCO PURO a propósito: las fotos respiran sin tinte. */
+  --card: oklch(1 0 0);                      /* #ffffff */
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
 
-  /* MARCA AMÉRICA CARDOZO: base NEGRA + grises opacos. UN acento: el ROJO del logo (#dc2626).
-     Toque cálido puntual: ÁMBAR (#f59e0b, el amarillo del logo). Verde SOLO WhatsApp.
-     La jerarquía la dan negro + glass + el rojo puntual (CTAs/badges).
-     OJO: --brand / --brand-foreground / --accent-warm / --primary / --ring se SOBREESCRIBEN
-     en runtime desde data/agencia.ts vía brandStyle() (HEX exactos #dc2626 / #ffffff / #f59e0b).
-     Estos oklch son el fallback fiel a esos HEX para evitar cualquier flash de color distinto. */
-  --brand: oklch(0.585 0.218 27);            /* ≈ #dc2626 rojo de marca */
-  --brand-foreground: oklch(0.99 0 0);
-  --electric: oklch(0.637 0.208 26);         /* rojo levemente más vivo (hover/glow) */
-  --accent-warm: oklch(0.77 0.16 70);        /* ≈ #f59e0b ámbar del logo */
-  --whatsapp: oklch(0.63 0.115 150);
-  --success: oklch(0.68 0.12 152);
+  /* MARCA AMÉRICA CARDOZO.
+     OJO: --brand / --brand-foreground / --brand-text / --accent-warm / --primary
+     / --ring se SOBREESCRIBEN en runtime desde data/agencia.ts vía brandStyle()
+     (HEX exactos #f02e19 / #ffffff / #c41f0d / #f7e6a6). Estos oklch son el
+     fallback fiel a esos HEX, para que no haya flash de un color distinto. */
+  --brand: oklch(0.617 0.230 30);            /* ≈ #f02e19 rojo de marca */
+  --brand-foreground: oklch(1 0 0);
+  /* Texto/links en rojo. El --brand puro da 3.3:1 sobre crema y 4.1:1 sobre
+     blanco → NO pasa WCAG AA. Éste da 5.7:1. Mismo hue, sólo más oscuro. */
+  --brand-text: oklch(0.527 0.200 30);       /* ≈ #c41f0d */
+  --electric: oklch(0.660 0.222 32);         /* rojo más vivo (hover/glow) */
+  --accent-warm: oklch(0.924 0.084 95);      /* ≈ #f7e6a6 crema de marca */
+  --whatsapp: oklch(0.55 0.13 150);          /* oscurecido: legible en claro */
+  --success: oklch(0.55 0.13 152);
 
   --primary: var(--brand);
   --primary-foreground: var(--brand-foreground);
 
-  --secondary: oklch(0.215 0 0);
-  --secondary-foreground: oklch(0.975 0 0);
-  --muted: oklch(0.215 0 0);
-  --muted-foreground: oklch(0.66 0 0);
-  --accent: oklch(0.24 0 0);
-  --accent-foreground: oklch(0.975 0 0);
+  /* Superficies: crema muy diluido → dan jerarquía sin ensuciar. */
+  --secondary: oklch(0.962 0.024 95);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(0.962 0.024 95);
+  --muted-foreground: oklch(0.47 0.015 90); /* ≈ #5f5a4f gris cálido → 6.6:1 */
+  --accent: oklch(0.948 0.034 95);
+  --accent-foreground: var(--foreground);
 
-  --destructive: oklch(0.62 0.21 18);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 12%);
+  --destructive: oklch(0.55 0.21 25);
+  /* Bordes: negro translúcido (antes eran blancos, para el fondo oscuro). */
+  --border: oklch(0.218 0.01 90 / 12%);
+  --input: oklch(0.218 0.01 90 / 16%);
   --ring: var(--brand);
 
-  /* Paleta de datos alineada a la marca: rojo → ámbar → grises neutros (cero azul/cian). */
-  --chart-1: oklch(0.585 0.218 27);   /* rojo de marca */
-  --chart-2: oklch(0.70 0.17 45);     /* rojo-naranja */
-  --chart-3: oklch(0.77 0.16 70);     /* ámbar */
-  --chart-4: oklch(0.68 0.12 152);    /* verde (solo data positiva) */
-  --chart-5: oklch(0.62 0.01 30);     /* gris neutro cálido */
+  /* Paleta de datos alineada a la marca: rojo → naranja → crema → grises.
+     Oscurecidas respecto del tema anterior para que se lean sobre claro. */
+  --chart-1: oklch(0.617 0.230 30);   /* rojo de marca */
+  --chart-2: oklch(0.66 0.17 45);     /* rojo-naranja */
+  --chart-3: oklch(0.78 0.13 85);     /* dorado (el crema puro no se ve) */
+  --chart-4: oklch(0.55 0.13 152);    /* verde (sólo data positiva) */
+  --chart-5: oklch(0.55 0.02 60);     /* gris neutro cálido */
 
-  --sidebar: oklch(0.165 0 0);
-  --sidebar-foreground: oklch(0.96 0 0);
+  --sidebar: oklch(0.975 0.016 95);
+  --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--brand);
   --sidebar-primary-foreground: var(--brand-foreground);
-  --sidebar-accent: oklch(0.24 0 0);
-  --sidebar-accent-foreground: oklch(0.96 0 0);
-  --sidebar-border: oklch(1 0 0 / 9%);
+  --sidebar-accent: oklch(0.948 0.034 95);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: oklch(0.218 0.01 90 / 10%);
   --sidebar-ring: var(--brand);
 
-  --glass-bg: rgba(255, 255, 255, 0.075);
-  --glass-border: rgba(255, 255, 255, 0.12);
+  /* Glass en claro: BLANCO translúcido sobre el fondo cálido (antes era blanco
+     translúcido sobre negro — invisible acá). El borde ahora es negro sutil. */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(26, 26, 26, 0.10);
 }
 
 @layer base {
@@ -114,7 +140,7 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
     background-image:
-      radial-gradient(1000px 700px at 50% -12%, color-mix(in oklch, var(--brand) 9%, transparent), transparent 62%);
+      radial-gradient(1000px 700px at 50% -12%, color-mix(in oklch, var(--accent-warm) 55%, transparent), transparent 62%);
   }
   html {
     @apply font-sans antialiased;
@@ -127,62 +153,79 @@
 
 /* ---------- Capa épica: glass, glow, profundidad (CSS plano) ---------- */
 
-/* Glass premium: el secreto NO es solo blur, es el HIGHLIGHT del borde superior +
-   un gradiente sutil top→bottom + saturate. Así no se ve "grisáceo/barato". */
+/* Glass premium EN CLARO: blanco translúcido + saturate. El highlight ya no va
+   arriba (eso era para el dark): acá el volumen lo da una sombra suave y cálida.
+   `.glass-dark` se mantiene como alias para no romper llamadas existentes. */
 .glass,
 .glass-dark {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.045));
-  backdrop-filter: blur(26px) saturate(150%);
-  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.62));
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
   border: 1px solid var(--glass-border);
-  border-top-color: rgba(255, 255, 255, 0.24);
+  border-top-color: rgba(255, 255, 255, 0.95);
   box-shadow:
-    0 16px 48px -16px rgba(0, 0, 0, 0.72),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.16);
+    0 12px 32px -14px rgba(60, 50, 25, 0.22),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
 }
-/* Panel sólido premium (para contenido sobre el dark: ficha, cotizador, filtros) */
+/* Panel sólido premium (ficha, cotizador, filtros): blanco sobre el fondo cálido. */
 .panel-glass {
-  background: linear-gradient(180deg, color-mix(in oklch, var(--card) 88%, white 12%), var(--card));
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top-color: rgba(255, 255, 255, 0.14);
+  background: var(--card);
+  border: 1px solid var(--border);
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.06),
-    0 18px 50px -28px rgba(0, 0, 0, 0.85);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
+    0 14px 40px -26px rgba(60, 50, 25, 0.35);
 }
 
-/* Sección con un plus de profundidad (más oscura que el fondo) */
-.section-dark {
-  background:
-    radial-gradient(1100px 700px at 50% -14%, color-mix(in oklch, var(--brand) 16%, transparent), transparent 58%),
-    linear-gradient(180deg, oklch(0.095 0 0), oklch(0.155 0 0));
-  color: oklch(0.975 0 0);
+/* Banda de sección: el CREMA de marca. Es lo que le da ritmo a la página —
+   alterna con el fondo blanco cálido de las secciones de catálogo.
+   (Antes se llamaba .section-dark y pintaba negro; el nombre ya mentía.) */
+/* ANTES era una banda crema con gradiente → la página se veía "cortada" en
+   franjas alternadas (crema / blanco-hueso) y el usuario lo marcó. Ahora el
+   fondo es UN SOLO color uniforme (--background) en toda la página; la calidez
+   la ponen las cards blancas, el rojo de marca y los glows locales (spotlight
+   del deck, auroras), que se funden sin bordes. */
+.section-band {
+  background: transparent;
+  color: var(--foreground);
 }
 
+/* Glow de marca: en claro un halo fuerte ENSUCIA. Anillo nítido + sombra corta. */
 .glow-brand {
   box-shadow:
-    0 0 0 1px color-mix(in oklch, var(--brand) 28%, transparent),
-    0 10px 30px -14px color-mix(in oklch, var(--brand) 32%, transparent);
+    0 0 0 1px color-mix(in oklch, var(--brand) 35%, transparent),
+    0 8px 22px -12px color-mix(in oklch, var(--brand) 55%, transparent);
 }
 /* iOS-clean: texto SÓLIDO (sin gradiente de color). La tipografía manda, no el color. */
 .text-gradient {
   color: var(--foreground);
 }
 
-/* Tarjeta premium dark con borde sutil */
+/* Tarjeta premium en claro: blanco puro + sombra cálida (la profundidad la da la
+   sombra, no un borde luminoso — eso era del dark). */
 .card-premium {
-  background: linear-gradient(180deg, color-mix(in oklch, var(--card) 78%, white 7%), var(--card));
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-top-color: rgba(255, 255, 255, 0.16);
+  background: var(--card);
+  border: 1px solid var(--border);
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
-    0 22px 52px -26px rgba(0, 0, 0, 0.9);
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
+    0 18px 44px -28px rgba(60, 50, 25, 0.4);
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease, border-color 0.4s ease;
 }
 
+/* Grilla de fondo: líneas NEGRAS sutiles (antes blancas, para el fondo oscuro).
+   `.bg-grid-dark` queda como alias para no romper llamadas existentes. */
+.bg-grid,
 .bg-grid-dark {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(to right, rgba(26, 26, 26, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(26, 26, 26, 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+/* Grilla BLANCA: para superficies de color saturado (el bloque rojo del CTA),
+   donde las líneas negras desaparecen. */
+.bg-grid-invert {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 
@@ -255,6 +298,18 @@
   50% { transform: translate(-3%, 3%) scale(1.08); opacity: 0.95; }
 }
 
+/* PERFORMANCE — estas tres animaciones corren INFINITAS mientras la página está
+   abierta. Sin `will-change` el navegador re-rasteriza el elemento (y su blur,
+   que en los blobs del hero es enorme) en cada frame, y el scroll se traba.
+   Con `will-change` cada una vive en su propia capa de GPU: se rasteriza una
+   vez y después sólo se compone. Es el caso de uso exacto de `will-change`:
+   elementos animados de forma permanente, no transiciones puntuales. */
+.animate-aurora,
+.animate-float,
+.animate-marquee {
+  will-change: transform, opacity;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
   /* Movimientos decorativos SUAVES y continuos que SÍ deben seguir (decisión de marca):
@@ -273,7 +328,7 @@
   font-weight: 700;
   letter-spacing: 0.01em;
   line-height: 1;
-  color: oklch(0.985 0 0);
+  color: var(--foreground);
 }
 .wordmark-rule {
   position: relative;
@@ -314,10 +369,12 @@
   transform: scaleX(1);
 }
 
-/* Glow rojo difuso para el bloque visual del hero (detrás de la casa) */
+/* Spotlight detrás de la casa del hero. En claro el rojo fuerte quema: el halo
+   lo da el CREMA de marca, con un corazón rojo apenas insinuado. */
 .hero-spotlight {
   background:
-    radial-gradient(60% 60% at 50% 40%, color-mix(in oklch, var(--brand) 38%, transparent), transparent 70%);
+    radial-gradient(60% 60% at 50% 40%, color-mix(in oklch, var(--brand) 14%, transparent), transparent 62%),
+    radial-gradient(72% 72% at 50% 45%, color-mix(in oklch, var(--accent-warm) 85%, transparent), transparent 72%);
 }
 
 /* ---------- Microinteracciones premium (cards / CTAs) ----------
@@ -336,7 +393,7 @@
   border-radius: inherit;
   background: radial-gradient(
     120% 80% at 50% -10%,
-    color-mix(in oklch, var(--brand) 30%, transparent),
+    color-mix(in oklch, var(--brand) 12%, transparent),
     transparent 55%
   );
   opacity: 0;
@@ -358,7 +415,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    color-mix(in oklch, var(--brand) 65%, white 10%),
+    color-mix(in oklch, var(--brand) 75%, transparent),
     transparent
   );
   opacity: 0;

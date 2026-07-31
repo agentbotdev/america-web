@@ -189,21 +189,29 @@ export function CatalogoBrowser({
     window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
   }, []);
 
-  const set = useCallback(
-    (key: keyof Filters, value: string) => {
-      setF((prev) => {
-        const next = { ...prev, [key]: value };
-        sync(next);
-        return next;
-      });
-    },
-    [sync],
-  );
+  const set = useCallback((key: keyof Filters, value: string) => {
+    // Updater PURO: nada de side effects acá. Antes llamaba a sync() adentro
+    // y eso corre DURANTE el render — Next parchea history.replaceState para
+    // sincronizar su Router, así que explotaba con "Cannot update Router while
+    // rendering CatalogoBrowser" (y en StrictMode disparaba doble).
+    setF((prev) => ({ ...prev, [key]: value }));
+  }, []);
 
   const limpiar = useCallback(() => {
     setF(FILTROS_VACIOS);
-    window.history.replaceState(null, "", window.location.pathname);
   }, []);
+
+  // La URL se sincroniza DESPUÉS del commit, cuando los filtros ya cambiaron.
+  // Salteamos el primer render: el estado inicial YA viene de la URL (deep-link)
+  // y reescribirla en el mount pisaría params ajenos (por ej. UTM).
+  const primeraVez = useRef(true);
+  useEffect(() => {
+    if (primeraVez.current) {
+      primeraVez.current = false;
+      return;
+    }
+    sync(f);
+  }, [f, sync]);
 
   const items = useMemo(() => filtrar(propiedades, f), [propiedades, f]);
 
@@ -421,7 +429,7 @@ export function CatalogoBrowser({
             type="button"
             onClick={limpiar}
             aria-label="Limpiar todos los filtros"
-            className="inline-flex h-9 items-center justify-center gap-1 rounded-lg px-3 text-sm font-medium text-brand transition-colors hover:bg-brand/10"
+            className="inline-flex h-9 items-center justify-center gap-1 rounded-lg px-3 text-sm font-medium text-brand-text transition-colors hover:bg-brand/10"
           >
             <X className="size-4" aria-hidden="true" /> Limpiar
           </button>
@@ -438,7 +446,7 @@ export function CatalogoBrowser({
               type="button"
               onClick={c.clear}
               aria-label={`Quitar filtro ${c.label}`}
-              className="inline-flex items-center gap-1 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand transition-colors hover:bg-brand/20"
+              className="inline-flex items-center gap-1 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand-text transition-colors hover:bg-brand/20"
             >
               {c.label}
               <X className="size-3" aria-hidden="true" />
@@ -449,7 +457,7 @@ export function CatalogoBrowser({
 
       {/* Grid (instantáneo, sin recargar) */}
       {items.length === 0 ? (
-        <div className="mt-16 flex flex-col items-center gap-4 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-16 text-center">
+        <div className="mt-16 flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border bg-muted/50 px-6 py-16 text-center">
           <span className="flex size-16 items-center justify-center rounded-full bg-brand/10 text-brand">
             <SearchX className="size-8" aria-hidden="true" />
           </span>

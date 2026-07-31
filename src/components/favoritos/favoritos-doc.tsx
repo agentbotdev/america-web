@@ -11,12 +11,15 @@ import { mensajeFavoritos, mensajePropiedad, waLink } from "@/lib/whatsapp";
 import { formatPrecio, formatM2, tituloPropiedad, labelOperacion } from "@/lib/format";
 import type { Propiedad } from "@/types";
 
-/* Paleta del documento (CLARA, imprimible — no usa los tokens dark del sitio). */
-const NAVY = "#1f3d6e"; // azul marino fuerte (headers, precio)
-const NAVY_SOFT = "#eff4fb"; // tinte navy para cajas
-const INK = "#0f172a";
-const MUTE = "#64748b";
-const LINE = "#e3e8f0";
+/* Paleta del documento imprimible. Va con HEX literales (no tokens CSS) porque
+   el PDF debe imprimirse igual en cualquier navegador, sin depender del tema.
+   Son los colores REALES de América Cardozo — antes acá vivía una paleta NAVY
+   heredada del proyecto Press, que no tenía nada que ver con esta marca. */
+const BRAND = "#f02e19"; // rojo de marca (headers, precio)
+const BRAND_SOFT = "#fdeeeb"; // tinte rojo para cajas
+const INK = "#1a1a1a"; // negro de marca (antes era un azulado)
+const MUTE = "#6b6459"; // gris CÁLIDO, acompaña el crema
+const LINE = "#e8e3d8"; // línea cálida
 
 function precioDoc(p: Propiedad): string {
   if (!p.precio_visible || p.precio == null) return "Consultar";
@@ -64,7 +67,7 @@ function PropiedadHoja({ p }: { p: Propiedad }) {
       <div className="doc-avoid grid gap-6 sm:grid-cols-[1.05fr_1fr]">
         <div
           className="relative aspect-[4/3] overflow-hidden rounded-2xl"
-          style={{ background: "#f6f8fb", border: `1px solid ${LINE}` }}
+          style={{ background: "#faf7ed", border: `1px solid ${LINE}` }}
         >
           {foto?.url ? (
             <Image
@@ -81,7 +84,7 @@ function PropiedadHoja({ p }: { p: Propiedad }) {
           <div className="flex flex-wrap items-center gap-2">
             <span
               className="rounded-md px-2 py-0.5 text-xs font-semibold"
-              style={{ background: NAVY_SOFT, color: NAVY }}
+              style={{ background: BRAND_SOFT, color: BRAND }}
             >
               {labelOperacion(p.tipo_operacion)}
             </span>
@@ -111,7 +114,7 @@ function PropiedadHoja({ p }: { p: Propiedad }) {
               {ubicacion}
             </p>
           )}
-          <p className="mt-3 font-mono text-3xl font-bold" style={{ color: NAVY }}>
+          <p className="mt-3 font-mono text-3xl font-bold" style={{ color: BRAND }}>
             {precioDoc(p)}
           </p>
 
@@ -134,7 +137,7 @@ function PropiedadHoja({ p }: { p: Propiedad }) {
       {/* Descripción */}
       {p.descripcion && (
         <div className="doc-avoid mt-6">
-          <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: NAVY }}>
+          <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: BRAND }}>
             Descripción
           </h3>
           <p className="mt-2 whitespace-pre-line text-sm leading-relaxed" style={{ color: INK }}>
@@ -146,7 +149,7 @@ function PropiedadHoja({ p }: { p: Propiedad }) {
       {/* Amenities / servicios (tags) */}
       {p.tags.length > 0 && (
         <div className="doc-avoid mt-5">
-          <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: NAVY }}>
+          <h3 className="text-sm font-bold uppercase tracking-wide" style={{ color: BRAND }}>
             Características y servicios
           </h3>
           <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1.5">
@@ -301,12 +304,12 @@ export function FavoritosDoc() {
         {/* Encabezado del documento */}
         <header
           className="mb-8 flex flex-wrap items-end justify-between gap-3 border-b pb-5"
-          style={{ borderColor: NAVY }}
+          style={{ borderColor: BRAND }}
         >
           <div>
             <p
               className="text-xs font-semibold uppercase tracking-[0.2em]"
-              style={{ color: NAVY }}
+              style={{ color: BRAND }}
             >
               {a.nombre}
             </p>

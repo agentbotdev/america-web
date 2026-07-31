@@ -45,7 +45,7 @@ export const ChatBody = forwardRef<HTMLDivElement, Props>(function ChatBody(
                 "max-w-[85%] rounded-2xl px-3.5 py-2 text-sm leading-snug " +
                 (b.de === "user"
                   ? "rounded-br-md bg-brand text-white"
-                  : "rounded-bl-md bg-white/10 text-slate-100")
+                  : "rounded-bl-md bg-muted text-foreground")
               }
             >
               {b.texto}
@@ -56,11 +56,11 @@ export const ChatBody = forwardRef<HTMLDivElement, Props>(function ChatBody(
 
       {escribiendo && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-          <span className="flex gap-1 rounded-2xl rounded-bl-md bg-white/10 px-3.5 py-3">
+          <span className="flex gap-1 rounded-2xl rounded-bl-md bg-muted px-3.5 py-3">
             {[0, 1, 2].map((d) => (
               <motion.span
                 key={d}
-                className="size-1.5 rounded-full bg-slate-300"
+                className="size-1.5 rounded-full bg-muted-foreground"
                 animate={{ opacity: [0.3, 1, 0.3], y: [0, -3, 0] }}
                 transition={{ duration: 0.9, repeat: Infinity, delay: d * 0.15 }}
               />
@@ -80,7 +80,7 @@ export const ChatBody = forwardRef<HTMLDivElement, Props>(function ChatBody(
           {recomendados.map((p, i) => (
             <MiniPropiedad key={p.id} p={p} index={i} onSeleccionar={onSeleccionar} />
           ))}
-          <p className="px-1 pt-0.5 text-[11px] text-slate-400">
+          <p className="px-1 pt-0.5 text-[11px] text-muted-foreground">
             Tocá una propiedad para ver la ficha completa 👆
           </p>
         </motion.div>

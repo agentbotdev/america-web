@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion, type Variants } from "motion/react";
+import { motion, type Variants } from "motion/react";
 import type { ReactNode } from "react";
 
 // Easing canónico de la marca (mismo que process-section / hero).
@@ -8,29 +8,25 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 type Direction = "up" | "down" | "left" | "right";
 
-// Variantes de entrada: fade + desplazamiento + blur-in. El blur le da el toque
-// "premium" (el contenido enfoca al entrar). Reduced-motion → sin blur ni shift,
-// solo un fade discreto (accesible y sin jank).
+// Variantes de entrada: fade + desplazamiento.
+//
+// IMPORTANTE: estas variantes son IDÉNTICAS en servidor y cliente — no dependen
+// de `useReducedMotion()`. Ramificarlas provocaba un hydration mismatch (el
+// servidor pintaba opacity:0 y un cliente con reduced-motion pintaba opacity:1),
+// y ante un mismatch React descarta el HTML del servidor y re-renderiza todo.
+// De la preferencia del usuario se ocupa `<MotionConfig reducedMotion="user">`
+// en el layout: cancela el desplazamiento y deja pasar sólo el fade.
+//
+// SIN blur-in: el filtro dependía de que la animación corriera para quitarse, y
+// con prefers-reduced-motion el navegador NO lo animaba → el contenido quedaba
+// BORROSO de forma permanente. Fade + slide es robusto y siempre legible.
 function buildVariants(
   direction: Direction,
   distance: number,
   blur: number,
-  reduced: boolean,
 ): Variants {
-  if (reduced) {
-    // Reduced-motion: el contenido SIEMPRE visible. NO lo ocultamos en `hidden`
-    // (antes era opacity:0 → si whileInView no disparaba, quedaba invisible/desvaído).
-    // Accesible y robusto: nada del contenido depende de que corra una animación.
-    return {
-      hidden: { opacity: 1 },
-      visible: { opacity: 1 },
-    };
-  }
   const axis = direction === "left" || direction === "right" ? "x" : "y";
   const sign = direction === "right" || direction === "down" ? 1 : -1;
-  // SIN blur-in: el filtro dependía de que la animación corriera para quitarse.
-  // Con prefers-reduced-motion el navegador NO anima el filtro → el contenido
-  // quedaba BORROSO de forma PERMANENTE. Fade + slide es robusto y siempre legible.
   void blur;
   return {
     hidden: { opacity: 0, [axis]: distance * sign },
@@ -64,8 +60,7 @@ export function Reveal({
   once?: boolean;
   className?: string;
 }) {
-  const reduced = useReducedMotion() ?? false;
-  const variants = buildVariants(direction, y, blur, reduced);
+  const variants = buildVariants(direction, y, blur);
 
   return (
     <motion.div
@@ -101,7 +96,6 @@ export function RevealGroup({
   once?: boolean;
   className?: string;
 }) {
-  const reduced = useReducedMotion() ?? false;
   return (
     <motion.div
       className={className}
@@ -110,12 +104,7 @@ export function RevealGroup({
       viewport={{ once, amount }}
       variants={{
         hidden: {},
-        visible: {
-          transition: {
-            staggerChildren: reduced ? 0 : stagger,
-            delayChildren: reduced ? 0 : delayChildren,
-          },
-        },
+        visible: { transition: { staggerChildren: stagger, delayChildren } },
       }}
     >
       {children}
@@ -137,8 +126,7 @@ export function RevealItem({
   blur?: number;
   className?: string;
 }) {
-  const reduced = useReducedMotion() ?? false;
-  const variants = buildVariants(direction, y, blur, reduced);
+  const variants = buildVariants(direction, y, blur);
   return (
     <motion.div
       className={className}

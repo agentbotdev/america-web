@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Sora } from "next/font/google";
+import { MotionConfig } from "motion/react";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -74,10 +75,11 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
 };
 
-// Web dark-first: la barra del navegador (mobile) acompaña con el negro de marca.
+// Web CLARA (branding real): la barra del navegador (mobile) acompaña con el
+// crema de marca. `colorScheme: light` evita que el navegador auto-oscurezca.
 export const viewport: Viewport = {
-  themeColor: "#0a0a0a",
-  colorScheme: "dark",
+  themeColor: "#f7e6a6",
+  colorScheme: "light",
 };
 
 export default function RootLayout({
@@ -90,11 +92,32 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-screen flex-col" style={brandStyle(AGENCIA)}>
-        <SiteHeader />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
-        <WhatsappFloat />
-        <AsesorChat />
+        {/* `reducedMotion="never"` — decisión deliberada, con su porqué:
+            1) Ramificar el render con `useReducedMotion()` provoca un hydration
+               mismatch garantizado (el servidor no tiene navegador: devuelve
+               `false` y pinta opacity:0, mientras un cliente con la preferencia
+               activada devuelve `true` y pinta opacity:1). Ante un mismatch React
+               DESCARTA el HTML del servidor y re-renderiza todo el árbol: era el
+               motivo real del scroll trabado y del cartel de issues de Next.
+            2) Pero `reducedMotion="user"` NO sirve acá: con la preferencia
+               activada motion no anima NADA — tampoco la opacidad — y como las
+               variantes arrancan en opacity:0, el contenido queda invisible para
+               siempre. Verificado: dejaba 26 elementos con texto sin mostrarse.
+            Con "never" el render es idéntico en servidor y cliente (no hay
+            mismatch) y la animación SIEMPRE termina, así que el contenido nunca
+            depende de una preferencia para verse. Las entradas son cortas y
+            suaves (fade + 26px). Las animaciones CSS infinitas —marquee, aurora,
+            float— siguen atenuadas por el @media de globals.css.
+            DEUDA: soportar reduced-motion de verdad exige mover estos reveals a
+            CSS con @media (prefers-reduced-motion), que se evalúa antes del
+            primer paint y no necesita JS. */}
+        <MotionConfig reducedMotion="never">
+          <SiteHeader />
+          <main className="flex-1">{children}</main>
+          <SiteFooter />
+          <WhatsappFloat />
+          <AsesorChat />
+        </MotionConfig>
       </body>
     </html>
   );

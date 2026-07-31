@@ -47,7 +47,9 @@ function mapFotos(rows: Array<Record<string, unknown>>): FotoPropiedad[] {
     .map((f) => ({
       url: String(f.url),
       thumbnail: str(f.thumbnail),
-      alt: str(f.descripcion) ?? "",
+      // Sin `?? ""`: un alt vacío es peor que ausente — pisaba al título en el
+      // fallback de PropertyImage y dejaba la foto sin texto alternativo.
+      alt: str(f.descripcion),
       es_portada: Boolean(f.es_portada),
       es_plano: Boolean(f.es_plano),
       orden: Number(f.orden) || 0,
@@ -100,7 +102,10 @@ function mapRow(r: Record<string, unknown>, fotos: FotoPropiedad[]): Propiedad {
     coordenadas_lng: num(r.coordenadas_lng),
     destacada_web: Boolean(r.destacada_web),
     alquiler_temporal: Boolean(r.alquiler_temporal),
-    tags: Array.isArray(r.tags) ? (r.tags as unknown[]).map(String) : [],
+    // Dedup: Tokko repite tags entre amenities y servicios ("Cocina" dos veces)
+    // → keys duplicadas en React en TODO lo que lista tags (ficha, brochure,
+    // favoritos). Un Set en la fuente lo corta de raíz.
+    tags: Array.isArray(r.tags) ? [...new Set((r.tags as unknown[]).map(String))] : [],
     tiene_video: Boolean(r.tiene_video),
     orientacion: str(r.orientacion),
     fotos,

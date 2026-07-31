@@ -14,10 +14,16 @@ export const AGENCIA: Agencia = {
   tagline: "Tu próxima propiedad te está esperando",
   logoTexto: "AMÉRICA CARDOZO",
   colores: {
-    // Marca real (del logo): ROJO + negro. Acento ámbar (el amarillo del logo).
-    brand: "#dc2626",
+    // Marca REAL, verificada en el CSS de americacardozo.com.ar (sitio Tokko):
+    // rojo bermellón + crema pastel + negro. NO es el #dc2626/#f59e0b que
+    // teníamos antes (eran una aproximación de memoria, no la marca).
+    brand: "#f02e19", // rojo de marca: rellenos, íconos, bordes, badges
     brandForeground: "#ffffff",
-    accent: "#f59e0b",
+    // El rojo de marca sobre fondo claro da 3.3:1 (crema) / 4.1:1 (blanco) →
+    // NO pasa WCAG AA para texto. Este es el mismo rojo oscurecido a 5.7:1,
+    // para links, labels y cualquier texto en rojo. La marca se respeta; se lee.
+    brandText: "#c41f0d",
+    accent: "#f7e6a6", // crema pastel: fondo de BANDA, no acento puntual
   },
   whatsapp: "5491159307526",
   email: "",

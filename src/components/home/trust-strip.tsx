@@ -13,24 +13,29 @@ const ITEMS: { icon: LucideIcon; title: string; desc: string }[] = [
 
 export function TrustStrip() {
   return (
-    <section className="section-dark border-y border-white/[0.06] py-10">
-      <p className="mb-6 text-center text-xs font-medium uppercase tracking-[0.28em] text-muted-foreground">
+    // Sin border-y ni fondo propio: el fondo de la página es UN color uniforme
+    // (feedback del cliente: las líneas entre secciones se leían como "cortes").
+    <section className="py-8">
+      <p className="mb-5 text-center text-xs font-medium uppercase tracking-[0.28em] text-muted-foreground">
         Por qué elegirnos
       </p>
 
-      {/* Rueda de beneficios (glass, cinta infinita) */}
-      <Marquee duration={30} gap="1.25rem">
+      {/* Rueda de beneficios: pills COMPACTAS (menos padding, ícono menor) y
+          paso más ágil — el cliente las marcó como "barras muy grandes". */}
+      {/* repeat=2: 6 pills (~1.6k px por set) alcanzan justo en monitores
+          anchos; duplicado no queda hueco. duration escala con el track. */}
+      <Marquee duration={30} gap="0.875rem" repeat={2}>
         {ITEMS.map((it) => (
           <li
             key={it.title}
-            className="flex items-center gap-3 whitespace-nowrap rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-3 [border-top-color:rgba(255,255,255,0.16)]"
+            className="card-premium flex items-center gap-2.5 whitespace-nowrap rounded-xl px-4 py-2.5"
           >
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand/15 text-brand ring-1 ring-brand/25">
-              <it.icon className="size-5" />
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand/12 text-brand ring-1 ring-brand/25">
+              <it.icon className="size-4" />
             </span>
             <div>
-              <p className="text-sm font-semibold text-white">{it.title}</p>
-              <p className="text-xs text-muted-foreground">{it.desc}</p>
+              <p className="text-sm font-semibold leading-tight text-foreground">{it.title}</p>
+              <p className="text-xs leading-tight text-muted-foreground">{it.desc}</p>
             </div>
           </li>
         ))}

@@ -3,7 +3,6 @@ import { ArrowRight } from "lucide-react";
 import PropertyCard from "@/components/propiedades/property-card";
 import { Tilt } from "@/components/ui/tilt";
 import { Reveal, RevealGroup, RevealItem } from "@/components/ui/reveal";
-import { getDestacadas } from "@/lib/supabase/queries";
 import { AGENCIA } from "@/data/agencia";
 import type { Propiedad } from "@/types";
 
@@ -11,8 +10,9 @@ import type { Propiedad } from "@/types";
  * Score de "vidriera": las que mejor venden van primero. Priorizamos las
  * propiedades más COMPLETAS (más fotos, precio a la vista, specs cargadas) —
  * son las que mejor se ven en la home y generan más consultas.
+ * Exportado: page.tsx ordena UNA vez y reparte entre el deck del hero y esta grilla.
  */
-function scoreVidriera(p: Propiedad): number {
+export function scoreVidriera(p: Propiedad): number {
   let s = 0;
   // Fotos: lo que más pesa visualmente (hasta ~12 pts).
   s += Math.min(p.fotos.length, 6) * 2;
@@ -31,21 +31,20 @@ function scoreVidriera(p: Propiedad): number {
   return s;
 }
 
-export async function FeaturedProperties() {
-  // Mismos datos (DB) que el listado → IDs consistentes para favoritos/PDF.
-  // Ordenamos por "calidad de vidriera" y mostramos sólo las mejores 6.
-  const destacadas = [...(await getDestacadas())]
-    .sort((a, b) => scoreVidriera(b) - scoreVidriera(a))
-    .slice(0, 6);
+export function FeaturedProperties({ propiedades }: { propiedades: Propiedad[] }) {
+  // Los datos llegan YA ordenados por vidriera desde page.tsx (fetch único a
+  // Supabase compartido con el deck del hero — antes cada sección fetcheaba
+  // por su cuenta y eran 2 queries idénticas por render).
+  const destacadas = propiedades.slice(0, 6);
 
   if (destacadas.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
       <Reveal>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-xl">
-            <span className="text-sm font-medium text-brand">Propiedades destacadas</span>
+            <span className="text-sm font-medium text-brand-text">Propiedades destacadas</span>
             <h2 className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl">
               Selección en {AGENCIA.zona_operacion}
             </h2>
@@ -56,7 +55,7 @@ export async function FeaturedProperties() {
           </div>
           <Link
             href="/propiedades"
-            className="group inline-flex items-center gap-1.5 text-sm font-medium text-brand transition-colors hover:text-foreground"
+            className="group inline-flex items-center gap-1.5 text-sm font-medium text-brand-text transition-colors hover:text-foreground"
           >
             Ver todas las propiedades
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />

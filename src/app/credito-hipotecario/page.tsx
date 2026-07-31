@@ -238,7 +238,9 @@ export default function CreditoHipotecarioPage() {
               <dt className="flex items-center gap-2 text-muted-foreground">
                 <TrendingUp className="size-4" /> Total intereses
               </dt>
-              <dd className="font-mono text-accent-warm">
+              {/* El crema de marca es un color de FONDO: como texto sobre claro
+                  es ilegible. La jerarquía acá la da la tipografía, no el color. */}
+              <dd className="font-mono font-semibold text-foreground">
                 {formatPrecio(sim.totalIntereses, moneda)}
               </dd>
             </div>
@@ -254,7 +256,7 @@ export default function CreditoHipotecarioPage() {
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               />
               <motion.div
-                className="bg-accent-warm"
+                className="bg-chart-3"
                 initial={false}
                 animate={{ width: `${pctInteres}%` }}
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -267,7 +269,7 @@ export default function CreditoHipotecarioPage() {
               </span>
               <span className="flex items-center gap-1">
                 Intereses {Math.round(pctInteres)}%{" "}
-                <span className="size-2 rounded-full bg-accent-warm" />
+                <span className="size-2 rounded-full bg-chart-3" />
               </span>
             </div>
           </div>

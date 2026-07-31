@@ -42,7 +42,7 @@ export function WaCierre({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.15 }}
-        className="mb-2.5 text-center text-sm font-semibold text-white"
+        className="mb-2.5 text-center text-sm font-semibold text-foreground"
       >
         🎉 ¡Listo! Te conecto con un asesor real ahora.
       </motion.p>
@@ -87,7 +87,7 @@ export function WaCierre({
       </p>
       <button
         onClick={onReiniciar}
-        className="mx-auto mt-2 block text-[11px] text-slate-400 underline-offset-2 hover:text-slate-200 hover:underline"
+        className="mx-auto mt-2 block text-[11px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
       >
         Empezar de nuevo
       </button>

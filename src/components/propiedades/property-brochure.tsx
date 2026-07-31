@@ -20,8 +20,8 @@ import type { Propiedad } from "@/types";
 
 /* Paleta del brochure — CLARA e imprimible, con la marca REAL de América (rojo).
    No usa los tokens dark del sitio: un PDF se imprime en blanco. */
-const BRAND = "#dc2626"; // rojo América Cardozo (logo)
-const BRAND_SOFT = "#fef2f2"; // tinte rojo para cajas/badges
+const BRAND = "#f02e19"; // rojo REAL de América Cardozo (verificado en su sitio)
+const BRAND_SOFT = "#fdeeeb"; // tinte rojo para cajas/badges
 const INK = "#0f172a";
 const MUTE = "#64748b";
 const LINE = "#e3e8f0";
