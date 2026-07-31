@@ -86,8 +86,9 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
 
           <motion.h1
             initial="hidden" animate="show" custom={1} variants={fadeUp}
-            // Escala CONTENIDA y fluida: en mobile convive con la card al lado.
-            className="text-balance text-2xl font-semibold leading-[1.1] tracking-tight text-foreground min-[440px]:text-3xl sm:mt-5 sm:text-4xl sm:leading-[1.06] lg:text-5xl xl:text-6xl"
+            // Título MÁS GRANDE en mobile: la columna tenía aire de sobra
+            // (feedback del cliente marcando el espacio desaprovechado).
+            className="text-balance text-3xl font-semibold leading-[1.08] tracking-tight text-foreground min-[440px]:text-4xl sm:mt-5 sm:leading-[1.06] lg:text-5xl xl:text-6xl"
           >
             Tu próxima propiedad
             <br />
@@ -101,25 +102,30 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
               />
             </span>
           </motion.h1>
-        </div>
 
-        {/* Resto del contenido: a lo ancho bajo el par título/deck en mobile;
-            en lg vuelve a la columna izquierda (bajo el título). */}
-        <div className="col-span-2 row-start-2 max-w-2xl lg:col-span-1 lg:col-start-1">
+          {/* La descripción ARRANCA acá, en el hueco al lado del deck (el
+              cliente lo marcó con un círculo: quedaba crema vacío bajo el
+              título mientras la descripción esperaba abajo del deck). */}
           <motion.p
             initial="hidden" animate="show" custom={2} variants={fadeUp}
-            className="max-w-lg text-balance text-base text-muted-foreground sm:text-lg"
+            className="mt-3 max-w-lg text-balance text-sm text-muted-foreground min-[440px]:text-base sm:mt-5 sm:text-lg"
           >
             Casas, departamentos, terrenos y locales en venta y alquiler en toda
             Argentina. Tasaciones sin cargo, visitas coordinadas y asesoría real.
             A un WhatsApp de distancia.
           </motion.p>
+        </div>
 
+        {/* Resto del contenido: a lo ancho bajo el par título/deck en mobile;
+            en lg vuelve a la columna izquierda (bajo el título). */}
+        <div className="col-span-2 row-start-2 max-w-2xl lg:col-span-1 lg:col-start-1">
           {/* Buscador prominente */}
           <motion.form
             action="/propiedades" method="get"
             initial="hidden" animate="show" custom={3} variants={fadeUp}
-            className="glass mt-9 flex max-w-xl items-center gap-2 rounded-full p-2 shadow-[0_18px_44px_-26px_rgba(60,50,25,0.5)] focus-within:border-brand/60"
+            // Sin mt: la separación la da el gap del grid (la descripción ya
+            // no vive arriba de este bloque — se mudó a la columna del título).
+            className="glass flex max-w-xl items-center gap-2 rounded-full p-2 shadow-[0_18px_44px_-26px_rgba(60,50,25,0.5)] focus-within:border-brand/60"
           >
             <Search className="ml-3 size-5 shrink-0 text-muted-foreground" />
             <input
