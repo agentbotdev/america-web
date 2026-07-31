@@ -67,9 +67,13 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
           Grid de 2 filas: fila 1 = [título | deck]; fila 2 = el resto del
           contenido a lo ancho. En lg el resto vuelve a la columna izquierda y
           el deck se centra abarcando las dos filas (mismo look de siempre). */}
-      <div className="relative mx-auto grid max-w-7xl grid-cols-[1.1fr_0.9fr] items-center gap-x-4 gap-y-8 px-4 pb-16 pt-6 sm:gap-x-8 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-x-12 lg:px-8 lg:pb-20 lg:pt-10">
-        {/* Título (+badge): SIEMPRE junto al deck */}
-        <div className="col-start-1 row-start-1 max-w-2xl self-center">
+      {/* items-START en mobile: el título arranca arriba, pegado al header
+          (antes items-center lo hundía al medio de la fila del deck). En lg se
+          re-centra. pt mínimo en mobile por lo mismo. */}
+      <div className="relative mx-auto grid max-w-7xl grid-cols-[1.1fr_0.9fr] items-start gap-x-4 gap-y-6 px-4 pb-16 pt-2 sm:gap-x-8 sm:px-6 sm:pt-4 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-x-12 lg:px-8 lg:pb-20 lg:pt-6">
+        {/* Título (+badge): SIEMPRE junto al deck. self-start: arriba de todo
+            en mobile (pedido del cliente); centrado recién en lg. */}
+        <div className="col-start-1 row-start-1 max-w-2xl self-start pt-2 lg:self-center lg:pt-0">
           <motion.div initial="hidden" animate="show" custom={0} variants={fadeUp}>
             {/* En columnas angostas el badge no entra: aparece desde sm. */}
             <span className="glass hidden items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium text-muted-foreground sm:inline-flex">
@@ -148,10 +152,11 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
             ))}
           </motion.div>
 
-          {/* Accesos a secciones (herramientas y servicios) */}
+          {/* Accesos a secciones (herramientas y servicios). En mobile viven
+              FIJOS en el top bar (SiteHeader) → acá solo desde md. */}
           <motion.div
             initial="hidden" animate="show" custom={5} variants={fadeUp}
-            className="mt-3 flex flex-wrap items-center gap-2"
+            className="mt-3 hidden flex-wrap items-center gap-2 md:flex"
           >
             {QUICK_LINKS.map((l) => (
               <Link
@@ -204,7 +209,9 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="relative col-start-2 row-start-1 self-center lg:row-span-2"
+          // self-start: el deck ARRIBA en todos los tamaños (en compu estaba
+          // centrado y quedaba hundido — pedido del cliente: "subir las cards").
+          className="relative col-start-2 row-start-1 self-start lg:row-span-2"
         >
           {deck.length > 0 ? (
             <HeroDeck items={deck} />

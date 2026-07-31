@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import { Menu, Tag, Landmark, Calculator } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -26,6 +26,15 @@ const NAV = [
   { href: "/calculadora-alquiler", label: "Calculadora" },
   { href: "/vende-tu-propiedad", label: "Vendé tu propiedad" },
   { href: "/nosotros", label: "Nosotros" },
+];
+
+// Accesos rápidos SIEMPRE VISIBLES en mobile (pedido del cliente: los pills
+// rojos del hero quedaban abajo de todo — acá viven fijos en el top bar).
+// En md+ desaparecen: la nav de escritorio ya tiene estos destinos.
+const ACCESOS_MOBILE = [
+  { href: "/vende-tu-propiedad", label: "Vendé tu propiedad", icon: Tag },
+  { href: "/credito-hipotecario", label: "Crédito", icon: Landmark },
+  { href: "/calculadora-alquiler", label: "Calculadora", icon: Calculator },
 ];
 
 // Marca un item como activo cuando estamos en su ruta o en una subruta de ella.
@@ -171,6 +180,21 @@ export function SiteHeader() {
             </SheetContent>
           </Sheet>
         </div>
+      </div>
+
+      {/* Accesos rápidos FIJOS en el top bar — SOLO mobile (en md+ la nav ya
+          los tiene). Scroll horizontal si no entran; sin scrollbar visible. */}
+      <div className="flex gap-2 overflow-x-auto px-4 pb-2.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden">
+        {ACCESOS_MOBILE.map((l) => (
+          <Link
+            key={l.href}
+            href={l.href}
+            className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-brand/35 px-3 py-1.5 text-xs font-semibold text-brand-text transition-colors hover:border-brand hover:bg-brand hover:text-brand-foreground"
+          >
+            <l.icon className="size-3.5" aria-hidden />
+            {l.label}
+          </Link>
+        ))}
       </div>
     </header>
   );
