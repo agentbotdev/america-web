@@ -46,3 +46,6 @@ next-env.d.ts
 CATALOGO/
 
 .vercel
+
+# temporales de scraping/diagnostico
+.tmp-*
