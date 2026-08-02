@@ -24,9 +24,27 @@ function FacebookGlyph({ className }: { className?: string }) {
   );
 }
 
+function YoutubeGlyph({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
+      <path d="m10 15 5-3-5-3z" />
+    </svg>
+  );
+}
+
+function TiktokGlyph({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M9 12a4 4 0 1 0 4 4V4c.68 2.03 2.4 3.72 4.5 4.2.47.11.97.17 1.5.17" />
+    </svg>
+  );
+}
+
 const NAV = [
-  { href: "/propiedades", label: "Propiedades" },
-  { href: "/credito-hipotecario", label: "Crédito hipotecario" },
+  { href: "/propiedades", label: "Inmuebles" },
+  { href: "/emprendimientos", label: "Emprendimientos" },
+  { href: "/credito-hipotecario", label: "Financiamos" },
   { href: "/calculadora-alquiler", label: "Calculadora de alquiler" },
   { href: "/vende-tu-propiedad", label: "Vendé tu propiedad" },
   { href: "/nosotros", label: "Nosotros" },
@@ -34,7 +52,9 @@ const NAV = [
 
 export function SiteFooter() {
   const a = AGENCIA;
-  const tieneRedes = Boolean(a.redes.instagram || a.redes.facebook);
+  const tieneRedes = Boolean(
+    a.redes.instagram || a.redes.facebook || a.redes.youtube || a.redes.tiktok,
+  );
   // Datos de contacto reales (NO inventar). El WhatsApp siempre está disponible.
   const tieneContacto = Boolean(a.direccion || a.horario || a.email);
 
@@ -88,6 +108,28 @@ export function SiteFooter() {
                   className="inline-flex size-9 items-center justify-center rounded-full border border-border transition-colors hover:bg-background"
                 >
                   <FacebookGlyph className="size-4" />
+                </a>
+              )}
+              {a.redes.youtube && (
+                <a
+                  href={a.redes.youtube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="YouTube"
+                  className="inline-flex size-9 items-center justify-center rounded-full border border-border transition-colors hover:bg-background"
+                >
+                  <YoutubeGlyph className="size-4" />
+                </a>
+              )}
+              {a.redes.tiktok && (
+                <a
+                  href={a.redes.tiktok}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="TikTok"
+                  className="inline-flex size-9 items-center justify-center rounded-full border border-border transition-colors hover:bg-background"
+                >
+                  <TiktokGlyph className="size-4" />
                 </a>
               )}
             </div>

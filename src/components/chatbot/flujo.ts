@@ -52,7 +52,8 @@ export type Respuestas = Partial<Record<RespKey, string>>;
 
 export const FLUJO: Record<string, Paso> = {
   inicio: {
-    bot: "¡Hola! 👋 Soy el asesor de Inmobiliaria América Cardozo. En un minuto te ayudo a encontrar tu próxima propiedad. ¿Con qué arrancamos?",
+    // Texto EXACTO pedido por la dueña.
+    bot: "¡Hola! 👋 Soy el asesor de Inmobiliaria América Cardozo. En un minuto te ayudo a encontrar tu próxima propiedad. ¿Comenzamos?",
     key: "intencion",
     opciones: [
       // `set` fija la operación de una → saltamos el paso puente "Continuar".

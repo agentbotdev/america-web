@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { getPropiedades } from "@/lib/supabase/queries";
 import { CatalogoBrowser, FILTROS_VACIOS } from "@/components/propiedades/catalogo-browser";
+import { HeroDeck } from "@/components/home/hero-deck";
+import { scoreVidriera } from "@/components/home/featured-properties";
+import { toDeckItems } from "@/lib/deck";
 
 // ISR: el catálogo se regenera cada 120s. El filtrado/orden es 100% client-side
 // (en memoria), así que una sola página estática sirve a todas las combinaciones.
@@ -50,13 +53,22 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
     orden: sp.orden ?? "destacadas",
   };
 
+  // El "librito" de destacadas en el margen derecho de la portada (pedido de
+  // la dueña). Mismos datos del catálogo → cero queries extra.
+  const deck = toDeckItems(
+    [...todas.filter((p) => p.destacada_web)]
+      .sort((a, b) => scoreVidriera(b) - scoreVidriera(a))
+      .slice(0, 4),
+  );
+
   return (
     <>
-      <div className="section-band border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      {/* Sin banda ni border-b: fondo uniforme (feedback previo del cliente). */}
+      <div className="mx-auto grid max-w-7xl items-center gap-x-8 px-4 py-10 sm:px-6 md:grid-cols-[1.15fr_0.85fr] lg:px-8">
+        <div>
           <p className="text-sm font-medium text-brand-text">Catálogo · Todo el país</p>
           <h1 className="mt-1 text-4xl font-bold tracking-tight sm:text-5xl">
-            Encontrá tu próxima propiedad
+            Encontrá tu próximo inmueble
           </h1>
           <p className="mt-3 max-w-prose text-muted-foreground">
             Casas, departamentos, PH, terrenos y locales en venta y alquiler en toda la Argentina.
@@ -64,6 +76,13 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
             WhatsApp. El equipo de América Cardozo te acompaña en cada paso.
           </p>
         </div>
+        {/* Deck a la derecha desde md (en el celu el catálogo va directo a los
+            resultados; el librito ya vive en la home). */}
+        {deck.length > 0 && (
+          <div className="hidden md:block">
+            <HeroDeck items={deck} />
+          </div>
+        )}
       </div>
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <CatalogoBrowser propiedades={todas} tipos={tipos} barrios={barrios} initial={initial} />

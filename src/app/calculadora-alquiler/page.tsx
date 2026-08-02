@@ -8,28 +8,39 @@ import { formatPrecio } from "@/lib/format";
 import { AGENCIA } from "@/data/agencia";
 import type { CostoAlquiler } from "@/types";
 
-// Costos de ingreso a un alquiler (referenciales, configurables por el usuario):
+// Costos de ingreso a un alquiler — REGLAS FIJAS definidas por la dueña:
 //  - Primer mes de alquiler
-//  - Depósito en garantía (N meses)
-//  - Comisión inmobiliaria (% sobre un mes — convención local)
-//  - Sellado / impuesto de sellos (% sobre el contrato; se estima sobre un mes)
+//  - Depósito en garantía (N meses, editable)
+//  - HONORARIOS (antes "comisión") = UN mes de alquiler, FIJO
+//  - Gastos administrativos = 10% del alquiler mensual, FIJO
+//  - SELLADO = 1,2% del TOTAL DEL CONTRATO, FIJO — el contrato dura
+//    2 años (vivienda) o 3 años (comercial), a elección del usuario.
 const DEFAULTS = {
   alquilerMensual: 350_000,
   mesesDeposito: 1,
-  comisionPct: 4.15,
-  selladoPct: 0.5,
+};
+
+const GASTOS_ADM_PCT = 10;
+const SELLADO_PCT = 1.2;
+
+export type TipoContrato = "vivienda" | "comercial";
+const CONTRATOS: Record<TipoContrato, { label: string; anios: number }> = {
+  vivienda: { label: "Vivienda", anios: 2 },
+  comercial: { label: "Comercial", anios: 3 },
 };
 
 function calcularCostoAlquiler(
   alquilerMensual: number,
   mesesDeposito: number,
-  comisionPct: number,
-  selladoPct: number,
+  tipoContrato: TipoContrato,
 ): CostoAlquiler {
   const alquiler = Math.max(0, alquilerMensual);
   const deposito = alquiler * Math.max(0, mesesDeposito);
-  const comision = alquiler * (Math.max(0, comisionPct) / 100);
-  const sellado = alquiler * (Math.max(0, selladoPct) / 100);
+  const honorarios = alquiler; // fijo: 1 mes de alquiler
+  const gastosAdm = alquiler * (GASTOS_ADM_PCT / 100);
+  const { anios } = CONTRATOS[tipoContrato];
+  const totalContrato = alquiler * anios * 12;
+  const sellado = totalContrato * (SELLADO_PCT / 100);
 
   const desglose = [
     { concepto: "Primer mes de alquiler", monto: alquiler },
@@ -39,8 +50,12 @@ function calcularCostoAlquiler(
       })`,
       monto: deposito,
     },
-    { concepto: `Comisión inmobiliaria (${comisionPct}%)`, monto: comision },
-    { concepto: `Sellado (${selladoPct}%)`, monto: sellado },
+    { concepto: "Honorarios (1 mes de alquiler)", monto: honorarios },
+    { concepto: `Gastos administrativos (${GASTOS_ADM_PCT}%)`, monto: gastosAdm },
+    {
+      concepto: `Sellado (${SELLADO_PCT}% del contrato de ${anios} años)`,
+      monto: sellado,
+    },
   ];
 
   const totalIngreso = desglose.reduce((acc, d) => acc + d.monto, 0);
@@ -119,13 +134,11 @@ function CampoNumero({
 export default function CalculadoraAlquilerPage() {
   const [alquilerMensual, setAlquilerMensual] = useState(DEFAULTS.alquilerMensual);
   const [mesesDeposito, setMesesDeposito] = useState(DEFAULTS.mesesDeposito);
-  const [comisionPct, setComisionPct] = useState(DEFAULTS.comisionPct);
-  const [selladoPct, setSelladoPct] = useState(DEFAULTS.selladoPct);
+  const [tipoContrato, setTipoContrato] = useState<TipoContrato>("vivienda");
 
   const costo = useMemo(
-    () =>
-      calcularCostoAlquiler(alquilerMensual, mesesDeposito, comisionPct, selladoPct),
-    [alquilerMensual, mesesDeposito, comisionPct, selladoPct],
+    () => calcularCostoAlquiler(alquilerMensual, mesesDeposito, tipoContrato),
+    [alquilerMensual, mesesDeposito, tipoContrato],
   );
 
   return (
@@ -139,8 +152,8 @@ export default function CalculadoraAlquilerPage() {
         </h1>
         <p className="mt-3 text-balance text-muted-foreground">
           Estimá todo lo que necesitás para ingresar: primer mes, depósito,
-          comisión y sellado. Ajustá los valores según tu caso. Te asesoramos
-          con el contrato por WhatsApp.
+          honorarios, gastos administrativos y sellado. Elegí el tipo de
+          contrato según tu caso. Te asesoramos con el contrato por WhatsApp.
         </p>
       </header>
 
@@ -165,24 +178,47 @@ export default function CalculadoraAlquilerPage() {
               max={12}
               suffix="meses"
             />
-            <CampoNumero
-              id="comision"
-              label="Comisión inmobiliaria"
-              value={comisionPct}
-              onChange={setComisionPct}
-              step={0.05}
-              max={100}
-              suffix="%"
-            />
-            <CampoNumero
-              id="sellado"
-              label="Sellado"
-              value={selladoPct}
-              onChange={setSelladoPct}
-              step={0.1}
-              max={100}
-              suffix="%"
-            />
+            {/* Tipo de contrato → define la duración sobre la que se calcula
+                el sellado (1,2% del total del contrato). */}
+            <div>
+              <span className="mb-2 block text-sm font-medium">Tipo de contrato</span>
+              <div className="flex gap-2">
+                {(Object.keys(CONTRATOS) as TipoContrato[]).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setTipoContrato(t)}
+                    aria-pressed={tipoContrato === t}
+                    className={
+                      "flex-1 rounded-xl border px-3 py-2.5 text-sm font-medium transition " +
+                      (tipoContrato === t
+                        ? "border-brand/60 bg-brand/10 text-foreground glow-brand"
+                        : "border-border bg-transparent text-muted-foreground hover:text-foreground")
+                    }
+                  >
+                    {CONTRATOS[t].label} · {CONTRATOS[t].anios} años
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Reglas FIJAS (definidas por la inmobiliaria, no editables). */}
+            <div className="space-y-2 rounded-xl border border-brand/25 bg-brand/8 px-3.5 py-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Honorarios</span>
+                <span className="font-mono font-semibold text-brand-text">1 mes de alquiler</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Gastos administrativos</span>
+                <span className="font-mono font-semibold text-brand-text">{GASTOS_ADM_PCT}%</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Sellado</span>
+                <span className="font-mono font-semibold text-brand-text">
+                  {SELLADO_PCT}% del contrato
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 

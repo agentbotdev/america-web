@@ -38,7 +38,7 @@ const QUICK_FILTERS = [
 // propia fila, para que se lean como navegación y no como un filtro más.
 const QUICK_LINKS = [
   { label: "Vendé tu propiedad", href: "/vende-tu-propiedad", icon: Tag },
-  { label: "Crédito hipotecario", href: "/credito-hipotecario", icon: Landmark },
+  { label: "Financiamos", href: "/credito-hipotecario", icon: Landmark },
   { label: "Calculadora de alquiler", href: "/calculadora-alquiler", icon: Calculator },
 ];
 
@@ -111,7 +111,7 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
             className="mt-3 max-w-lg text-balance text-sm text-muted-foreground min-[440px]:text-base sm:mt-5 sm:text-lg"
           >
             Casas, departamentos, terrenos y locales en venta y alquiler en toda
-            Argentina. Tasaciones sin cargo, visitas coordinadas y asesoría real.
+            Argentina. Tasaciones en 48 hs, visitas coordinadas y asesoría real.
             A un WhatsApp de distancia.
           </motion.p>
         </div>

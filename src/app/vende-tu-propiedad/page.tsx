@@ -27,7 +27,7 @@ const OPERACIONES: { value: TipoOperacion; label: string }[] = [
 const BENEFICIOS = [
   {
     icon: Sparkles,
-    title: "Tasación sin cargo",
+    title: "Tasación en 48 hs",
     desc: "Te decimos cuánto vale tu propiedad, sin compromiso.",
   },
   {
@@ -116,7 +116,7 @@ export default function VendeTuPropiedadPage() {
         </h1>
         <p className="mt-3 text-balance text-muted-foreground">
           Contanos qué tenés y cómo querés operar. Te contactamos por WhatsApp
-          con una tasación sin cargo y todo el asesoramiento en {AGENCIA.zona_operacion}.
+          con una tasación en 48 hs y todo el asesoramiento en {AGENCIA.zona_operacion}.
         </p>
       </header>
 

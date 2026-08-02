@@ -3,7 +3,7 @@ import { Marquee } from "@/components/ui/marquee";
 
 // Beneficios de la inmobiliaria: cinta infinita (marquee). Sin logos de marcas.
 const ITEMS: { icon: LucideIcon; title: string; desc: string }[] = [
-  { icon: Calculator, title: "Tasaciones sin cargo", desc: "Valuamos tu propiedad gratis." },
+  { icon: Calculator, title: "Tasaciones en 48 hs", desc: "Valuamos tu propiedad rápido y con criterio de mercado." },
   { icon: CalendarCheck, title: "Visitas coordinadas", desc: "A tu ritmo y agenda." },
   { icon: Scale, title: "Asesoría legal", desc: "Papeles en regla de punta a punta." },
   { icon: MapPin, title: "Cobertura nacional", desc: "Operamos en todo el país." },

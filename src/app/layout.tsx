@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: `%s | América Cardozo`,
   },
   description:
-    "Propiedades en venta y alquiler en toda Argentina. Casas, departamentos, terrenos y locales. Tasaciones sin cargo, visitas coordinadas y asesoría real. Consultá por WhatsApp.",
+    "Propiedades en venta y alquiler en toda Argentina. Casas, departamentos, terrenos y locales. Tasaciones en 48 hs, visitas coordinadas y asesoría real. Consultá por WhatsApp.",
   keywords: [
     "inmobiliaria",
     "propiedades en venta",

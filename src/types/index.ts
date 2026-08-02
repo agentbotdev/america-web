@@ -120,7 +120,7 @@ export interface Agencia {
   ciudad: string;
   zona_operacion: string;
   horario: string;
-  redes: { instagram?: string; facebook?: string };
+  redes: { instagram?: string; facebook?: string; youtube?: string; tiktok?: string };
   anios_experiencia: number;
   propiedades_vendidas: number;
 }

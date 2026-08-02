@@ -34,6 +34,12 @@ export const AGENCIA: Agencia = {
   horario: "Coordiná tu visita por WhatsApp",
   redes: {
     instagram: "https://www.instagram.com/americacardozovende/",
+    // Del boceto de la dueña: "F /americacardozovende" (mismo handle que IG).
+    facebook: "https://www.facebook.com/americacardozovende",
+    // ⚠️ Pedidos por la dueña pero SIN URL todavía — el ícono no se muestra
+    // hasta cargarlas acá (render condicional en el footer).
+    youtube: "",
+    tiktok: "",
   },
   anios_experiencia: 20,
   propiedades_vendidas: 0,

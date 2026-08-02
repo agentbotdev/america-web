@@ -20,9 +20,12 @@ import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
 import { mensajeGeneral } from "@/lib/whatsapp";
 import { cn } from "@/lib/utils";
 
+// Solapas en MAYÚSCULA (pedido de la dueña, tipografía como la del footer).
+// Renombres: Propiedades→INMUEBLES, Crédito→FINANCIAMOS. Nueva: EMPRENDIMIENTOS.
 const NAV = [
-  { href: "/propiedades", label: "Propiedades" },
-  { href: "/credito-hipotecario", label: "Crédito" },
+  { href: "/propiedades", label: "Inmuebles" },
+  { href: "/emprendimientos", label: "Emprendimientos" },
+  { href: "/credito-hipotecario", label: "Financiamos" },
   { href: "/calculadora-alquiler", label: "Calculadora" },
   { href: "/vende-tu-propiedad", label: "Vendé tu propiedad" },
   { href: "/nosotros", label: "Nosotros" },
@@ -33,7 +36,7 @@ const NAV = [
 // En md+ desaparecen: la nav de escritorio ya tiene estos destinos.
 const ACCESOS_MOBILE = [
   { href: "/vende-tu-propiedad", label: "Vendé tu propiedad", icon: Tag },
-  { href: "/credito-hipotecario", label: "Crédito", icon: Landmark },
+  { href: "/credito-hipotecario", label: "Financiamos", icon: Landmark },
   { href: "/calculadora-alquiler", label: "Calculadora", icon: Calculator },
 ];
 
@@ -84,7 +87,9 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Logo />
 
-        <nav className="hidden items-center gap-8 md:flex">
+        {/* MAYÚSCULA + tracking (tipografía como los títulos del footer),
+            texto un punto más chico para que entren las 6 solapas. */}
+        <nav className="hidden items-center gap-6 md:flex lg:gap-7">
           {NAV.map((item) => {
             const active = isActive(pathname, item.href);
             return (
@@ -94,7 +99,7 @@ export function SiteHeader() {
                 aria-current={active ? "page" : undefined}
                 data-active={active ? "true" : undefined}
                 className={cn(
-                  "nav-underline text-sm font-medium transition-colors hover:text-foreground",
+                  "nav-underline text-xs font-semibold uppercase tracking-wider transition-colors hover:text-foreground",
                   active ? "text-foreground" : "text-muted-foreground",
                 )}
               >

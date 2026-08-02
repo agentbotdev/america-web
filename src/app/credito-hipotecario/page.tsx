@@ -56,12 +56,17 @@ function mensajeHipoteca(
   );
 }
 
+// Tasa anual FIJA al 10% acumulativo (definición de la dueña): el usuario ya
+// no la ajusta — solo monto, anticipo y plazo. Se aplica compuesta mensual
+// (sistema francés), que es la forma acumulativa estándar de una TNA.
+const TASA_FIJA_PCT = 10;
+
 export default function CreditoHipotecarioPage() {
   const [moneda, setMoneda] = useState<Moneda>("USD");
   const [montoPropiedad, setMontoPropiedad] = useState(MONTO_DEFAULT.USD);
   const [anticipoPct, setAnticipoPct] = useState(20);
   const [plazoAnios, setPlazoAnios] = useState(20);
-  const [tasaPct, setTasaPct] = useState(8);
+  const tasaPct = TASA_FIJA_PCT;
 
   function handleMoneda(m: Moneda) {
     setMoneda(m);
@@ -84,15 +89,17 @@ export default function CreditoHipotecarioPage() {
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
       <header className="max-w-2xl">
         <p className="flex items-center gap-2 text-sm font-medium text-brand">
-          <Landmark className="size-4" /> Crédito hipotecario
+          <Landmark className="size-4" /> Financiamos
         </p>
+        {/* Título y copy EXACTOS de la dueña (se quita "tasa" de los ajustables
+            porque ahora es fija al 10%). */}
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
-          Simulá tu crédito hipotecario
+          Simulá tu cuota
         </h1>
         <p className="mt-3 text-balance text-muted-foreground">
-          Calculá la cuota mensual estimada de tu crédito por sistema francés.
-          Ajustá monto, anticipo, plazo y tasa para ver cómo cambia. Te
-          confirmamos las condiciones reales por WhatsApp.
+          Calculá la cuota mensual estimada de tu crédito personal. Ajustá
+          monto, anticipo y plazo para encontrar tu facilidad. Te confirmamos
+          las condiciones reales por WhatsApp.
         </p>
       </header>
 
@@ -188,21 +195,12 @@ export default function CreditoHipotecarioPage() {
             />
           </div>
 
-          {/* TNA */}
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <label className="text-sm font-medium">Tasa anual (TNA)</label>
-              <span className="font-mono text-sm">{tasaPct}%</span>
-            </div>
-            <Slider
-              value={[tasaPct]}
-              min={0}
-              max={60}
-              step={0.5}
-              onValueChange={(v) =>
-                setTasaPct(Array.isArray(v) ? v[0] : (v as number))
-              }
-            />
+          {/* Tasa FIJA (no ajustable): 10% anual acumulativo. */}
+          <div className="flex items-center justify-between rounded-xl border border-brand/25 bg-brand/8 px-3.5 py-3">
+            <span className="text-sm font-medium">Tasa anual fija</span>
+            <span className="font-mono text-sm font-semibold text-brand-text">
+              {TASA_FIJA_PCT}% acumulativo
+            </span>
           </div>
         </div>
 
