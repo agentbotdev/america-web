@@ -12,7 +12,8 @@ import type { CostoAlquiler } from "@/types";
 //  - Primer mes de alquiler
 //  - Depósito en garantía (N meses, editable)
 //  - HONORARIOS (antes "comisión") = UN mes de alquiler, FIJO
-//  - Gastos administrativos = 10% del alquiler mensual, FIJO
+//  - Gastos administrativos = 10% del alquiler mensual, FIJO (base CONFIRMADA
+//    por el cliente: se calcula sobre el alquiler mensual)
 //  - SELLADO = 1,2% del TOTAL DEL CONTRATO, FIJO — el contrato dura
 //    2 años (vivienda) o 3 años (comercial), a elección del usuario.
 const DEFAULTS = {
