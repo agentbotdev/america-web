@@ -34,11 +34,14 @@ export const AGENCIA: Agencia = {
   horario: "Coordiná tu visita por WhatsApp",
   redes: {
     instagram: "https://www.instagram.com/americacardozovende/",
-    // Del boceto de la dueña: "F /americacardozovende" (mismo handle que IG).
-    facebook: "https://www.facebook.com/americacardozovende",
-    // ⚠️ Pedidos por la dueña pero SIN URL todavía — el ícono no se muestra
-    // hasta cargarlas acá (render condicional en el footer).
-    youtube: "",
+    // VERIFICADO por búsqueda web: la página real es /americacardozoinmobiliaria
+    // (el handle del boceto "/americacardozovende" era el de Instagram, no el
+    // de Facebook — el link anterior estaba ROTO).
+    facebook: "https://www.facebook.com/americacardozoinmobiliaria/",
+    // VERIFICADO: canal enlazado desde el footer de americacardozo.com.ar.
+    youtube: "https://www.youtube.com/@americacardozo1162",
+    // Buscado y NO existe cuenta de la inmobiliaria (a la fecha). El ícono
+    // aparece solo cuando se cargue una URL acá.
     tiktok: "",
   },
   anios_experiencia: 20,

@@ -65,9 +65,9 @@ const ALIADOS: Aliado[] = [
     ancho: 640,
     alto: 428,
   },
-  // Portales donde publica la inmobiliaria. El de Mercado Libre es el REAL
-  // del CDN oficial (logo_large_25years@2x). Zonaprop PENDIENTE: no existe
-  // fuente utilizable — pedir el archivo al cliente o a su kit de prensa.
+  // Portales donde publica la inmobiliaria (VERIFICADO: perfil activo en
+  // Zonaprop desde 2010 — id 17068225 —, MercadoLibre y Argenprop). Los tres
+  // logos son los REALES de los CDN oficiales de cada portal.
   {
     nombre: "Mercado Libre",
     rubro: "Portal — publicaciones activas",
@@ -75,6 +75,14 @@ const ALIADOS: Aliado[] = [
     ancho: 269,
     alto: 69,
     claseAlto: "h-6", // wordmark apaisado: a h-10 quedaba gigante
+  },
+  {
+    nombre: "Zonaprop",
+    rubro: "Portal — publicaciones activas",
+    logo: "/aliados/zonaprop.png",
+    ancho: 400,
+    alto: 174,
+    claseAlto: "h-7", // wordmark apaisado, como el de ML
   },
   {
     nombre: "Argenprop",
