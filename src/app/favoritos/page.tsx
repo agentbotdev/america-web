@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Mi selección de propiedades",
   // Página personal del visitante: no se indexa.
   robots: { index: false, follow: false },
+  // Redundante con el noindex, pero evita que herede `canonical: "/"` del
+  // layout: así ninguna ruta del sitio se declara duplicada de la home.
+  alternates: { canonical: "/favoritos" },
 };
 
 export default function FavoritosPage() {

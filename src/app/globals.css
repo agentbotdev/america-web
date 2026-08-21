@@ -286,6 +286,26 @@
     0 12px 32px -14px rgba(60, 50, 25, 0.22);
 }
 
+/* DIFERIR RENDER FUERA DE PANTALLA — para items que se repiten en listas largas.
+   Motivo concreto: el catálogo tiene 141 propiedades con scroll infinito, y cada
+   card lleva `backdrop-filter: blur(19px)`. Sin esto, al scrollear un rato el
+   navegador termina componiendo el blur de las 141 a la vez — el blur es el
+   filtro caro (muestrea la vecindad de cada pixel) y ese es exactamente el jank
+   que el CSS de este proyecto ya había documentado una vez.
+   Con `content-visibility: auto` el navegador saltea layout, paint Y el
+   backdrop-filter de todo lo que está fuera del viewport: el costo pasa a ser
+   proporcional a lo que se ve, no a lo que hay cargado.
+
+   `contain-intrinsic-size: auto 520px`: 520px es la altura estimada de una card
+   (foto 4:3 de ~389px de ancho ≈ 292px + cuerpo ≈ 228px). El `auto` hace que el
+   navegador RECUERDE la altura real una vez que la midió, así el scrollbar no
+   salta. Sin un tamaño intrínseco la barra de scroll pegaría saltos al entrar
+   y salir cada card. */
+.list-defer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 520px;
+}
+
 /* Superficie flotante SOBRE CONTENIDO (chatbot, tooltips, PiP).
    Tercer nivel, y no es capricho: `sheer` y `solid` asumen que atrás está el
    fondo crema LISO. Estas flotan sobre texto y fotos, o sea sobre cualquier

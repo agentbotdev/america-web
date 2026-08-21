@@ -10,7 +10,10 @@ import { toDeckItems } from "@/lib/deck";
 export const revalidate = 120;
 
 export const metadata: Metadata = {
-  title: "Propiedades en venta y alquiler en Argentina — América Cardozo",
+  // SIN "— América Cardozo": el layout ya lo agrega vía `title.template`.
+  // Antes rendereaba la marca dos veces y el título superaba largamente los
+  // ~60 caracteres que Google muestra, cortando lo importante.
+  title: "Propiedades en venta y alquiler en Argentina",
   description:
     "Casas, departamentos, PH, terrenos y locales en venta y alquiler en todo el país. Filtrá por operación, tipo, zona, dormitorios y precio, y consultá por WhatsApp al instante con América Cardozo.",
   alternates: { canonical: "/propiedades" },

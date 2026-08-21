@@ -38,8 +38,11 @@ function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
   const precio = precioCard(p);
   const aptoCredito = p.apto_credito === "Apto crédito";
 
+  // `list-defer`: el catálogo llega a 141 cards en el DOM con scroll infinito y
+  // cada una lleva backdrop-filter. Difiere layout/paint/blur de las que están
+  // fuera del viewport (ver globals.css).
   return (
-    <article className="card-glow card-topline card-premium group relative flex h-full flex-col overflow-hidden rounded-3xl hover:-translate-y-2 hover:border-brand/45 hover:shadow-[0_28px_60px_-26px_color-mix(in_oklch,var(--brand)_45%,transparent)]">
+    <article className="card-glow card-topline card-premium list-defer group relative flex h-full flex-col overflow-hidden rounded-3xl hover:-translate-y-2 hover:border-brand/45 hover:shadow-[0_28px_60px_-26px_color-mix(in_oklch,var(--brand)_45%,transparent)]">
       {/* Link-overlay: cubre TODA la card por encima del contenido → 1 click
           desde cualquier punto. Los CTAs lo "perforan" con z-20. */}
       <Link href={href} className="absolute inset-0 z-10" aria-label={`Ver ${titulo}`} />

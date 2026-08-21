@@ -111,9 +111,26 @@ export default function RootLayout({
             DEUDA: soportar reduced-motion de verdad exige mover estos reveals a
             CSS con @media (prefers-reduced-motion), que se evalúa antes del
             primer paint y no necesita JS. */}
+        {/* Skip link — WCAG 2.4.1 "Bypass Blocks" (nivel A). Invisible hasta que
+            recibe foco por teclado; entonces aparece arriba a la izquierda.
+            Sin esto, quien navega con teclado o lector de pantalla tiene que
+            tabular por el logo y las 6 solapas del header EN CADA página antes
+            de llegar al contenido. `sr-only` + `focus:not-sr-only` es el patrón
+            estándar: no ocupa espacio ni se ve para el resto de los usuarios. */}
+        <a
+          href="#contenido"
+          className="sr-only rounded-full bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:outline-none focus:ring-2 focus:ring-foreground"
+        >
+          Saltar al contenido
+        </a>
         <MotionConfig reducedMotion="never">
           <SiteHeader />
-          <main className="flex-1">{children}</main>
+          {/* `tabIndex={-1}`: para que el navegador pueda MOVER el foco acá al
+              seguir el skip link. Sin esto el link scrollea pero el foco queda
+              en el header y el siguiente Tab vuelve a la navegación. */}
+          <main id="contenido" tabIndex={-1} className="flex-1 focus:outline-none">
+            {children}
+          </main>
           <SiteFooter />
           <WhatsappFloat />
           <AsesorChat />

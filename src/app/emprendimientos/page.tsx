@@ -13,9 +13,22 @@ import { mensajeGeneral } from "@/lib/whatsapp";
 // mientras no haya cargados, un estado "en preparación" honesto con CTA.
 
 export const metadata: Metadata = {
-  title: "Emprendimientos | América Cardozo",
+  // SIN el sufijo "| América Cardozo": el layout raíz ya lo agrega con
+  // `title.template`. Escribirlo acá rendereaba "Emprendimientos | América
+  // Cardozo | América Cardozo" — la marca dos veces, comiéndose los ~60
+  // caracteres que Google muestra en el resultado de búsqueda.
+  title: "Emprendimientos",
   description:
     "Desarrollos inmobiliarios de American Group: proyectos en pozo, en obra, terminados y loteos. Oportunidades de inversión con el respaldo de América Cardozo.",
+  // Sin esto heredaba `canonical: "/"` del layout y se declaraba duplicada de
+  // la home ante Google (mismo bug que tenían calculadora, crédito y vende).
+  alternates: { canonical: "/emprendimientos" },
+  openGraph: {
+    title: "Emprendimientos | América Cardozo",
+    description:
+      "Proyectos en pozo, en obra, terminados y loteos. Invertí con el respaldo de América Cardozo.",
+    url: "/emprendimientos",
+  },
 };
 
 // Las etapas que la dueña pidió destacar: cómo se desarrolla e invierte.

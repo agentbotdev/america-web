@@ -15,6 +15,7 @@ import {
 import { AGENCIA } from "@/data/agencia";
 import { mensajePropiedad, waLink } from "@/lib/whatsapp";
 import { formatPrecio, formatM2, tituloPropiedad, labelOperacion } from "@/lib/format";
+import { useMounted } from "@/lib/use-client-hooks";
 import { cn } from "@/lib/utils";
 import type { Propiedad } from "@/types";
 
@@ -368,9 +369,11 @@ function BrochureDoc({ p, onClose }: { p: Propiedad; onClose: () => void }) {
 /* ------------------------------------------------------------------ */
 export function PropertyBrochure({ propiedad: p }: { propiedad: Propiedad }) {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  // `useMounted()` (useSyncExternalStore) en vez del par useState + useEffect:
+  // era el único componente del proyecto que seguía con el patrón viejo —
+  // asesor-chat, favorite-button y favorites-store ya usaban el hook.
+  // Hace falta porque createPortal necesita document.body, que no existe en SSR.
+  const mounted = useMounted();
 
   // Bloquea el scroll del fondo + cierra con Escape mientras el overlay está abierto.
   useEffect(() => {

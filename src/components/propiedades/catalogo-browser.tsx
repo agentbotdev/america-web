@@ -217,9 +217,19 @@ export function CatalogoBrowser({
 
   // Al cambiar el resultado del filtrado, reseteamos la tanda visible: el usuario
   // siempre ve la "primera página" de su nueva búsqueda desde arriba.
-  useEffect(() => {
+  //
+  // Se ajusta DURANTE el render comparando con los items previos, no con un
+  // effect. Es el patrón que documenta React para "resetear estado cuando
+  // cambia una entrada" (react.dev/learn/you-might-not-need-an-effect):
+  // React detecta el setState en render, descarta el render en curso y vuelve
+  // a renderizar de inmediato SIN pintar el intermedio.
+  // Con el effect anterior el usuario veía un frame con la lista nueva y el
+  // scroll/paginado viejo antes de que el effect corrigiera.
+  const [itemsPrevios, setItemsPrevios] = useState(items);
+  if (items !== itemsPrevios) {
+    setItemsPrevios(items);
     setVisibles(PAGE_SIZE);
-  }, [items]);
+  }
 
   const mostrados = useMemo(() => items.slice(0, visibles), [items, visibles]);
   const hayMas = visibles < items.length;
