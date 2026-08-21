@@ -71,9 +71,19 @@
   --foreground: oklch(0.218 0 0);            /* ≈ #1a1a1a — negro suave: el
                                                 negro puro sobre crema vibra */
 
-  /* Card BLANCO PURO a propósito: las fotos respiran sin tinte. */
-  --card: oklch(1 0 0);                      /* #ffffff */
+  /* Card CRISTAL, no velo blanco. Pedido del cliente: "que se vea como cristal".
+     Primer intento fue al 62% de blanco y se veía SUCIO — con razón: blanco
+     sobre un color saturado no lo aclara, lo LAVA (el crema perdía la mitad de
+     su croma: 0.085 → 0.043 en oklch, o sea medio color muerto).
+     Un cristal real no pinta encima: difumina lo que hay detrás. Por eso el
+     velo baja a 38% y el trabajo lo hace `--glass-filter` (blur) en las
+     clases. Legible igual: sobre el crema PELADO, sin nada encima, los
+     contrastes ya son foreground 14.0 / muted 5.5 / brand-text 4.76 → AA.
+     Las fotos NO se tiñen: son <img> opacas, el alpha de la card no las toca. */
+  --card: oklch(1 0 0 / 38%);
   --card-foreground: var(--foreground);
+  /* Popover SÍ queda opaco: los dropdowns/selects flotan sobre CONTENIDO
+     (texto, fotos), no sobre el fondo crema. Translúcido = ilegible. */
   --popover: oklch(1 0 0);
   --popover-foreground: var(--foreground);
 
@@ -126,10 +136,80 @@
   --sidebar-border: oklch(0.218 0.01 90 / 10%);
   --sidebar-ring: var(--brand);
 
-  /* Glass en claro: BLANCO translúcido sobre el fondo cálido (antes era blanco
-     translúcido sobre negro — invisible acá). El borde ahora es negro sutil. */
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(26, 26, 26, 0.10);
+  /* ---------- ESCALA GLASS: una sola fuente de verdad ----------
+     Antes cada clase (.glass, .card-premium, .panel-glass, la carta del deck)
+     hardcodeaba sus propios rgba() → cuatro "glass" distintos que había que
+     tocar de a uno. Ahora TODAS consumen estos tokens: subir o bajar la
+     transparencia de todo el sitio es cambiar un número acá.
+
+     Dos niveles, porque no todas las superficies piden lo mismo:
+       · sheer  → cards y chips: dejan pasar el crema con ganas
+       · solid  → paneles grandes con mucho dato (cotizador, ficha técnica):
+                  más cuerpo para que tablas y números no compitan con el fondo
+     El borde es BLANCO (no negro): sobre crema, un filo blanco es lo que da la
+     lectura de "vidrio". Un borde oscuro lo devuelve a "caja con marco".
+
+     VELO MÍNIMO — el cristal no pinta, refracta.
+     Estos valores estaban en 0.74/0.44 y el resultado se veía SUCIO. Motivo
+     técnico: el blanco sobre un color saturado no lo aclara, lo DESATURA. El
+     crema #f6e7a5 (oklch chroma 0.085) con blanco al 44% encima cae a chroma
+     0.043 → pierde la mitad del color y queda lechoso, no cristalino.
+     Ahora el velo casi no existe y el volumen lo dan `--glass-filter` + el filo
+     especular. Se puede bajar tanto porque el texto YA es legible sobre el
+     crema pelado (contrastes AA verificados arriba, en --background).
+
+     ELECCIÓN DEL CLIENTE: se le mostraron 6 tratamientos ópticos lado a lado
+     (página /lab-cristal, ya borrada) y eligió "mezcla entre 1 y 5, me gusta
+     más la 1". O sea: la base translúcida y limpia de la 1, sumándole de la 5
+     el RELIEVE — ver `--glass-relief` más abajo. Los velos quedan casi como
+     estaban (0.34/0.20 → 0.36/0.19): el volumen nuevo lo aportan las sombras,
+     no más blanco. */
+  --glass-sheer-top: rgba(255, 255, 255, 0.36);
+  --glass-sheer-bottom: rgba(255, 255, 255, 0.19);
+  --glass-solid-top: rgba(255, 255, 255, 0.48);
+  --glass-solid-bottom: rgba(255, 255, 255, 0.31);
+
+  /* VIDRIO ESMERILADO. `blur` es lo que lo define — es el efecto que la gente
+     reconoce como "glass". Requiere la textura de fondo del body (ver ahí): sin
+     algo detrás que difuminar, el blur no hace absolutamente nada.
+
+     SIN `saturate` alto, y esto es una corrección de un error anterior:
+     estuvo en saturate(115–185%) y el cliente lo rechazó — "se ve un amarillo
+     muy fake". Tenía razón. `saturate` no revela el amarillo del fondo: lo
+     INVENTA, sube el croma por encima del de la marca (a 185% llegaba a 1.63x
+     el croma de #f6e7a5) y el ojo lee un color que no existe en ningún lado del
+     branding. Un vidrio real no tiñe lo que atraviesa: lo difumina.
+     Queda en 104% — apenas compensa lo poco que desatura el velo, nada más.
+
+     El blur es el filtro CARO (muestrea la vecindad de cada pixel, a diferencia
+     de saturate que es por-pixel). 18px es el mínimo donde el esmerilado se lee
+     claramente; bajarlo abarata pero lo devuelve a "capa translúcida".
+     19px y saturate 110% = punto medio 1↔5 con el peso en la 1 (la 1 tenía
+     18px/104%, la 5 tenía 20px/125%). */
+  --glass-filter: blur(19px) saturate(110%);
+
+  /* Filo especular: con el velo casi en cero, el borde es lo que DIBUJA el
+     canto del vidrio. Por eso sube de 0.72 a casi opaco. */
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --glass-border-top: rgba(255, 255, 255, 1);
+  /* Sombra cálida (marrón, no negra): sobre crema el negro puro ensucia. */
+  --glass-shadow: 0 20px 48px -28px rgba(60, 50, 25, 0.42);
+
+  /* RELIEVE — lo que la variante 5 aportó a la mezcla, y la razón por la que
+     una card se lee como vidrio CON ESPESOR y no como una lámina pegada.
+     Son dos sombras internas que simulan cómo la luz trata un canto real:
+       1. línea de luz en el borde de arriba, donde la luz pega de frente
+       2. sombra difusa subiendo desde abajo, el canto opuesto en penumbra
+     Van suavizadas respecto de la 5 original (que usaba 2px y 0.30 de sombra)
+     porque el cliente pidió más peso de la 1: se busca el volumen, no el
+     relieve marcado que hacía ver la card despegada del fondo. */
+  --glass-relief:
+    inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
+    inset 0 -14px 26px -20px rgba(110, 90, 45, 0.22);
+  --glass-inset: inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+
+  /* Alias legacy — hay llamadas viejas a --glass-bg. */
+  --glass-bg: var(--glass-sheer-top);
 }
 
 @layer base {
@@ -139,8 +219,42 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    /* TEXTURA DE FONDO — requisito técnico del vidrio esmerilado, no decoración.
+       `backdrop-filter: blur()` difumina lo que hay DETRÁS del elemento. Sobre un
+       color plano no cambia un solo pixel: difuminar liso da liso. El
+       glassmorphism de iOS se ve porque siempre hay un wallpaper con detalle
+       atrás. Sin esto, las cards con blur se leerían como pintura blanca.
+       Son glows MUY diluidos del propio crema de marca + un rojo casi
+       imperceptible: no inventan un color nuevo, modulan el que ya está.
+
+       `fixed`: el fondo NO scrollea. Así las cards, al desplazarse, van pasando
+       por zonas distintas del gradiente y lo que difuminan CAMBIA — es eso lo
+       que se percibe como vidrio de verdad y no como una capa pegada. */
+    background-attachment: fixed;
+    /* La PRIMERA capa es la que hace posible el vidrio esmerilado, y el motivo
+       es de procesamiento de señal, no de gusto: `blur()` es un filtro pasa-bajos
+       — destruye ALTA frecuencia espacial y apenas toca la baja.
+       Un gradiente suave es baja frecuencia: difuminarlo lo deja casi idéntico
+       (medido: los glows de abajo varían Δ11/255 → el blur no se notaba nada).
+       Una trama de puntos finos es alta frecuencia: el blur la funde en un velo
+       uniforme, y ESE contraste entre "puntos nítidos afuera / fundido adentro"
+       es exactamente lo que el ojo lee como vidrio esmerilado.
+       CALIBRADA, no a ojo. Se buscó el punto donde el contraste LOCAL alcance
+       para verse (rango ≥18/255) sin que el promedio ensucie el crema. Medido:
+         alpha 0.09 / 22px → rango 10 (3.9%)  ← imperceptible, no servía
+         alpha 0.13 / 22px → rango 15 (5.9%)  ← justo
+         alpha 0.20 / 20px → rango 22 (8.6%)  ← ESTE
+         alpha 0.26 / 20px → rango 29 (11.4%) ← ya se lee como textura sucia
+       No ensucia porque puntos de 1px cada 20px cubren <1% del área: el
+       oscurecimiento PROMEDIO es 0.2/255. Todo el efecto es contraste local. */
     background-image:
-      radial-gradient(1000px 700px at 50% -12%, color-mix(in oklch, var(--accent-warm) 55%, transparent), transparent 62%);
+      radial-gradient(circle at 1px 1px, rgba(60, 50, 25, 0.20) 1px, transparent 0),
+      radial-gradient(1000px 700px at 50% -12%, color-mix(in oklch, var(--accent-warm) 55%, transparent), transparent 62%),
+      radial-gradient(760px 620px at 88% 18%, color-mix(in oklch, var(--brand) 7%, transparent), transparent 60%),
+      radial-gradient(900px 700px at 6% 42%, color-mix(in oklch, var(--accent-warm) 78%, transparent), transparent 64%),
+      radial-gradient(820px 640px at 78% 74%, color-mix(in oklch, var(--accent-warm) 62%, transparent), transparent 62%),
+      radial-gradient(680px 560px at 22% 92%, color-mix(in oklch, var(--brand) 5%, transparent), transparent 58%);
+    background-size: 20px 20px, auto, auto, auto, auto, auto;
   }
   html {
     @apply font-sans antialiased;
@@ -162,20 +276,46 @@
    ~10 capas. El look glass lo da el gradiente translúcido + borde luminoso. */
 .glass,
 .glass-dark {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.64));
+  background: linear-gradient(180deg, var(--glass-sheer-top), var(--glass-sheer-bottom));
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
   border: 1px solid var(--glass-border);
-  border-top-color: rgba(255, 255, 255, 0.95);
+  border-top-color: var(--glass-border-top);
   box-shadow:
-    0 12px 32px -14px rgba(60, 50, 25, 0.22),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+    var(--glass-relief),
+    0 12px 32px -14px rgba(60, 50, 25, 0.22);
 }
-/* Panel sólido premium (ficha, cotizador, filtros): blanco sobre el fondo cálido. */
+
+/* Superficie flotante SOBRE CONTENIDO (chatbot, tooltips, PiP).
+   Tercer nivel, y no es capricho: `sheer` y `solid` asumen que atrás está el
+   fondo crema LISO. Estas flotan sobre texto y fotos, o sea sobre cualquier
+   color. Con el velo de una card (6–20%) una foto oscura detrás daba 3.9:1 de
+   contraste → por debajo de AA, conversación ilegible.
+   Acá el `blur` SÍ va (único lugar del sitio): destruye el detalle de atrás,
+   que es justo lo que hace falta. El costo de GPU es despreciable porque son
+   2-3 elementos fijos, no 42 cards scrolleando en grilla. */
+.glass-float {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.90), rgba(255, 255, 255, 0.82));
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-border-top);
+}
+
+/* Panel grande (ficha técnica, cotizador, crédito, filtros).
+   ANTES: `background: var(--card)` con --card en blanco PURO → de "glass" no
+   tenía nada, era una caja blanca maciza que tapaba el crema. El nombre mentía.
+   AHORA: glass de verdad, en el nivel `solid` porque estos paneles cargan
+   tablas, cuotas y números — necesitan más cuerpo que una card suelta. */
 .panel-glass {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--glass-solid-top), var(--glass-solid-bottom));
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-border-top);
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
-    0 14px 40px -26px rgba(60, 50, 25, 0.35);
+    var(--glass-relief),
+    0 16px 42px -26px rgba(60, 50, 25, 0.38);
 }
 
 /* Banda de sección: el CREMA de marca. Es lo que le da ritmo a la página —
@@ -206,14 +346,19 @@
    sombra, no un borde luminoso — eso era del dark). */
 /* GLASS translúcido, no blanco macizo (pedido del cliente: "las cards blancas
    se ven raras, hacelas tipo glass"). Deja pasar el crema del fondo — misma
-   estética que la carta del deck del hero. Sin backdrop-filter (perf). */
+   estética que la carta del deck del hero. Sin backdrop-filter (perf).
+   Arrancaba en 0.92 → el tope seguía leyéndose blanco. Después pasó a 0.74/0.44
+   y seguía sucio (el blanco desatura el crema). Ahora el velo es casi cero y el
+   efecto lo da `--glass-filter`: el crema atraviesa la card AVIVADO. */
 .card-premium {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.68));
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  border-top-color: rgba(255, 255, 255, 0.95);
+  background: linear-gradient(180deg, var(--glass-sheer-top), var(--glass-sheer-bottom));
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-border-top);
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
-    0 18px 44px -28px rgba(60, 50, 25, 0.4);
+    var(--glass-relief),
+    var(--glass-shadow);
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease, border-color 0.4s ease;
 }
 

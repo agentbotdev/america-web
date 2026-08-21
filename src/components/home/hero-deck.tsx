@@ -145,9 +145,15 @@ export function HeroDeck({ items }: { items: DeckItem[] }) {
                     setEstado((s) => ({ front: i, prev: s.front }));
                   }
                 }}
-                // Cuerpo TRANSLÚCIDO (blanco 82% — sin backdrop-blur, que ya nos
-                // costó performance): deja respirar el crema y se ve liviana.
-                className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-3xl border border-white/70 bg-white/[0.82] shadow-[0_30px_70px_-30px_rgba(60,45,20,0.45)] transition-shadow hover:shadow-[0_34px_80px_-30px_color-mix(in_oklch,var(--brand)_50%,transparent)]"
+                // BLANCO SÓLIDO a propósito — decisión explícita del cliente:
+                // el resto del sitio es cristal, pero estas cartas NO.
+                // Y tiene lógica: son las únicas que se apilan UNA SOBRE OTRA.
+                // Translúcidas, el precio y el título de la carta de atrás se
+                // transparentaban a través de la de adelante (dos precios
+                // superpuestos = ilegible). El blanco corta eso de raíz y además
+                // hace que el deck resalte como el foco del hero.
+                // NO usa `.card-premium`: esa clase ahora lleva blur y velo.
+                className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-3xl border border-[rgba(60,50,25,0.10)] bg-white shadow-[0_30px_70px_-30px_rgba(60,45,20,0.45)] transition-shadow hover:shadow-[0_34px_80px_-30px_color-mix(in_oklch,var(--brand)_50%,transparent)]"
               >
                 <div className="pointer-events-none relative aspect-[4/3] shrink-0 overflow-hidden bg-muted">
                   {/* TODAS las cartas con `priority`: son 4 imágenes above-the-fold

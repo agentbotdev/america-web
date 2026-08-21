@@ -196,7 +196,11 @@ export function AsesorChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.92 }}
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
-            className="flex h-[32rem] w-[min(90vw,23rem)] flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl shadow-[rgba(60,50,25,0.35)]"
+            // `.glass-float`, no `bg-card`: este panel flota sobre CONTENIDO
+            // (texto, fotos), no sobre el fondo crema liso. Con el velo de una
+            // card normal, una foto oscura detrás dejaba el texto en 3.9:1 →
+            // por debajo de AA. `.glass-float` lleva blur + más cuerpo.
+            className="flex h-[32rem] w-[min(90vw,23rem)] flex-col overflow-hidden rounded-3xl shadow-2xl shadow-[rgba(60,50,25,0.35)] glass-float"
           >
             {/* Header: barra ROJA sólida — el chat es el CTA más fuerte de la web. */}
             <div className="flex items-center gap-3 border-b border-black/10 bg-brand px-4 py-3">
@@ -308,7 +312,8 @@ export function AsesorChat() {
             transition={{ type: "spring", stiffness: 420, damping: 32 }}
             onClick={() => setModo("abierto")}
             aria-label="Agrandar el asesor"
-            className="flex w-[min(68vw,17rem)] items-center gap-2.5 rounded-2xl border border-border bg-card px-3 py-2.5 text-left shadow-2xl shadow-[rgba(60,50,25,0.3)]"
+            // `.glass-float`: flota sobre contenido, ver nota en el panel.
+            className="glass-float flex w-[min(68vw,17rem)] items-center gap-2.5 rounded-2xl px-3 py-2.5 text-left shadow-2xl shadow-[rgba(60,50,25,0.3)]"
           >
             <span className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-brand text-white">
               <Sparkles className="size-3.5" />
@@ -352,7 +357,8 @@ export function AsesorChat() {
               setModo("abierto");
               setTip(false);
             }}
-            className="hidden max-w-[14rem] rounded-2xl rounded-br-md border border-border bg-card px-3.5 py-2 text-left text-xs text-foreground shadow-xl lg:block"
+            // `.glass-float`: flota sobre contenido, ver nota en el panel.
+            className="glass-float hidden max-w-[14rem] rounded-2xl rounded-br-md px-3.5 py-2 text-left text-xs text-foreground shadow-xl lg:block"
           >
             👋 ¿Te ayudo a encontrar tu próxima propiedad?
           </motion.button>
