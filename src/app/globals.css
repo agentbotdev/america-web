@@ -559,6 +559,89 @@
   mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
 }
 
+/* Tilt 3D de las cards (ver components/ui/tilt.tsx). El ángulo llega por las
+   custom properties que escribe el pointermove; la suavidad la da esta
+   transición, no un spring en JS. */
+.tilt-3d {
+  transform-style: preserve-3d;
+  transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tilt-3d {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ENTRADA DEL HERO en cascada — reemplaza las variantes `fadeUp` de motion.
+   Es una animación de CARGA (no depende del scroll), así que basta un keyframe
+   con `both`: no hace falta observer ni JS. Cada bloque declara su turno con
+   `--i` y el delay sale de ahí.
+   `both` deja el estado final aplicado al terminar, y el `from` en opacity:0
+   sólo existe mientras la animación corre: si el CSS no cargara, no hay riesgo
+   de contenido invisible permanente. */
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+.hero-in {
+  animation: hero-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 0.08s);
+}
+/* Entrada del deck: aparece con un zoom mínimo, un toque más lenta que el
+   texto para que se lea como el foco visual del hero. */
+@keyframes hero-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.hero-zoom {
+  animation: hero-zoom 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-in,
+  .hero-zoom {
+    animation: none;
+  }
+}
+
+/* Vuelo de la carta que deja el frente en el deck del hero.
+   Sale hacia la izquierda, baja apenas, se desvanece y aterriza atrás. El dip
+   de opacidad del medio tapa el cambio instantáneo de z-index.
+   Estaba hecho con keyframes de motion en JS; acá lo corre el compositor, que
+   es lo que saca el lag que reportó el cliente. Los valores en % son relativos
+   a la propia carta, así el abanico escala igual en mobile y en escritorio. */
+@keyframes deck-vuela {
+  0% {
+    transform: translate(0%, 0%) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-37%, 3.5%) rotate(-9deg) scale(0.96);
+    opacity: 0.25;
+  }
+  100% {
+    transform: translate(19.5%, -10.5%) rotate(8deg) scale(0.885);
+    opacity: 0.95;
+  }
+}
+.animate-deck-vuela {
+  animation: deck-vuela 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0) rotate(-0.4deg); }
   50% { transform: translateY(-22px) rotate(0.4deg); }

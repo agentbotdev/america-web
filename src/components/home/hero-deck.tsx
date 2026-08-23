@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { motion } from "motion/react";
 import { BedDouble, Bath, Ruler, MapPin } from "lucide-react";
 import { PropertyImage } from "@/components/propiedades/property-image";
 import type { DeckItem } from "@/lib/deck";
@@ -19,8 +18,6 @@ import type { DeckItem } from "@/lib/deck";
 // HYDRATION-SAFE: cero ramas por preferencia/entorno en el render — el estado
 // inicial (front=0) pinta idéntico en servidor y cliente, y las cards NO llevan
 // `initial` (SSR ya las emite en su posición final).
-
-const EASE = [0.22, 1, 0.36, 1] as const;
 
 // ARRANQUE CON PUNCH (pedido del cliente): las 2 primeras rotaciones salen casi
 // enseguida para que, apenas entrás, el deck se muestre vivo y se entienda que
@@ -53,6 +50,10 @@ export function HeroDeck({ items }: { items: DeckItem[] }) {
   const [pausado, setPausado] = useState(false);
   // Un swipe NO debe disparar la navegación del Link al soltar.
   const arrastrando = useRef(false);
+  // Punto donde empezó el gesto. Va acá arriba con el resto de los hooks: más
+  // abajo hay un `return` temprano y declararlo después haría que el hook se
+  // llame de forma condicional.
+  const inicioX = useRef(0);
   const n = items.length;
 
   // Cuántas veces rotó sola. Sirve para acelerar el arranque y después soltar.
@@ -75,6 +76,28 @@ export function HeroDeck({ items }: { items: DeckItem[] }) {
 
   const avanzar = () =>
     setEstado((s) => ({ front: (s.front + 1) % n, prev: s.front }));
+
+  // SWIPE con Pointer Events nativos (antes lo hacía el `drag` de motion).
+  // Sólo interesa el punto de inicio y el de fin: si el dedo recorrió más de
+  // 50px en horizontal, se pasa de carta. No hace falta seguir el dedo en vivo
+  // —ni mover la carta mientras arrastra— y por eso no hay un listener de
+  // pointermove disparando en cada píxel del gesto, que era parte del costo.
+  const onPointerDown = (e: React.PointerEvent) => {
+    inicioX.current = e.clientX;
+    arrastrando.current = false;
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    const dx = e.clientX - inicioX.current;
+    if (Math.abs(dx) > 50) {
+      // Marca que hubo arrastre para que el <Link> no navegue al soltar.
+      arrastrando.current = true;
+      avanzar();
+      // El click fantasma llega en este mismo tick: se libera en el próximo.
+      setTimeout(() => {
+        arrastrando.current = false;
+      }, 0);
+    }
+  };
 
   return (
     <div
@@ -100,47 +123,34 @@ export function HeroDeck({ items }: { items: DeckItem[] }) {
           const vuela = i === estado.prev && !alFrente;
 
           return (
-            <motion.article
+            <article
               key={item.id}
-              className="absolute inset-0"
-              style={{ zIndex: Z[pos] ?? 10, transformOrigin: "50% 80%" }}
-              animate={
-                vuela
-                  ? {
-                      // Todo en %, misma unidad que POSICIONES (mezclar px y %
-                      // entre keyframes rompe la interpolación de motion).
-                      x: ["0%", "-37%", destino.x],
-                      y: ["0%", "3.5%", destino.y],
-                      rotate: [0, -9, destino.rotate],
-                      scale: [1, 0.96, destino.scale],
-                      opacity: [1, 0.25, destino.opacity],
-                    }
-                  : destino
-              }
-              transition={
-                vuela
-                  ? { duration: 0.85, times: [0, 0.5, 1], ease: EASE }
-                  : { duration: 0.7, ease: EASE }
-              }
-              // SWIPE en la carta del frente: soltar con arrastre horizontal
-              // pasa a la siguiente. `dragSnapToOrigin` devuelve la carta si el
-              // gesto no llegó al umbral.
-              drag={alFrente && n > 1 ? "x" : false}
-              dragSnapToOrigin
-              dragElastic={0.6}
-              onDragStart={() => {
-                arrastrando.current = true;
+              // ANIMACIÓN EN CSS PURO, sin motion. El cliente reportó el deck
+              // "re laggeado": eran 4 elementos animándose por JS, cada uno
+              // recalculando su transform en cada frame desde el hilo principal
+              // — que además compite con la hidratación de la home.
+              // Una transición CSS de transform+opacity la corre el COMPOSITOR,
+              // fuera del hilo principal: aunque el JS esté ocupado, el deck se
+              // mueve fluido. Es la misma animación, sin el costo.
+              // La carta que sale del frente usa una animación con keyframes
+              // (`animate-deck-vuela`, en globals.css) para el arco de reparto.
+              className={`absolute inset-0 ${vuela ? "animate-deck-vuela" : ""}`}
+              style={{
+                zIndex: Z[pos] ?? 10,
+                transformOrigin: "50% 80%",
+                transform: `translate(${destino.x}, ${destino.y}) rotate(${destino.rotate}deg) scale(${destino.scale})`,
+                opacity: destino.opacity,
+                transition: vuela
+                  ? "none"
+                  : "transform 0.7s cubic-bezier(0.22,1,0.36,1), opacity 0.7s cubic-bezier(0.22,1,0.36,1)",
+                // Sólo las 3 cartas visibles piden capa propia. Marcar las 4 (o
+                // las que haya) dejaría capas de GPU vivas de gusto.
+                willChange: pos < 3 ? "transform, opacity" : undefined,
               }}
-              onDragEnd={(_, info) => {
-                if (Math.abs(info.offset.x) > 60 || Math.abs(info.velocity.x) > 500) {
-                  avanzar();
-                }
-                // El click fantasma post-drag se dispara en este mismo tick →
-                // liberamos el flag recién en el próximo.
-                setTimeout(() => {
-                  arrastrando.current = false;
-                }, 0);
-              }}
+              // SWIPE con Pointer Events nativos, sin la capa de drag de motion.
+              onPointerDown={alFrente && n > 1 ? onPointerDown : undefined}
+              onPointerUp={alFrente && n > 1 ? onPointerUp : undefined}
+              onPointerCancel={alFrente && n > 1 ? onPointerUp : undefined}
             >
               <Link
                 href={`/propiedad/${item.slug}`}
@@ -232,7 +242,7 @@ export function HeroDeck({ items }: { items: DeckItem[] }) {
                   </div>
                 </div>
               </Link>
-            </motion.article>
+            </article>
           );
         })}
       </div>

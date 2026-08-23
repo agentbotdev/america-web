@@ -1,6 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Sora } from "next/font/google";
-import { MotionConfig } from "motion/react";
+// `MotionConfig` se eliminó: existía para forzar `reducedMotion="never"` sobre
+// todo el árbol y evitar un hydration mismatch de motion. Ya no hace falta —
+// hero, deck, reveals, contadores, tilt y el proceso corren en CSS, donde la
+// preferencia del usuario la resuelve `@media (prefers-reduced-motion)` sin
+// ramificar el render. Y su sola presencia acá metía la librería (~160 KB) en
+// el bundle de TODAS las páginas, aunque la página no animara nada.
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
@@ -126,18 +131,16 @@ export default function RootLayout({
         >
           Saltar al contenido
         </a>
-        <MotionConfig reducedMotion="never">
-          <SiteHeader />
-          {/* `tabIndex={-1}`: para que el navegador pueda MOVER el foco acá al
-              seguir el skip link. Sin esto el link scrollea pero el foco queda
-              en el header y el siguiente Tab vuelve a la navegación. */}
-          <main id="contenido" tabIndex={-1} className="flex-1 focus:outline-none">
-            {children}
-          </main>
-          <SiteFooter />
-          <WhatsappFloat />
-          <AsesorChatLazy />
-        </MotionConfig>
+        <SiteHeader />
+        {/* `tabIndex={-1}`: para que el navegador pueda MOVER el foco acá al
+            seguir el skip link. Sin esto el link scrollea pero el foco queda
+            en el header y el siguiente Tab vuelve a la navegación. */}
+        <main id="contenido" tabIndex={-1} className="flex-1 focus:outline-none">
+          {children}
+        </main>
+        <SiteFooter />
+        <WhatsappFloat />
+        <AsesorChatLazy />
       </body>
     </html>
   );

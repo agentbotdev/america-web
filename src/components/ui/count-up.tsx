@@ -1,13 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  useInView,
-  useMotionValue,
-  useReducedMotion,
-  animate,
-} from "motion/react";
-import { useMounted } from "@/lib/use-client-hooks";
+import { useMediaQuery } from "@/lib/use-client-hooks";
 
 // Count-up al entrar en viewport. Reescrito desde el patrón de 21st/Magic pero
 // limpio: usa motion/react nativo (useMotionValue + animate), respeta
@@ -31,41 +25,68 @@ export function CountUp({
   className?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.6 });
-  const reduced = useReducedMotion() ?? false;
-  const mounted = useMounted();
-  const motionValue = useMotionValue(from);
+  const reduced = useMediaQuery("(prefers-reduced-motion: reduce)");
   const [animado, setAnimado] = useState(() => format(from, decimals));
 
-  useEffect(() => {
-    // Sin animación que arrancar si el usuario pidió reduced-motion o el
-    // contador todavía no entró en viewport.
-    if (reduced || !inView) return;
-    const controls = animate(motionValue, to, {
-      duration,
-      ease: [0.22, 1, 0.36, 1],
-      // setState desde un callback del animador NO es "setState en el cuerpo
-      // del effect": es una suscripción a un sistema externo, que es
-      // exactamente para lo que sirve useEffect.
-      onUpdate: (v) => setAnimado(format(v, decimals)),
-    });
-    return () => controls.stop();
-  }, [inView, reduced, to, duration, decimals, motionValue]);
-
-  // Reduced-motion: el valor final se DERIVA durante el render, no se sincroniza
-  // con un effect (antes era `setDisplay(...)` en el cuerpo del effect → render
-  // en cascada).
+  // Conteo con requestAnimationFrame, sin la librería de animación.
+  // Un contador numérico no necesita un motor de animación: es interpolar un
+  // número entre dos valores durante N milisegundos. La curva de easing son
+  // tres líneas. Traer ~160 KB para esto era desproporcionado.
   //
-  // El `mounted &&` NO es decorativo: sin él esto rompe la hidratación.
-  // `useReducedMotion()` lee una media query, así que devuelve `false` en el
-  // servidor y el valor REAL en el cliente. Derivar directo de `reduced` hacía
-  // que el server pintara "0" y el cliente "20" en el mismo nodo → hydration
-  // mismatch (verificado en consola), y ante un mismatch React descarta el HTML
-  // del servidor y re-renderiza todo el árbol.
-  // Con `useMounted()` el server y el PRIMER render del cliente coinciden
-  // siempre (ambos `false` → muestran `animado`); recién después de hidratar
-  // aparece el valor final. Mismo hook que ya usa el resto del proyecto.
-  const display = mounted && reduced ? format(to, decimals) : animado;
+  // El IntersectionObserver también es propio (reemplaza a `useInView`) y se
+  // desconecta apenas dispara: el contador corre una sola vez.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // Con reduced-motion no hay nada que animar: el valor final se DERIVA
+    // abajo, durante el render. Sin observer ni rAF.
+    if (reduced) return;
+
+    let raf = 0;
+    let inicio = 0;
+    // easeOutExpo — misma sensación que el cubic-bezier que se usaba antes:
+    // arranca rápido y frena suave al llegar al número final.
+    const easing = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+
+    const tick = (ahora: number) => {
+      if (!inicio) inicio = ahora;
+      const avance = Math.min((ahora - inicio) / (duration * 1000), 1);
+      setAnimado(format(from + (to - from) * easing(avance), decimals));
+      if (avance < 1) raf = requestAnimationFrame(tick);
+    };
+
+    // Sin IntersectionObserver (navegador viejo) se anima de una: mejor eso
+    // que dejar el número clavado en el valor inicial.
+    if (!("IntersectionObserver" in window)) {
+      raf = requestAnimationFrame(tick);
+      return () => {
+        if (raf) cancelAnimationFrame(raf);
+      };
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          raf = requestAnimationFrame(tick);
+        }
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(el);
+
+    return () => {
+      io.disconnect();
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [reduced, to, from, duration, decimals]);
+
+  // Con reduced-motion el valor final se DERIVA durante el render, no se
+  // sincroniza con un effect (eso disparaba un render en cascada y el linter lo
+  // marca). `useMediaQuery` devuelve false en el servidor Y en el primer render
+  // del cliente, así que no hay hydration mismatch — el bug que ya apareció una
+  // vez acá cuando el server pintaba "0" y el cliente "20".
+  const display = reduced ? format(to, decimals) : animado;
 
   return (
     <span ref={ref} className={className}>

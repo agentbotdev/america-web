@@ -6,23 +6,15 @@ import {
   Search, ShieldCheck, ArrowRight, MapPin, Award, Handshake,
   Tag, Landmark, Calculator,
 } from "lucide-react";
-import { motion } from "motion/react";
 import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
 import { HeroDeck } from "@/components/home/hero-deck";
 import { AGENCIA } from "@/data/agencia";
 import { mensajeGeneral } from "@/lib/whatsapp";
 import type { DeckItem } from "@/lib/deck";
 
-// Reduced-motion: el contenido arranca VISIBLE (opacity 1, sin desplazamiento) →
-// nunca queda invisible si la animación no corre. Normal: fade + subida en cascada.
-const fadeUp = {
-  hidden: { opacity: 0, y: 26 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] as const },
-  }),
-};
+// La entrada en cascada del hero ahora vive en CSS (`.hero-in` en globals.css):
+// cada bloque declara su turno con `--i` y el delay sale de ahí. Antes eran
+// variantes de motion; se migró para sacar la librería del camino crítico.
 
 // Tags rápidos del hero: deep-link a /propiedades con filtros por OPERACIÓN / TIPO.
 // Nada geo-específico (mensaje nacional): NO barrios.
@@ -74,7 +66,7 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
         {/* Título (+badge): SIEMPRE junto al deck. self-start: arriba de todo
             en mobile (pedido del cliente); centrado recién en lg. */}
         <div className="col-start-1 row-start-1 max-w-2xl self-start pt-2 lg:self-center lg:pt-0">
-          <motion.div initial="hidden" animate="show" custom={0} variants={fadeUp}>
+          <div className="hero-in" style={{ "--i": 0 } as React.CSSProperties}>
             {/* En columnas angostas el badge no entra: aparece desde sm. */}
             <span className="glass hidden items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium text-muted-foreground sm:inline-flex">
               <ShieldCheck className="size-3.5 text-brand" />
@@ -82,14 +74,13 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
               <span aria-hidden className="text-muted-foreground">·</span>
               Operamos en todo el país
             </span>
-          </motion.div>
+          </div>
 
-          <motion.h1
-            initial="hidden" animate="show" custom={1} variants={fadeUp}
+          <h1
             // Título MÁS GRANDE en mobile: la columna tenía aire de sobra
             // (feedback del cliente marcando el espacio desaprovechado).
-            className="text-balance text-3xl font-semibold leading-[1.08] tracking-tight text-foreground min-[440px]:text-4xl sm:mt-5 sm:leading-[1.06] lg:text-5xl xl:text-6xl"
-          >
+            className="hero-in text-balance text-3xl font-semibold leading-[1.08] tracking-tight text-foreground min-[440px]:text-4xl sm:mt-5 sm:leading-[1.06] lg:text-5xl xl:text-6xl"
+           style={{ "--i": 1 } as React.CSSProperties}>
             Tu próxima propiedad
             <br />
             <span className="relative inline-block">
@@ -101,32 +92,30 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
                 style={{ background: "var(--brand)", boxShadow: "0 0 22px -4px var(--brand)" }}
               />
             </span>
-          </motion.h1>
+          </h1>
 
           {/* La descripción ARRANCA acá, en el hueco al lado del deck (el
               cliente lo marcó con un círculo: quedaba crema vacío bajo el
               título mientras la descripción esperaba abajo del deck). */}
-          <motion.p
-            initial="hidden" animate="show" custom={2} variants={fadeUp}
-            className="mt-3 max-w-lg text-balance text-sm text-muted-foreground min-[440px]:text-base sm:mt-5 sm:text-lg"
-          >
+          <p
+            className="hero-in mt-3 max-w-lg text-balance text-sm text-muted-foreground min-[440px]:text-base sm:mt-5 sm:text-lg"
+           style={{ "--i": 2 } as React.CSSProperties}>
             Casas, departamentos, terrenos y locales en venta y alquiler en toda
             Argentina. Tasaciones en 48 hs, visitas coordinadas y asesoría real.
             A un WhatsApp de distancia.
-          </motion.p>
+          </p>
         </div>
 
         {/* Resto del contenido: a lo ancho bajo el par título/deck en mobile;
             en lg vuelve a la columna izquierda (bajo el título). */}
         <div className="col-span-2 row-start-2 max-w-2xl lg:col-span-1 lg:col-start-1">
           {/* Buscador prominente */}
-          <motion.form
+          <form
             action="/propiedades" method="get"
-            initial="hidden" animate="show" custom={3} variants={fadeUp}
             // Sin mt: la separación la da el gap del grid (la descripción ya
             // no vive arriba de este bloque — se mudó a la columna del título).
-            className="glass flex max-w-xl items-center gap-2 rounded-full p-2 shadow-[0_18px_44px_-26px_rgba(60,50,25,0.5)] focus-within:border-brand/60"
-          >
+            className="hero-in glass flex max-w-xl items-center gap-2 rounded-full p-2 shadow-[0_18px_44px_-26px_rgba(60,50,25,0.5)] focus-within:border-brand/60"
+           style={{ "--i": 3 } as React.CSSProperties}>
             <Search className="ml-3 size-5 shrink-0 text-muted-foreground" />
             <input
               // El placeholder muestra un EJEMPLO COMBINADO a propósito: ahora
@@ -142,13 +131,12 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
             >
               Buscar
             </button>
-          </motion.form>
+          </form>
 
           {/* Quick-filters por operación / tipo */}
-          <motion.div
-            initial="hidden" animate="show" custom={4} variants={fadeUp}
-            className="mt-5 flex flex-wrap items-center gap-2"
-          >
+          <div
+            className="hero-in mt-5 flex flex-wrap items-center gap-2"
+           style={{ "--i": 4 } as React.CSSProperties}>
             <span className="text-xs font-medium text-muted-foreground">Accesos rápidos:</span>
             {QUICK_FILTERS.map((f) => (
               <Link
@@ -159,14 +147,13 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
                 {f.label}
               </Link>
             ))}
-          </motion.div>
+          </div>
 
           {/* Accesos a secciones (herramientas y servicios). En mobile viven
               FIJOS en el top bar (SiteHeader) → acá solo desde md. */}
-          <motion.div
-            initial="hidden" animate="show" custom={5} variants={fadeUp}
-            className="mt-3 hidden flex-wrap items-center gap-2 md:flex"
-          >
+          <div
+            className="hero-in mt-3 hidden flex-wrap items-center gap-2 md:flex"
+           style={{ "--i": 5 } as React.CSSProperties}>
             {QUICK_LINKS.map((l) => (
               <Link
                 key={l.href}
@@ -181,13 +168,12 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
                 <ArrowRight className="size-3 transition-transform group-hover/link:translate-x-0.5" aria-hidden />
               </Link>
             ))}
-          </motion.div>
+          </div>
 
           {/* CTAs */}
-          <motion.div
-            initial="hidden" animate="show" custom={6} variants={fadeUp}
-            className="mt-8 flex flex-wrap items-center gap-3"
-          >
+          <div
+            className="hero-in mt-8 flex flex-wrap items-center gap-3"
+           style={{ "--i": 6 } as React.CSSProperties}>
             <WhatsappButton numero={a.whatsapp} mensaje={mensajeGeneral(a)} label="Asesoría por WhatsApp" size="lg" />
             <Link
               href="/propiedades"
@@ -195,13 +181,12 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
             >
               Ver propiedades <ArrowRight className="size-4" />
             </Link>
-          </motion.div>
+          </div>
 
           {/* Banda de confianza */}
-          <motion.dl
-            initial="hidden" animate="show" custom={7} variants={fadeUp}
-            className="mt-12 grid max-w-xl grid-cols-3 gap-4 border-t border-border pt-7"
-          >
+          <dl
+            className="hero-in mt-12 grid max-w-xl grid-cols-3 gap-4 border-t border-border pt-7"
+           style={{ "--i": 7 } as React.CSSProperties}>
             {TRUST.map((t) => (
               <div key={t.value} className="flex flex-col gap-1.5">
                 <t.icon className="size-5 text-brand" aria-hidden />
@@ -209,18 +194,18 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
                 <dd className="text-xs leading-snug text-muted-foreground">{t.label}</dd>
               </div>
             ))}
-          </motion.dl>
+          </dl>
         </div>
 
         {/* Visual: el DECK de destacadas (baraja abanicada que rota sola) sobre
             el spotlight rojo de marca. Si no hay destacadas, cae a la casa. */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.94 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+        <div
+          // Entrada del deck en CSS (`hero-zoom`, globals.css). Era el último
+          // `motion.div` del hero: sacarlo deja la portada entera sin la
+          // librería de animación.
           // self-start: el deck ARRIBA en todos los tamaños (en compu estaba
           // centrado y quedaba hundido — pedido del cliente: "subir las cards").
-          className="relative col-start-2 row-start-1 self-start lg:row-span-2"
+          className="hero-zoom relative col-start-2 row-start-1 self-start lg:row-span-2"
         >
           {deck.length > 0 ? (
             <HeroDeck items={deck} />
@@ -239,7 +224,7 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
 
           {/* (El chip de "Cobertura nacional" se quitó: quedaba superpuesto a
               las cartas del deck, y el dato ya vive en el badge y en TRUST.) */}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
