@@ -282,6 +282,14 @@
        `overflow-x: clip` en vez de `hidden` para no crear un contenedor de
        scroll — `hidden` rompería el `position: sticky` del header. */
     overflow-x: clip;
+    /* Corta el REBOTE lateral. Aunque la página ya no tenga scroll horizontal
+       (verificado: scrollWidth == viewport), al arrastrar de costado en mobile
+       el navegador hace "rubber band" y despega el contenido, dejando ver una
+       franja de fondo vacío. El cliente lo describió como "si hacés slide de
+       costado aparece una parte de fondo solo".
+       `contain` bloquea el rebote de la página pero NO el de los carruseles
+       internos, que siguen deslizándose normal. */
+    overscroll-behavior-x: contain;
   }
   h1, h2, h3, h4 {
     @apply font-heading font-bold;
@@ -384,7 +392,17 @@
    y salir cada card. */
 .list-defer {
   content-visibility: auto;
-  contain-intrinsic-size: auto 520px;
+  /* ⚠️ SÓLO LA ALTURA. Acá hubo un bug real que rompía el mobile:
+     `contain-intrinsic-size: auto 520px` aplica el valor a las DOS dimensiones,
+     así que además del alto le declaraba 520px de ANCHO a cada card. En mobile
+     la grilla de una columna leía ese tamaño intrínseco y armaba una columna de
+     521px dentro de un contenedor de 343px: la card se salía 162px de pantalla.
+     Eso era lo que el cliente veía como la card cortada, o como el navegador
+     alejando la página y descuadrando la barra de arriba.
+     `contain-intrinsic-height` estima sólo el alto (que es lo que hace falta
+     para que el scrollbar no salte) y deja que el ancho lo resuelva la grilla.
+     El `auto` hace que, una vez medida la card de verdad, recuerde su alto real. */
+  contain-intrinsic-height: auto 520px;
 }
 
 /* Superficie flotante SOBRE CONTENIDO (chatbot, tooltips, PiP).

@@ -34,10 +34,14 @@ const NAV = [
 // Accesos rápidos SIEMPRE VISIBLES en mobile (pedido del cliente: los pills
 // rojos del hero quedaban abajo de todo — acá viven fijos en el top bar).
 // En md+ desaparecen: la nav de escritorio ya tiene estos destinos.
+// `label` es el texto de escritorio; `corto` el de la barra mobile.
+// Medido a 375px: con los textos largos los tres accesos pedían 481px contra
+// 343px disponibles — sobraban 138px y había que deslizar la fila para ver el
+// tercero (el cliente lo marcó). Con los cortos entran los tres de una.
 const ACCESOS_MOBILE = [
-  { href: "/vende-tu-propiedad", label: "Vendé tu propiedad", icon: Tag },
-  { href: "/credito-hipotecario", label: "Financiamos", icon: Landmark },
-  { href: "/calculadora-alquiler", label: "Calculadora", icon: Calculator },
+  { href: "/vende-tu-propiedad", label: "Vendé tu propiedad", corto: "Vender", icon: Tag },
+  { href: "/credito-hipotecario", label: "Financiamos", corto: "Crédito", icon: Landmark },
+  { href: "/calculadora-alquiler", label: "Calculadora", corto: "Alquiler", icon: Calculator },
 ];
 
 // Marca un item como activo cuando estamos en su ruta o en una subruta de ella.
@@ -206,15 +210,26 @@ export function SiteHeader() {
           que el cliente marcó como "se ve corrido" en mobile.
           `scroll-px-4`: el snap respeta el padding lateral y la primera pastilla
           no queda pegada al borde de la pantalla. */}
-      <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-4 px-4 pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden">
+      {/* GRID de 3 columnas iguales, sin scroll horizontal.
+          Antes era una fila con `overflow-x-auto`: los tres accesos pedían
+          481px contra 343px de pantalla, así que el tercero quedaba fuera y
+          había que deslizar para descubrirlo — un acceso que no se ve no es un
+          acceso. Con `grid-cols-3` cada uno recibe exactamente un tercio y los
+          tres entran siempre, en cualquier celular.
+          Se conserva `h-11` (44px) porque es el mínimo táctil cómodo: lo que se
+          achica es el ANCHO y el texto, no el alto. */}
+      <div className="grid grid-cols-3 gap-2 px-4 pb-3 md:hidden">
         {ACCESOS_MOBILE.map((l) => (
           <Link
             key={l.href}
             href={l.href}
-            className="inline-flex h-11 shrink-0 snap-start items-center gap-2 whitespace-nowrap rounded-full border border-brand/45 bg-white/55 px-4 text-sm font-semibold text-brand-text transition-colors hover:border-brand hover:bg-brand hover:text-brand-foreground"
+            // `min-w-0` + `truncate`: si algún label creciera, se corta con
+            // puntos suspensivos en vez de desbordar la columna y reventar la
+            // grilla (que es como aparecían los cortes laterales).
+            className="inline-flex h-11 min-w-0 items-center justify-center gap-1.5 rounded-full border border-brand/45 bg-white/55 px-2 text-xs font-semibold text-brand-text transition-colors hover:border-brand hover:bg-brand hover:text-brand-foreground"
           >
-            <l.icon className="size-4" aria-hidden />
-            {l.label}
+            <l.icon className="size-4 shrink-0" aria-hidden />
+            <span className="truncate">{l.corto}</span>
           </Link>
         ))}
       </div>
