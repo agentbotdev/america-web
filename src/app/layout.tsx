@@ -4,8 +4,11 @@ import { MotionConfig } from "motion/react";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
-import { AsesorChat } from "@/components/chatbot/asesor-chat";
 import { WhatsappFloat } from "@/components/whatsapp/whatsapp-float";
+// El asesor se carga DIFERIDO: pesaba en todas las páginas aunque casi nadie lo
+// abra. El envoltorio existe porque `ssr: false` no se admite en un Server
+// Component como este layout — ver el comentario del archivo.
+import { AsesorChatLazy } from "@/components/chatbot/asesor-chat-lazy";
 import { brandStyle } from "@/lib/brand";
 import { AGENCIA } from "@/data/agencia";
 
@@ -133,7 +136,7 @@ export default function RootLayout({
           </main>
           <SiteFooter />
           <WhatsappFloat />
-          <AsesorChat />
+          <AsesorChatLazy />
         </MotionConfig>
       </body>
     </html>

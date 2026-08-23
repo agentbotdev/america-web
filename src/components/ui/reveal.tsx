@@ -1,92 +1,112 @@
 "use client";
 
-import { motion, type Variants } from "motion/react";
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
-// Easing canónico de la marca (mismo que process-section / hero).
-const EASE = [0.22, 1, 0.36, 1] as const;
+// Scroll-reveal en CSS PURO + un IntersectionObserver compartido.
+//
+// POR QUÉ SE REESCRIBIÓ (venía de motion/react):
+// `Reveal` sólo hace fade + desplazamiento, y se usa en 26 lugares. Cada uno era
+// un `<motion.div>` con su propio ciclo de animación en JS. El cliente reportó
+// el sitio lento y motion pesa ~160 KB en el bundle; esto es la misma animación
+// con cero JS de animación — el navegador la corre en el compositor.
+//
+// UN SOLO OBSERVER para todos los elementos, no uno por componente: crear 26
+// IntersectionObserver es 26 veces el trabajo de cálculo de intersección en cada
+// scroll. Es la misma idea que deduplicar listeners globales.
+//
+// SEGURIDAD ANTE FALLO DE JS — importante, porque este proyecto YA tuvo el bug
+// de contenido invisible: el CSS que oculta vive detrás de la clase
+// `.js-reveal`, que agrega este módulo al montar. Si el JS no corre, no se
+// descarga o falla, `.js-reveal` nunca aparece y TODO se ve. Nunca se puede
+// quedar contenido en opacity:0.
+
+let observer: IntersectionObserver | null = null;
+const pendientes = new Set<Element>();
+
+function getObserver(): IntersectionObserver | null {
+  if (typeof window === "undefined" || !("IntersectionObserver" in window)) return null;
+  if (observer) return observer;
+
+  // Marca el documento: recién ahora el CSS puede ocultar (ver globals.css).
+  document.documentElement.classList.add("js-reveal");
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        e.target.classList.add("is-visible");
+        // `once`: una vez visible ya no interesa seguir observándolo.
+        observer?.unobserve(e.target);
+        pendientes.delete(e.target);
+      }
+    },
+    { rootMargin: "0px 0px -10% 0px", threshold: 0.15 },
+  );
+  return observer;
+}
+
+function useReveal(delayMs: number) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = getObserver();
+    // Sin soporte de IntersectionObserver: se muestra y listo.
+    if (!obs) {
+      el.classList.add("is-visible");
+      return;
+    }
+    if (delayMs) el.style.transitionDelay = `${delayMs}ms`;
+    obs.observe(el);
+    pendientes.add(el);
+    return () => {
+      obs.unobserve(el);
+      pendientes.delete(el);
+    };
+  }, [delayMs]);
+
+  return ref;
+}
 
 type Direction = "up" | "down" | "left" | "right";
 
-// Variantes de entrada: fade + desplazamiento.
-//
-// IMPORTANTE: estas variantes son IDÉNTICAS en servidor y cliente — no dependen
-// de `useReducedMotion()`. Ramificarlas provocaba un hydration mismatch (el
-// servidor pintaba opacity:0 y un cliente con reduced-motion pintaba opacity:1),
-// y ante un mismatch React descarta el HTML del servidor y re-renderiza todo.
-// De la preferencia del usuario se ocupa `<MotionConfig reducedMotion="user">`
-// en el layout: cancela el desplazamiento y deja pasar sólo el fade.
-//
-// SIN blur-in: el filtro dependía de que la animación corriera para quitarse, y
-// con prefers-reduced-motion el navegador NO lo animaba → el contenido quedaba
-// BORROSO de forma permanente. Fade + slide es robusto y siempre legible.
-function buildVariants(
-  direction: Direction,
-  distance: number,
-  blur: number,
-): Variants {
-  const axis = direction === "left" || direction === "right" ? "x" : "y";
-  const sign = direction === "right" || direction === "down" ? 1 : -1;
-  void blur;
-  return {
-    hidden: { opacity: 0, [axis]: distance * sign },
-    visible: { opacity: 1, x: 0, y: 0 },
-  };
-}
-
-/**
- * Scroll-reveal premium reutilizable: el contenido aparece al entrar en viewport
- * con fade + desplazamiento + blur-in. API retrocompatible (`delay`, `y`,
- * `className`) más opciones nuevas (`direction`, `blur`, `amount`, `once`).
- */
+/** Aparición al entrar en viewport: fade + desplazamiento. */
 export function Reveal({
   children,
   delay = 0,
   y = 28,
   direction = "up",
-  blur = 8,
-  amount = 0.2,
-  once = true,
   className,
 }: {
   children: ReactNode;
   delay?: number;
-  /** Distancia de desplazamiento (compat: era el offset vertical). */
+  /** Distancia de desplazamiento en px. */
   y?: number;
   direction?: Direction;
-  /** Intensidad del blur-in en px. `0` lo desactiva. */
+  /** @deprecated el blur-in se quitó: dejaba texto borroso con reduced-motion. */
   blur?: number;
   amount?: number;
   once?: boolean;
   className?: string;
 }) {
-  const variants = buildVariants(direction, y, blur);
-
+  const ref = useReveal(delay * 1000);
   return (
-    <motion.div
-      className={className}
-      variants={variants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once, amount }}
-      transition={{ duration: 0.65, delay, ease: EASE }}
+    <div
+      ref={ref}
+      className={`reveal ${className ?? ""}`}
+      style={desplazamiento(direction, y)}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
-/**
- * Contenedor que orquesta un stagger entre sus hijos `<RevealItem>`. Ideal para
- * grids/listas: los items entran en cascada elegante sin calcular delays a mano.
- * Usá `RevealGroup` en el wrapper y `RevealItem` en cada hijo.
- */
+/** Contenedor que escalona la entrada de sus `<RevealItem>`. */
 export function RevealGroup({
   children,
   stagger = 0.09,
   delayChildren = 0,
-  amount = 0.15,
-  once = true,
   className,
 }: {
   children: ReactNode;
@@ -97,27 +117,27 @@ export function RevealGroup({
   className?: string;
 }) {
   return (
-    <motion.div
+    <div
       className={className}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once, amount }}
-      variants={{
-        hidden: {},
-        visible: { transition: { staggerChildren: stagger, delayChildren } },
-      }}
+      // El escalonado se resuelve en CSS: cada hijo lee su índice de una
+      // custom property y calcula su propio delay. Sin orquestador en JS.
+      style={
+        {
+          "--reveal-stagger": `${stagger}s`,
+          "--reveal-delay-base": `${delayChildren}s`,
+        } as React.CSSProperties
+      }
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
-/** Hijo de `RevealGroup`: hereda el timing del stagger del contenedor. */
+/** Hijo de `RevealGroup`: hereda el timing del escalonado. */
 export function RevealItem({
   children,
   y = 28,
   direction = "up",
-  blur = 8,
   className,
 }: {
   children: ReactNode;
@@ -126,14 +146,24 @@ export function RevealItem({
   blur?: number;
   className?: string;
 }) {
-  const variants = buildVariants(direction, y, blur);
+  const ref = useReveal(0);
   return (
-    <motion.div
-      className={className}
-      variants={variants}
-      transition={{ duration: 0.6, ease: EASE }}
+    <div
+      ref={ref}
+      className={`reveal reveal-item ${className ?? ""}`}
+      style={desplazamiento(direction, y)}
     >
       {children}
-    </motion.div>
+    </div>
   );
+}
+
+/** Traduce dirección + distancia al par de custom properties que usa el CSS. */
+function desplazamiento(direction: Direction, distancia: number): React.CSSProperties {
+  const eje = direction === "left" || direction === "right" ? "X" : "Y";
+  const signo = direction === "right" || direction === "down" ? 1 : -1;
+  return {
+    "--reveal-x": eje === "X" ? `${distancia * signo}px` : "0px",
+    "--reveal-y": eje === "Y" ? `${distancia * signo}px` : "0px",
+  } as React.CSSProperties;
 }

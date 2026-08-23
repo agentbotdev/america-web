@@ -129,7 +129,10 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
           >
             <Search className="ml-3 size-5 shrink-0 text-muted-foreground" />
             <input
-              name="q" type="search" placeholder="¿Qué estás buscando? Tipo, operación, ciudad…"
+              // El placeholder muestra un EJEMPLO COMBINADO a propósito: ahora
+              // la frase se interpreta (tipo + operación + zona van a filtros
+              // distintos), y si no se sugiere nadie lo descubre solo.
+              name="q" type="search" placeholder="Ej: casa en venta en Moreno"
               aria-label="Buscar propiedades"
               className="h-11 w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
             />

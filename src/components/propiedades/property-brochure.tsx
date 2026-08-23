@@ -386,8 +386,11 @@ function BrochureDoc({ p, onClose }: { p: Propiedad; onClose: () => void }) {
                   {url}
                 </p>
               </div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              {/* Pasa por next/image (no <img> directo) para que se sirva desde
+                  nuestro dominio: una imagen cross-origin sin CORS contamina el
+                  canvas de html2canvas y rompe la exportación a PDF.
+                  Ver la nota en next.config.ts. */}
+              <Image
                 src={qrSrc(url)}
                 alt="Escaneá para ver la propiedad online"
                 width={104}

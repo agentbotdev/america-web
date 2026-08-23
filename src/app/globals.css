@@ -317,6 +317,56 @@
     0 12px 32px -14px rgba(60, 50, 25, 0.22);
 }
 
+/* ---------- SCROLL-REVEAL EN CSS (reemplaza a motion/react) ----------
+   Fade + desplazamiento al entrar en viewport. Lo dispara un único
+   IntersectionObserver compartido (ver components/ui/reveal.tsx) que agrega
+   `.is-visible`; la animación la corre el compositor, sin JS por frame.
+
+   ⚠️ EL SELECTOR CUELGA DE `.js-reveal`, Y ES DELIBERADO.
+   Esa clase la agrega el JS al montar. Si el JS no corre, no llega o falla,
+   `.js-reveal` nunca existe y NADA se oculta: todo el contenido se ve.
+   Este proyecto ya se comió una vez el bug de dejar 26 bloques de texto en
+   opacity:0 permanente por depender de que una animación terminara. */
+.js-reveal .reveal {
+  opacity: 0;
+  transform: translate3d(var(--reveal-x, 0), var(--reveal-y, 28px), 0);
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  /* `will-change` sólo mientras está por entrar: al terminar se libera abajo,
+     para no dejar 26 capas de GPU vivas el resto de la sesión. */
+  will-change: opacity, transform;
+}
+.js-reveal .reveal.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
+}
+
+/* Escalonado de `RevealGroup`: cada hijo calcula su delay a partir de su
+   posición, sin orquestador en JS. `nth-child` hasta 12 cubre las grillas del
+   sitio; del 13 en adelante entran sin delay extra (imperceptible). */
+.js-reveal .reveal-item:nth-child(1) { transition-delay: calc(var(--reveal-delay-base, 0s) + var(--reveal-stagger, 0.09s) * 0); }
+.js-reveal .reveal-item:nth-child(2) { transition-delay: calc(var(--reveal-delay-base, 0s) + var(--reveal-stagger, 0.09s) * 1); }
+.js-reveal .reveal-item:nth-child(3) { transition-delay: calc(var(--reveal-delay-base, 0s) + var(--reveal-stagger, 0.09s) * 2); }
+.js-reveal .reveal-item:nth-child(4) { transition-delay: calc(var(--reveal-delay-base, 0s) + var(--reveal-stagger, 0.09s) * 3); }
+.js-reveal .reveal-item:nth-child(5) { transition-delay: calc(var(--reveal-delay-base, 0s) + var(--reveal-stagger, 0.09s) * 4); }
+.js-reveal .reveal-item:nth-child(6) { transition-delay: calc(var(--reveal-delay-base, 0s) + var(--reveal-stagger, 0.09s) * 5); }
+.js-reveal .reveal-item:nth-child(7) { transition-delay: calc(var(--reveal-delay-base, 0s) + var(--reveal-stagger, 0.09s) * 6); }
+.js-reveal .reveal-item:nth-child(8) { transition-delay: calc(var(--reveal-delay-base, 0s) + var(--reveal-stagger, 0.09s) * 7); }
+.js-reveal .reveal-item:nth-child(n + 9) { transition-delay: calc(var(--reveal-delay-base, 0s) + var(--reveal-stagger, 0.09s) * 8); }
+
+/* Reduced-motion: el contenido aparece igual, sin desplazamiento ni espera.
+   Nunca se queda invisible. */
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+}
+
 /* DIFERIR RENDER FUERA DE PANTALLA — para items que se repiten en listas largas.
    Motivo concreto: el catálogo tiene 141 propiedades con scroll infinito, y cada
    card lleva `backdrop-filter: blur(19px)`. Sin esto, al scrollear un rato el

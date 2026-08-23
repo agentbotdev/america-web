@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Marquee } from "@/components/ui/marquee";
 
 // Cinta de PROFESIONALES ALIADOS: la red con la que trabaja la inmobiliaria
@@ -109,21 +108,37 @@ export function AlliesStrip() {
         </p>
       </div>
 
-      {/* Paso ágil y continuo, logos CHICOS (feedback: estaban muy grandes y
-          pasaban lento). El gris→color al hover queda. */}
-      {/* repeat=7: cada set de 5 logos mide ~386px (medido) — para que la cinta
-          no muestre HUECO en monitores anchos, la mitad del track debe superar
-          el viewport: 7 × 386 ≈ 2.7k px → cubre hasta QHD (2560). La duración
-          escala con el track: 91s/7 = mismos 13s por set que eligió el cliente. */}
-      <Marquee className="mt-6" duration={91} gap="1.75rem" repeat={7}>
+      {/* PERFORMANCE — esta cinta era el mayor peso de la home.
+          Medido en producción: 84 de las 96 imágenes del HTML eran estos logos
+          (6 logos × repeat 7 × 2 copias que el marquee duplica para el loop), y
+          cada <img> de next/image aporta ~561 bytes de markup con su srcset.
+          Solos explicaban buena parte de los 307 KB de HTML.
+
+          El repeat alto existía para que la cinta no mostrara hueco en pantallas
+          anchas: el track debe medir al menos el ancho del viewport. Pero eso se
+          consigue igual con MENOS COPIAS y MÁS AIRE — 6 logos más grandes con
+          gap de 6rem miden ~1.5k px por set, y con repeat 2 el track pasa los
+          2.9k px, suficiente hasta QHD. De 84 imágenes a 24: −71%.
+          Bonus: los logos se ven más grandes, que era mejor de todos modos. */}
+      <Marquee className="mt-6" duration={52} gap="6rem" repeat={2}>
         {ALIADOS.map((a) => {
-          const claseAlto = a.claseAlto ?? "h-10";
+          const claseAlto = a.claseAlto ?? "h-12";
+          // <img> NATIVO, no next/image, y es a propósito. El optimizador genera
+          // un srcset de 8 anchos por imagen — útil para una foto de propiedad
+          // que se ve a 400px o a 1200px, inútil para un logo que SIEMPRE se
+          // muestra a 48px de alto. Acá el srcset era puro markup: ~561 bytes por
+          // logo contra ~90 del <img> plano, multiplicado por las copias del
+          // marquee. Los PNG ya están recortados y pesan poco.
+          // `decoding="async"` evita que el decodificado bloquee el hilo.
           const logo = (
-            <Image
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
               src={a.logo}
               alt={`${a.nombre} — ${a.rubro}`}
               width={a.ancho}
               height={a.alto}
+              loading="lazy"
+              decoding="async"
               className={
                 a.mantieneColor
                   ? `${claseAlto} w-auto object-contain`

@@ -44,26 +44,37 @@ export async function exportarNodoAPdf(
   });
 
   const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-
-  // Se escala el ancho del canvas al ancho de la hoja; el alto queda proporcional.
-  const altoEnMm = (canvas.height * A4.ancho) / canvas.width;
   const imagen = canvas.toDataURL("image/jpeg", 0.92);
 
-  // Una sola página: entra directo.
-  if (altoEnMm <= A4.alto) {
-    pdf.addImage(imagen, "JPEG", 0, A4.ancho ? 0 : 0, A4.ancho, altoEnMm);
+  // Alto que tendría el documento si se escala a lo ancho de la hoja.
+  const altoNatural = (canvas.height * A4.ancho) / canvas.width;
+
+  // UNA SOLA HOJA SIEMPRE QUE SE PUEDA (pedido del cliente: "a veces te deja
+  // una partecita re chiquita abajo").
+  // Si el documento se pasa del alto de A4 pero por poco, en vez de abrir una
+  // segunda hoja con un resto mínimo se ACHICA todo para que entre justo. El
+  // tope de 25% es el punto donde el texto todavía se lee cómodo impreso;
+  // más allá, achicar sería peor que partir.
+  const MAX_ACHIQUE = 1.25;
+
+  if (altoNatural <= A4.alto * MAX_ACHIQUE) {
+    const escala = Math.min(1, A4.alto / altoNatural);
+    const ancho = A4.ancho * escala;
+    const alto = altoNatural * escala;
+    // Centrado horizontal cuando se achicó, para que no quede pegado al margen.
+    const x = (A4.ancho - ancho) / 2;
+    pdf.addImage(imagen, "JPEG", x, 0, ancho, alto);
     pdf.save(`${nombreArchivo}.pdf`);
     return;
   }
 
-  // Varias páginas: se reposiciona la MISMA imagen con offset negativo y se
-  // recorta con el alto de hoja. Es el patrón estándar — evita re-rasterizar
-  // por página, que multiplicaría el tiempo y la memoria.
-  let restante = altoEnMm;
+  // Documento realmente largo: se parte en hojas reposicionando la MISMA imagen
+  // con offset negativo. Evita re-rasterizar por página (tiempo y memoria).
+  let restante = altoNatural;
   let offset = 0;
   while (restante > 0) {
     if (offset > 0) pdf.addPage();
-    pdf.addImage(imagen, "JPEG", 0, -offset, A4.ancho, altoEnMm);
+    pdf.addImage(imagen, "JPEG", 0, -offset, A4.ancho, altoNatural);
     restante -= A4.alto;
     offset += A4.alto;
   }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getPropiedades } from "@/lib/supabase/queries";
 import { CatalogoBrowser, FILTROS_VACIOS } from "@/components/propiedades/catalogo-browser";
+import { interpretarBusqueda } from "@/lib/buscador";
 
 // ISR: el catálogo se regenera cada 120s. El filtrado/orden es 100% client-side
 // (en memoria), así que una sola página estática sirve a todas las combinaciones.
@@ -37,13 +38,23 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
     (a, b) => a.localeCompare(b, "es"),
   );
 
+  // BÚSQUEDA COMBINADA (pedido del cliente: "poder poner varias cosas de filtro
+  // como casa en venta o depto en alquiler").
+  // El buscador del hero manda una frase libre en `q`. Antes se usaba como
+  // búsqueda literal sobre título/barrio/descripción, así que "casa en venta"
+  // daba CERO resultados: ninguna propiedad tiene esa frase escrita.
+  // Ahora la frase se interpreta y cada parte va al filtro que le corresponde.
+  // Los parámetros EXPLÍCITOS de la URL (?operacion=…&tipo=…) tienen prioridad:
+  // vienen de los chips de acceso rápido, que ya son inequívocos.
+  const interpretada = interpretarBusqueda(sp.q ?? "");
+
   // Filtros iniciales desde el URL (deep-links del hero / búsquedas guardadas).
   // A partir de la hidratación, el filtrado es client-side (instantáneo).
   const initial = {
     ...FILTROS_VACIOS,
-    q: sp.q ?? "",
-    operacion: sp.operacion ?? "all",
-    tipo: sp.tipo ?? "all",
+    q: interpretada.texto,
+    operacion: sp.operacion ?? interpretada.operacion ?? "all",
+    tipo: sp.tipo ?? interpretada.tipo ?? "all",
     barrio: sp.barrio ?? "all",
     dormitorios: sp.dormitorios ?? "all",
     banos: sp.banos ?? "all",
