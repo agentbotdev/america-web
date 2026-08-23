@@ -290,10 +290,43 @@
        `contain` bloquea el rebote de la página pero NO el de los carruseles
        internos, que siguen deslizándose normal. */
     overscroll-behavior-x: contain;
+    /* Evita que iOS y Android agranden el texto solos al rotar el teléfono a
+       horizontal — un "text inflation" que rompe layouts pensados al detalle. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* SAFE AREAS de iPhone (notch / isla dinámica / barra de gestos).
+     Los elementos fijos del sitio viven pegados a los bordes: en un iPhone
+     moderno el de abajo cae DEBAJO de la barra de gestos, que se lo come, y en
+     horizontal los laterales quedan tapados por el notch.
+     `env(safe-area-inset-*)` vale 0px en cualquier pantalla sin recortes, así
+     que no cambia nada en el resto de los dispositivos. */
+  @supports (padding: env(safe-area-inset-bottom)) {
+    .fixed.bottom-5 {
+      bottom: calc(1.25rem + env(safe-area-inset-bottom));
+    }
+    .fixed.left-5 {
+      left: calc(1.25rem + env(safe-area-inset-left));
+    }
+    .fixed.right-5 {
+      right: calc(1.25rem + env(safe-area-inset-right));
+    }
   }
   h1, h2, h3, h4 {
     @apply font-heading font-bold;
     letter-spacing: -0.03em;
+    /* `balance` reparte las palabras entre las líneas de un título en vez de
+       dejar una sola colgando abajo ("viuda"). Se nota justo en las anchuras
+       intermedias —tablet, celulares grandes— donde un título de dos líneas
+       queda con cinco palabras arriba y una sola abajo. */
+    text-wrap: balance;
+  }
+  /* Párrafos: `pretty` sólo evita la palabra huérfana en la última línea, sin
+     reequilibrar todo el bloque (que en textos largos es caro y además cambia
+     el ritmo de lectura). */
+  p, li {
+    text-wrap: pretty;
   }
 }
 

@@ -235,7 +235,12 @@ export function CalculadoraAlquilerClient() {
             <Calculator className="size-4 text-brand" /> Desglose estimado
           </p>
 
-          <table className="mt-4 w-full text-sm">
+          {/* `table-fixed` + wrap en la primera columna: los conceptos son
+              largos ("Sellado (1,2% del contrato de 2 años)") y en pantallas de
+              360px empujaban la columna del monto fuera de la card. Con ancho
+              fijo la tabla nunca crece más que su contenedor y el texto baja de
+              línea en vez de desbordar. */}
+          <table className="mt-4 w-full table-fixed text-sm">
             <tbody>
               {costo.desglose.map((d) => (
                 <tr key={d.concepto} className="border-b border-border/60">
