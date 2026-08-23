@@ -1,36 +1,54 @@
-// Motor genérico de cuota (sistema francés: cuota fija mensual).
-// Reusado por el simulador de crédito hipotecario. Valores referenciales —
-// las tasas/entidades reales las confirma la agencia por WhatsApp.
+// Motor de cuota de la financiación PROPIA de la inmobiliaria.
+//
+// ⚠️ NO es sistema francés (cuota fija con amortización). Confirmado por el
+// cliente: acá el interés se calcula SOBRE EL TOTAL y el resultado se divide en
+// partes iguales. Es la forma habitual de la financiación directa inmobiliaria,
+// y da una cuota MUY distinta de la bancaria — a 20 años y 10% el francés daba
+// ~USD 926 donde esta fórmula da USD 1.200 sobre el mismo capital.
 
 import type { CuotaHipoteca } from "@/types";
 
 /**
- * Cuota fija mensual por sistema francés.
+ * Total a devolver con interés SIMPLE sobre el capital original.
  *
- *   cuota = C · i / (1 − (1 + i)^−n)
+ *   total = C · (1 + i · años)
  *
- * donde:
+ * El interés de cada año se calcula siempre sobre el capital ORIGINAL, no
+ * sobre el saldo acumulado. Confirmado por el cliente frente a la variante
+ * compuesta (C · (1+i)^años), que a 20 años daba más del doble de cuota.
+ *
  *   C = capital a financiar
- *   i = tasa mensual = TNA / 12 (TNA en decimal: 0.08 = 8%)
- *   n = cantidad de meses
- *
- * Si la tasa es 0, la cuota es la división lineal del capital.
+ *   i = tasa anual en decimal (0.10 = 10%)
  */
-export function cuotaFrancesa(capital: number, tasaAnual: number, meses: number): number {
-  if (capital <= 0 || meses <= 0) return 0;
-  const i = tasaAnual / 12;
-  if (i === 0) return capital / meses;
-  const factor = Math.pow(1 + i, -meses);
-  return (capital * i) / (1 - factor);
+export function totalConInteresSimple(
+  capital: number,
+  tasaAnual: number,
+  anios: number,
+): number {
+  if (capital <= 0) return 0;
+  const i = Math.max(0, tasaAnual);
+  const a = Math.max(0, anios);
+  return capital * (1 + i * a);
 }
 
 /**
- * Simula un crédito hipotecario y devuelve el detalle completo.
+ * Cuota mensual: el total con interés dividido en partes IGUALES.
+ *
+ *   cuota = C · (1 + i · años) / (años · 12)
+ */
+export function cuotaSimple(capital: number, tasaAnual: number, anios: number): number {
+  const meses = Math.round(Math.max(0, anios) * 12);
+  if (meses <= 0) return 0;
+  return totalConInteresSimple(capital, tasaAnual, anios) / meses;
+}
+
+/**
+ * Simula la financiación y devuelve el detalle completo.
  *
  * @param montoPropiedad  Valor total de la propiedad.
  * @param anticipoPct     Porcentaje de anticipo (0–100).
- * @param plazoAnios      Plazo del crédito en años.
- * @param tasaAnualPct    TNA en PORCENTAJE (8 = 8% anual).
+ * @param plazoAnios      Plazo en años.
+ * @param tasaAnualPct    Tasa anual en PORCENTAJE (10 = 10% anual).
  * @param moneda          Moneda del resultado (default "USD").
  */
 export function simularHipoteca(
@@ -45,11 +63,12 @@ export function simularHipoteca(
   const anticipo = monto * (pct / 100);
   const montoFinanciar = Math.max(0, monto - anticipo);
 
-  const meses = Math.max(0, Math.round(plazoAnios * 12));
+  const anios = Math.max(0, plazoAnios);
+  const meses = Math.round(anios * 12);
   const tasaAnual = Math.max(0, tasaAnualPct) / 100; // decimal
 
-  const cuotaMensual = cuotaFrancesa(montoFinanciar, tasaAnual, meses);
-  const totalCuotas = cuotaMensual * meses;
+  const totalCuotas = totalConInteresSimple(montoFinanciar, tasaAnual, anios);
+  const cuotaMensual = meses > 0 ? totalCuotas / meses : 0;
   const totalPagado = anticipo + totalCuotas;
   const totalIntereses = Math.max(0, totalCuotas - montoFinanciar);
 
@@ -59,6 +78,7 @@ export function simularHipoteca(
     montoFinanciar,
     plazoAnios,
     tasaAnual, // decimal (coherente con el tipo CuotaHipoteca)
+    cantidadCuotas: meses,
     cuotaMensual,
     totalPagado,
     totalIntereses,

@@ -40,9 +40,10 @@ export const AGENCIA: Agencia = {
     facebook: "https://www.facebook.com/americacardozoinmobiliaria/",
     // VERIFICADO: canal enlazado desde el footer de americacardozo.com.ar.
     youtube: "https://www.youtube.com/@americacardozo1162",
-    // Buscado y NO existe cuenta de la inmobiliaria (a la fecha). El ícono
-    // aparece solo cuando se cargue una URL acá.
-    tiktok: "",
+    // Cuenta pasada por el cliente. Se guarda la URL LIMPIA: el link original
+    // venía con los parámetros de tracking de la app (?_r=1&_t=ZS-994tXA0Burt),
+    // que son de esa sesión concreta y no aportan nada en un link público.
+    tiktok: "https://www.tiktok.com/@ventas.americacardozo",
   },
   anios_experiencia: 20,
   propiedades_vendidas: 0,

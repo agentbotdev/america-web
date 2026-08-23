@@ -122,13 +122,21 @@ export function SiteHeader() {
 
           {/* Menú mobile (Base UI: Trigger es el button; cierre controlado) */}
           <Sheet open={open} onOpenChange={setOpen}>
+            {/* Hamburguesa MÁS GRANDE y con caja visible (pedido del cliente:
+                "poner las tres líneas más grandes o que se vean mejor en
+                mobile"). Antes era un ícono de 20px suelto sobre el fondo crema:
+                se perdía. Ahora 26px dentro de una pastilla con borde — se lee
+                como un botón y el área táctil pasa de 40 a 44px. */}
             <SheetTrigger
               aria-label="Abrir menú"
-              className="inline-flex size-10 items-center justify-center rounded-full transition-colors hover:bg-secondary md:hidden"
+              className="inline-flex size-11 items-center justify-center rounded-xl border border-foreground/15 bg-white/60 text-foreground shadow-sm transition-colors hover:bg-white md:hidden"
             >
-              <Menu className="size-5" />
+              <Menu className="size-[26px]" strokeWidth={2.25} />
             </SheetTrigger>
-            <SheetContent side="left" className="w-80 max-w-[85vw] gap-0 p-0">
+            {/* `bg-background`: la sidebar va en el CREMA de marca, no en el
+                blanco del popover (pedido del cliente: "la sidebar que sea
+                también amarillita"). */}
+            <SheetContent side="left" className="w-80 max-w-[85vw] gap-0 bg-background p-0">
               <SheetHeader className="border-b border-border px-5 py-4">
                 <SheetTitle className="flex items-center gap-2.5">
                   <Image
@@ -189,14 +197,23 @@ export function SiteHeader() {
 
       {/* Accesos rápidos FIJOS en el top bar — SOLO mobile (en md+ la nav ya
           los tiene). Scroll horizontal si no entran; sin scrollbar visible. */}
-      <div className="flex gap-2 overflow-x-auto px-4 pb-2.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden">
+      {/* ACCESOS MÁS GRANDES (pedido del cliente). Antes: texto de 12px con
+          padding de 6px → 27px de alto, por debajo del mínimo táctil y difíciles
+          de leer de un vistazo. Ahora 14px de texto y 44px de alto, que es el
+          mínimo cómodo para el dedo.
+          `snap-x` + `snap-start`: al arrastrar la fila, las pastillas encajan en
+          el borde en vez de quedar cortadas por la mitad — era una de las cosas
+          que el cliente marcó como "se ve corrido" en mobile.
+          `scroll-px-4`: el snap respeta el padding lateral y la primera pastilla
+          no queda pegada al borde de la pantalla. */}
+      <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-px-4 px-4 pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden">
         {ACCESOS_MOBILE.map((l) => (
           <Link
             key={l.href}
             href={l.href}
-            className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-brand/35 px-3 py-1.5 text-xs font-semibold text-brand-text transition-colors hover:border-brand hover:bg-brand hover:text-brand-foreground"
+            className="inline-flex h-11 shrink-0 snap-start items-center gap-2 whitespace-nowrap rounded-full border border-brand/45 bg-white/55 px-4 text-sm font-semibold text-brand-text transition-colors hover:border-brand hover:bg-brand hover:text-brand-foreground"
           >
-            <l.icon className="size-3.5" aria-hidden />
+            <l.icon className="size-4" aria-hidden />
             {l.label}
           </Link>
         ))}

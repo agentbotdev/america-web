@@ -7,7 +7,7 @@ import {
   Wallet,
   Receipt,
   TrendingUp,
-  Info,
+  AlertTriangle,
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
@@ -56,9 +56,13 @@ function mensajeHipoteca(
   );
 }
 
-// Tasa anual FIJA al 10% acumulativo (definición de la dueña): el usuario ya
-// no la ajusta — solo monto, anticipo y plazo. Se aplica compuesta mensual
-// (sistema francés), que es la forma acumulativa estándar de una TNA.
+// Tasa anual FIJA al 10% (definición de la dueña): el usuario ya no la ajusta,
+// solo monto, anticipo y plazo.
+//
+// ⚠️ Se aplica como interés SIMPLE sobre el capital original, no compuesto ni
+// por sistema francés. Cada año suma un 10% del capital inicial; el total se
+// divide en cuotas iguales. Confirmado por el cliente contra la variante
+// compuesta, que a 20 años daba más del doble de cuota. Ver lib/cotizador.ts.
 const TASA_FIJA_PCT = 10;
 
 export function CreditoHipotecarioClient() {
@@ -182,12 +186,18 @@ export function CreditoHipotecarioClient() {
           <div className="mb-6">
             <div className="mb-2 flex items-center justify-between">
               <label className="text-sm font-medium">Plazo</label>
-              <span className="font-mono text-sm">{plazoAnios} años</span>
+              {/* Se muestran también las CUOTAS: el usuario razona en cuotas,
+                  no en años (pedido del cliente). */}
+              <span className="font-mono text-sm">
+                {plazoAnios} {plazoAnios === 1 ? "año" : "años"}
+                <span className="text-muted-foreground"> · {sim.cantidadCuotas} cuotas</span>
+              </span>
             </div>
             <Slider
               value={[plazoAnios]}
-              min={10}
-              max={30}
+              // Rango 2–20 años (definición del cliente). Antes era 10–30.
+              min={2}
+              max={20}
               step={1}
               onValueChange={(v) =>
                 setPlazoAnios(Array.isArray(v) ? v[0] : (v as number))
@@ -216,6 +226,12 @@ export function CreditoHipotecarioClient() {
           >
             {formatPrecio(sim.cuotaMensual, moneda)}
           </motion.p>
+          {/* La cantidad de cuotas, pegada al número grande: es el dato que el
+              usuario necesita para dimensionar la cuota (pedido del cliente). */}
+          <p className="mt-1 text-sm font-medium text-muted-foreground">
+            en <span className="font-mono font-semibold text-foreground">{sim.cantidadCuotas}</span> cuotas
+            mensuales iguales
+          </p>
 
           <dl className="mt-6 space-y-3 text-sm">
             <div className="flex items-center justify-between gap-3">
@@ -272,12 +288,27 @@ export function CreditoHipotecarioClient() {
             </div>
           </div>
 
-          <p className="mt-5 flex items-start gap-2 rounded-xl bg-secondary/40 p-3 text-xs text-muted-foreground">
-            <Info className="mt-0.5 size-3.5 shrink-0" />
-            Valores referenciales. No constituyen una oferta de crédito. Las
-            condiciones reales (tasa, requisitos y aprobación) dependen de cada
-            entidad.
-          </p>
+          {/* AVISO LEGAL DESTACADO — pedido explícito del cliente: "un cartel
+              enorme que diga VALORES APROXIMADOS SUJETO A APROBACIÓN Y ANÁLISIS".
+              Va en rojo de marca, con borde e ícono de alerta: antes era gris
+              chiquito al pie y se perdía. `role="note"` para que los lectores de
+              pantalla lo anuncien como advertencia y no como texto suelto. */}
+          <div
+            role="note"
+            className="mt-5 rounded-2xl border-2 border-brand bg-brand/10 p-4 text-center"
+          >
+            <p className="flex items-center justify-center gap-2 text-sm font-bold uppercase leading-tight tracking-wide text-brand-text sm:text-base">
+              <AlertTriangle className="size-5 shrink-0" aria-hidden />
+              Valores aproximados
+            </p>
+            <p className="mt-1 text-sm font-bold uppercase leading-tight tracking-wide text-brand-text sm:text-base">
+              Sujeto a aprobación y análisis
+            </p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              No constituyen una oferta de crédito. Las condiciones reales (tasa,
+              requisitos y aprobación) se confirman con la inmobiliaria.
+            </p>
+          </div>
 
           <div className="mt-5">
             <WhatsappButton

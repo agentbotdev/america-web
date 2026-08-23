@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { Calculator, Info, KeyRound } from "lucide-react";
+import { Calculator, AlertTriangle, KeyRound } from "lucide-react";
 import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
 import { formatPrecio } from "@/lib/format";
 import { AGENCIA } from "@/data/agencia";
@@ -10,7 +10,9 @@ import type { CostoAlquiler } from "@/types";
 
 // Costos de ingreso a un alquiler — REGLAS FIJAS definidas por la dueña:
 //  - Primer mes de alquiler
-//  - Depósito en garantía (N meses, editable)
+//  - DEPÓSITO en garantía = UN mes, FIJO (confirmado por el cliente; antes era
+//    un campo editable de hasta 12 meses y permitía simular algo que la
+//    inmobiliaria no ofrece)
 //  - HONORARIOS (antes "comisión") = UN mes de alquiler, FIJO
 //  - Gastos administrativos = 10% del alquiler mensual, FIJO (base CONFIRMADA
 //    por el cliente: se calcula sobre el alquiler mensual)
@@ -18,8 +20,10 @@ import type { CostoAlquiler } from "@/types";
 //    2 años (vivienda) o 3 años (comercial), a elección del usuario.
 const DEFAULTS = {
   alquilerMensual: 350_000,
-  mesesDeposito: 1,
 };
+
+/** Depósito en garantía: SIEMPRE 1 mes. Regla fija, no editable. */
+const MESES_DEPOSITO = 1;
 
 const GASTOS_ADM_PCT = 10;
 const SELLADO_PCT = 1.2;
@@ -134,12 +138,13 @@ function CampoNumero({
 
 export function CalculadoraAlquilerClient() {
   const [alquilerMensual, setAlquilerMensual] = useState(DEFAULTS.alquilerMensual);
-  const [mesesDeposito, setMesesDeposito] = useState(DEFAULTS.mesesDeposito);
   const [tipoContrato, setTipoContrato] = useState<TipoContrato>("vivienda");
 
+  // Depósito FIJO en 1 mes: es una regla de la inmobiliaria, no una variable
+  // del usuario. Ya no vive en estado porque no hay nada que cambiar.
   const costo = useMemo(
-    () => calcularCostoAlquiler(alquilerMensual, mesesDeposito, tipoContrato),
-    [alquilerMensual, mesesDeposito, tipoContrato],
+    () => calcularCostoAlquiler(alquilerMensual, MESES_DEPOSITO, tipoContrato),
+    [alquilerMensual, tipoContrato],
   );
 
   return (
@@ -170,15 +175,10 @@ export function CalculadoraAlquilerClient() {
               step={10_000}
               suffix="ARS"
             />
-            <CampoNumero
-              id="deposito"
-              label="Meses de depósito"
-              value={mesesDeposito}
-              onChange={setMesesDeposito}
-              step={1}
-              max={12}
-              suffix="meses"
-            />
+            {/* El depósito ya NO es editable: es SIEMPRE 1 mes (regla fija de
+                la inmobiliaria, confirmada por el cliente). Antes era un campo
+                con max={12} y el usuario podía simular depósitos que la
+                inmobiliaria no toma. Pasa al bloque de reglas fijas de abajo. */}
             {/* Tipo de contrato → define la duración sobre la que se calcula
                 el sellado (1,2% del total del contrato). */}
             <div>
@@ -205,6 +205,12 @@ export function CalculadoraAlquilerClient() {
 
             {/* Reglas FIJAS (definidas por la inmobiliaria, no editables). */}
             <div className="space-y-2 rounded-xl border border-brand/25 bg-brand/8 px-3.5 py-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Depósito en garantía</span>
+                <span className="font-mono font-semibold text-brand-text">
+                  {MESES_DEPOSITO} mes de alquiler
+                </span>
+              </div>
               <div className="flex items-center justify-between">
                 <span className="font-medium">Honorarios</span>
                 <span className="font-mono font-semibold text-brand-text">1 mes de alquiler</span>
@@ -255,12 +261,25 @@ export function CalculadoraAlquilerClient() {
             </motion.p>
           </div>
 
-          <p className="mt-5 flex items-start gap-2 rounded-xl bg-secondary/40 p-3 text-xs text-muted-foreground">
-            <Info className="mt-0.5 size-3.5 shrink-0" />
-            Valores referenciales. Los porcentajes de comisión y sellado varían
-            según la jurisdicción y el tipo de contrato. Consultá tu caso
-            puntual.
-          </p>
+          {/* AVISO LEGAL DESTACADO — mismo tratamiento que en el simulador de
+              financiación (pedido del cliente: que se note, en rojo). Antes era
+              gris chiquito al pie y pasaba desapercibido. */}
+          <div
+            role="note"
+            className="mt-5 rounded-2xl border-2 border-brand bg-brand/10 p-4 text-center"
+          >
+            <p className="flex items-center justify-center gap-2 text-sm font-bold uppercase leading-tight tracking-wide text-brand-text sm:text-base">
+              <AlertTriangle className="size-5 shrink-0" aria-hidden />
+              Valores aproximados
+            </p>
+            <p className="mt-1 text-sm font-bold uppercase leading-tight tracking-wide text-brand-text sm:text-base">
+              Sujeto a aprobación y análisis
+            </p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Los porcentajes de honorarios y sellado varían según la jurisdicción
+              y el tipo de contrato. Consultá tu caso puntual.
+            </p>
+          </div>
 
           <div className="mt-auto pt-5">
             <WhatsappButton

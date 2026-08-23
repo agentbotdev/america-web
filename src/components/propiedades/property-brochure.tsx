@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import {
-  Printer,
   X,
   Check,
   MapPin,
   Phone,
   AtSign,
   FileDown,
+  Loader2,
 } from "lucide-react";
 import { AGENCIA } from "@/data/agencia";
 import { mensajePropiedad, waLink } from "@/lib/whatsapp";
@@ -89,6 +89,27 @@ function BrochureDoc({ p, onClose }: { p: Propiedad; onClose: () => void }) {
 
   const tel = `+${AGENCIA.whatsapp.replace(/[^\d]/g, "")}`;
 
+  // Ref al DOCUMENTO (no al overlay): es lo único que va al PDF.
+  const docRef = useRef<HTMLDivElement>(null);
+  const [generando, setGenerando] = useState(false);
+
+  async function descargar() {
+    if (!docRef.current || generando) return;
+    setGenerando(true);
+    try {
+      // Import dinámico adentro: jsPDF + html2canvas (~500 KB) se bajan recién
+      // ahora, no en el bundle de la ficha. Ver lib/pdf.ts.
+      const { exportarNodoAPdf, nombreArchivoSano } = await import("@/lib/pdf");
+      await exportarNodoAPdf(docRef.current, nombreArchivoSano(titulo));
+    } catch {
+      // Si la generación falla (navegador viejo, imagen sin CORS), no dejamos al
+      // usuario sin salida: cae al diálogo de impresión, que siempre existe.
+      window.print();
+    } finally {
+      setGenerando(false);
+    }
+  }
+
   return (
     <div
       id="brochure-root"
@@ -120,33 +141,61 @@ function BrochureDoc({ p, onClose }: { p: Propiedad; onClose: () => void }) {
               <X className="size-4" /> Cerrar
             </button>
             <button
-              onClick={() => window.print()}
-              className="inline-flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+              onClick={descargar}
+              disabled={generando}
+              className="inline-flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-wait disabled:opacity-70"
               style={{ background: BRAND }}
             >
-              <Printer className="size-4" /> Descargar / Imprimir
+              {generando ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" /> Generando PDF…
+                </>
+              ) : (
+                <>
+                  <FileDown className="size-4" /> Descargar PDF
+                </>
+              )}
             </button>
           </div>
         </div>
 
-        {/* Documento claro imprimible */}
-        <div className="doc-print rounded-3xl bg-white p-6 text-[#0f172a] shadow-2xl shadow-black/40 sm:p-9">
+        {/* Documento claro imprimible. El `ref` es lo que se rasteriza al PDF:
+            apunta acá y no al overlay, para que el fondo oscuro no entre. */}
+        <div
+          ref={docRef}
+          className="doc-print rounded-3xl bg-white p-6 text-[#0f172a] shadow-2xl shadow-black/40 sm:p-9"
+        >
           <article className="doc-page" style={{ color: INK }}>
             {/* Cabecera con wordmark de marca */}
             <header
               className="doc-avoid mb-6 flex flex-wrap items-end justify-between gap-3 border-b pb-4"
               style={{ borderColor: BRAND }}
             >
-              <div>
-                <p
-                  className="text-lg font-black uppercase tracking-[0.18em]"
-                  style={{ color: BRAND }}
-                >
-                  {AGENCIA.logoTexto}
-                </p>
-                <p className="mt-0.5 text-sm" style={{ color: MUTE }}>
-                  {AGENCIA.tagline}
-                </p>
+              {/* LOGO REAL de la marca (pedido del cliente: antes la cabecera
+                  era solo texto). `unoptimized`: el brochure se rasteriza con
+                  html2canvas y el optimizador de Next sirve las imágenes desde
+                  otra ruta que puede dar problemas de CORS al pasar a canvas —
+                  el PNG directo de /public siempre entra. */}
+              <div className="flex items-center gap-3">
+                <Image
+                  src="/marca/america-cardozo-flat.png"
+                  alt={AGENCIA.nombre}
+                  width={132}
+                  height={132}
+                  unoptimized
+                  className="h-14 w-auto shrink-0 object-contain"
+                />
+                <div>
+                  <p
+                    className="text-lg font-black uppercase leading-tight tracking-[0.18em]"
+                    style={{ color: BRAND }}
+                  >
+                    {AGENCIA.logoTexto}
+                  </p>
+                  <p className="mt-0.5 text-sm" style={{ color: MUTE }}>
+                    {AGENCIA.tagline}
+                  </p>
+                </div>
               </div>
               <div className="text-right text-xs" style={{ color: MUTE }}>
                 <p className="font-semibold" style={{ color: INK }}>

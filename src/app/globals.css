@@ -219,18 +219,32 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    /* TEXTURA DE FONDO — requisito técnico del vidrio esmerilado, no decoración.
-       `backdrop-filter: blur()` difumina lo que hay DETRÁS del elemento. Sobre un
-       color plano no cambia un solo pixel: difuminar liso da liso. El
-       glassmorphism de iOS se ve porque siempre hay un wallpaper con detalle
-       atrás. Sin esto, las cards con blur se leerían como pintura blanca.
-       Son glows MUY diluidos del propio crema de marca + un rojo casi
-       imperceptible: no inventan un color nuevo, modulan el que ya está.
+  }
 
-       `fixed`: el fondo NO scrollea. Así las cards, al desplazarse, van pasando
-       por zonas distintas del gradiente y lo que difuminan CAMBIA — es eso lo
-       que se percibe como vidrio de verdad y no como una capa pegada. */
-    background-attachment: fixed;
+  /* TEXTURA DE FONDO — requisito técnico del vidrio esmerilado, no decoración.
+     `backdrop-filter: blur()` difumina lo que hay DETRÁS del elemento. Sobre un
+     color plano no cambia un solo pixel: difuminar liso da liso. El
+     glassmorphism de iOS se ve porque siempre hay un wallpaper con detalle
+     atrás. Sin esto, las cards con blur se leerían como pintura blanca.
+     Son glows MUY diluidos del propio crema de marca + un rojo casi
+     imperceptible: no inventan un color nuevo, modulan el que ya está.
+
+     ⚠️ VA EN UN PSEUDO-ELEMENTO `position: fixed`, NO en `background-attachment:
+     fixed` del body. Esa primera versión era una causa directa del scroll lento
+     que reportó el cliente: `background-attachment: fixed` obliga al navegador a
+     RE-PINTAR el fondo en cada frame de scroll (no puede cachearlo como capa), y
+     encima de eso hay ~60 elementos con backdrop-filter que dependen de él.
+     Un elemento fijo aparte se rasteriza UNA vez y después solo se compone:
+     mismo efecto visual (el fondo no scrollea, las cards van difuminando zonas
+     distintas), sin el repaint por frame. Bonus: iOS Safari ignora
+     `background-attachment: fixed` pero sí respeta `position: fixed`, así que
+     ahora el efecto también funciona en iPhone. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
     /* La PRIMERA capa es la que hace posible el vidrio esmerilado, y el motivo
        es de procesamiento de señal, no de gusto: `blur()` es un filtro pasa-bajos
        — destruye ALTA frecuencia espacial y apenas toca la baja.
@@ -258,6 +272,16 @@
   }
   html {
     @apply font-sans antialiased;
+    /* Corta el scroll horizontal accidental. El cliente reportó partes "apenas
+       corridas" y "margen de scroll" en mobile: eso pasa cuando UN elemento se
+       pasa unos pocos px del viewport (una sombra ancha, un `w-screen` dentro de
+       un contenedor con padding, un blob decorativo posicionado con valores
+       negativos) y el navegador habilita el scroll lateral de toda la página.
+       El síntoma es que TODO se puede correr, no solo el elemento culpable.
+       Va en <html> y no en <body>: en iOS Safari el overflow del body no alcanza.
+       `overflow-x: clip` en vez de `hidden` para no crear un contenedor de
+       scroll — `hidden` rompería el `position: sticky` del header. */
+    overflow-x: clip;
   }
   h1, h2, h3, h4 {
     @apply font-heading font-bold;
@@ -274,11 +298,18 @@
    aporta nada visible, y cada elemento glass era una capa de composición que
    la GPU recalculaba al scrollear — con badge + buscador + chips + CTAs eran
    ~10 capas. El look glass lo da el gradiente translúcido + borde luminoso. */
+/* `.glass` son las piezas CHICAS (badges, pills, chips del buscador): hay ~25
+   por página. Usan un blur de 9px en vez de los 19px de las cards, y no es un
+   recorte arbitrario: el costo de un blur crece con el RADIO (más pixeles
+   vecinos que muestrear por cada pixel de salida), y en una pastilla de 28px de
+   alto un radio de 19px ya difumina más que el propio elemento — el resultado
+   visible es idéntico al de 9px. Se paga una fracción por el mismo efecto.
+   Las cards grandes sí conservan el radio completo. */
 .glass,
 .glass-dark {
   background: linear-gradient(180deg, var(--glass-sheer-top), var(--glass-sheer-bottom));
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: blur(9px) saturate(110%);
+  backdrop-filter: blur(9px) saturate(110%);
   border: 1px solid var(--glass-border);
   border-top-color: var(--glass-border-top);
   box-shadow:

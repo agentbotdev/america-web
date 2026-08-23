@@ -21,7 +21,14 @@ import type { DeckItem } from "@/lib/deck";
 // `initial` (SSR ya las emite en su posición final).
 
 const EASE = [0.22, 1, 0.36, 1] as const;
-const INTERVALO_MS = 5000;
+
+// ARRANQUE CON PUNCH (pedido del cliente): las 2 primeras rotaciones salen casi
+// enseguida para que, apenas entrás, el deck se muestre vivo y se entienda que
+// las cartas se pueden pasar. Después baja al ritmo de lectura normal — a 900ms
+// permanentes no daría tiempo de leer ni el título.
+const MS_ARRANQUE = 900;
+const MS_CRUCERO = 5000;
+const ROTACIONES_RAPIDAS = 2;
 
 // Posiciones del abanico (pos 0 = frente). Las de atrás corren a la derecha y
 // HACIA ARRIBA: lo que asoma es el techo de sus fotos — no el pie de la card
@@ -48,14 +55,21 @@ export function HeroDeck({ items }: { items: DeckItem[] }) {
   const arrastrando = useRef(false);
   const n = items.length;
 
+  // Cuántas veces rotó sola. Sirve para acelerar el arranque y después soltar.
+  const [rotaciones, setRotaciones] = useState(0);
+
+  // setTimeout y no setInterval: el intervalo CAMBIA (900ms las dos primeras,
+  // 5s el resto), y un setInterval quedaría clavado en el valor del primer
+  // render. Al depender de `rotaciones`, el effect se reprograma cada vuelta.
   useEffect(() => {
     if (pausado || n < 2) return;
-    const t = setInterval(
-      () => setEstado((s) => ({ front: (s.front + 1) % n, prev: s.front })),
-      INTERVALO_MS,
-    );
-    return () => clearInterval(t);
-  }, [pausado, n]);
+    const ms = rotaciones < ROTACIONES_RAPIDAS ? MS_ARRANQUE : MS_CRUCERO;
+    const t = setTimeout(() => {
+      setEstado((s) => ({ front: (s.front + 1) % n, prev: s.front }));
+      setRotaciones((r) => r + 1);
+    }, ms);
+    return () => clearTimeout(t);
+  }, [pausado, n, rotaciones]);
 
   if (n === 0) return null;
 

@@ -39,8 +39,16 @@ export function FavoriteButton({
         // Sin `backdrop-blur`: son 6+ botones simultáneos sobre las cards y cada
         // uno es una capa de composición extra que se recalcula al scrollear.
         // Subiendo la opacidad del fondo se lee igual de bien, gratis.
+        //
+        // PASTILLA CLARA, no negra. Era `bg-black/55` y el cliente la marcó como
+        // "muy oscura": manchaba la foto y desentonaba con el resto del sitio,
+        // que es claro. Además había un bug de contraste real — el fondo era
+        // negro/55 pero el corazón inactivo es `text-foreground/70` (negro
+        // suave), o sea negro sobre negro: prácticamente no se veía.
+        // Blanco/85 da contraste sobre cualquier foto y deja ver el corazón.
+        // size-9 → size-10: acerca el área táctil al mínimo cómodo en mobile.
         variant === "floating" &&
-          "size-9 border border-white/20 bg-black/55 text-white shadow-md hover:bg-black/70",
+          "size-10 border border-white/80 bg-white/85 shadow-[0_2px_10px_-2px_rgba(60,50,25,0.5)] hover:bg-white",
         variant === "inline" && "size-10 border border-border hover:bg-secondary",
         className,
       )}

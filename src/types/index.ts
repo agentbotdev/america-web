@@ -130,13 +130,17 @@ export interface Favorito {
   propiedadId: string;
 }
 
-/** Resultado del simulador de crédito hipotecario (sistema francés). */
+/** Resultado del simulador de financiación.
+ *  OJO: NO es sistema francés — es interés SIMPLE sobre el capital original,
+ *  dividido en cuotas iguales (confirmado por el cliente). Ver lib/cotizador.ts. */
 export interface CuotaHipoteca {
   montoPropiedad: number;
   anticipo: number;
   montoFinanciar: number;
   plazoAnios: number;
-  tasaAnual: number; // TNA decimal (0.08 = 8%)
+  tasaAnual: number; // tasa anual decimal (0.10 = 10%)
+  /** Cantidad total de cuotas (plazoAnios × 12). Se muestra en pantalla. */
+  cantidadCuotas: number;
   cuotaMensual: number;
   totalPagado: number;
   totalIntereses: number;

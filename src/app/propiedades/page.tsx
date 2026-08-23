@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { getPropiedades } from "@/lib/supabase/queries";
 import { CatalogoBrowser, FILTROS_VACIOS } from "@/components/propiedades/catalogo-browser";
-import { HeroDeck } from "@/components/home/hero-deck";
-import { scoreVidriera } from "@/components/home/featured-properties";
-import { toDeckItems } from "@/lib/deck";
 
 // ISR: el catálogo se regenera cada 120s. El filtrado/orden es 100% client-side
 // (en memoria), así que una sola página estática sirve a todas las combinaciones.
@@ -56,14 +53,6 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
     orden: sp.orden ?? "destacadas",
   };
 
-  // El "librito" de destacadas en el margen derecho de la portada (pedido de
-  // la dueña). Mismos datos del catálogo → cero queries extra.
-  const deck = toDeckItems(
-    [...todas.filter((p) => p.destacada_web)]
-      .sort((a, b) => scoreVidriera(b) - scoreVidriera(a))
-      .slice(0, 4),
-  );
-
   return (
     <>
       {/* Sin banda ni border-b: fondo uniforme (feedback previo del cliente). */}
@@ -79,13 +68,13 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
             WhatsApp. El equipo de América Cardozo te acompaña en cada paso.
           </p>
         </div>
-        {/* Deck a la derecha desde md (en el celu el catálogo va directo a los
-            resultados; el librito ya vive en la home). */}
-        {deck.length > 0 && (
-          <div className="hidden md:block">
-            <HeroDeck items={deck} />
-          </div>
-        )}
+        {/* El deck de destacadas se QUITÓ de acá (pedido del cliente: "sacar en
+            la parte inmuebles las cards del hero, así no es tan repetitivo y
+            arranca de una").
+            Tenía sentido: quien entra a /propiedades ya decidió que quiere ver
+            el catálogo — mostrarle primero el mismo librito que ya vio en la
+            home lo hace bajar antes de llegar a lo que vino a buscar. Además
+            ahorra 4 imágenes `priority` que competían con el LCP del catálogo. */}
       </div>
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <CatalogoBrowser propiedades={todas} tipos={tipos} barrios={barrios} initial={initial} />

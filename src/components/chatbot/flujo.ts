@@ -197,12 +197,30 @@ export function recomendar(
   const tope = topePresupuestoUSD(resp.presupuesto);
   const dentroDePresupuesto = (p: Propiedad) => {
     if (tope == null) return true;
+    // Los topes del flujo (USD 60.000 / 120.000 / 200.000) son valores de
+    // COMPRA. Aplicarlos a un alquiler no tiene sentido: un alquiler de ARS
+    // 350.000/mes son ~USD 318, así que cualquier tope lo deja pasar y el
+    // filtro sólo agrega ruido al ordenamiento. En alquiler no se filtra por
+    // presupuesto (el precio mensual se negocia con la inmobiliaria).
+    if (p.tipo_operacion === "alquiler") return true;
     const usd = precioUSD(p);
     return usd == null || usd <= tope * 1.12; // 12% de margen
   };
 
   // Filtros del más restrictivo al más laxo: si un nivel queda vacío, soltamos
   // el criterio menos importante y reintentamos.
+  //
+  // ⚠️ LA OPERACIÓN NUNCA SE RELAJA. Aparece en TODOS los niveles a propósito.
+  // Antes había un último nivel `() => true` que soltaba todo, y era el bug que
+  // reportó el cliente ("en alquileres sale precio de venta"): si pedías
+  // alquiler y ningún nivel daba resultado, ese fallback devolvía el catálogo
+  // ENTERO — 113 propiedades en venta contra 27 de alquiler —, ordenado por
+  // destacadas. El usuario terminaba viendo casas en venta a USD 200.000
+  // después de decir que quería alquilar.
+  // Zona, tipo, dormitorios y presupuesto son preferencias y se pueden aflojar.
+  // Comprar y alquilar son cosas DISTINTAS: relajar eso no es recomendar de
+  // más, es responder otra pregunta. Si no hay stock, mejor no devolver nada
+  // (el flujo ya deriva a WhatsApp) que devolver lo contrario de lo pedido.
   const niveles: Array<(p: Propiedad) => boolean> = [
     (p) =>
       matchOperacion(p, resp.operacion) &&
@@ -217,8 +235,8 @@ export function recomendar(
       dentroDePresupuesto(p),
     (p) => matchOperacion(p, resp.operacion) && matchTipo(p, resp.tipo) && dentroDePresupuesto(p),
     (p) => matchOperacion(p, resp.operacion) && dentroDePresupuesto(p),
+    (p) => matchOperacion(p, resp.operacion) && matchTipo(p, resp.tipo),
     (p) => matchOperacion(p, resp.operacion),
-    () => true,
   ];
 
   let pool: Propiedad[] = [];
