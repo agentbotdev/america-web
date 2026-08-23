@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { SearchX, Search, X, SlidersHorizontal, Loader2 } from "lucide-react";
+import { SearchX, Search, X, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { useMediaQuery } from "@/lib/use-client-hooks";
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select";
@@ -15,12 +16,18 @@ import type { Propiedad } from "@/types";
 // (deep-links sin flash) y, a partir de ahí, todo es client-side. La barra del
 // navegador se sincroniza con history.replaceState (no hay viaje al server).
 //
-// RENDER: scroll infinito. En vez de pintar las ~109 cards de una, mostramos
-// tandas de PAGE_SIZE y cargamos la siguiente cuando un sentinel entra en
-// viewport (IntersectionObserver). La tanda visible se resetea al cambiar
-// cualquier filtro/orden → siempre arrancás desde arriba con resultados frescos.
+// RENDER: tandas con botón "Ver más" EXPLÍCITO (antes era scroll infinito).
+// El scroll infinito seguía cargando solo mientras bajabas: en el celular
+// terminabas con decenas de cards montadas, la página no terminaba nunca y al
+// pie no se llegaba. Con un botón, las tandas las pide el usuario.
+// La tanda se resetea al cambiar cualquier filtro/orden → siempre arrancás
+// desde arriba con resultados frescos.
 
-const PAGE_SIZE = 12;
+// Menos cards por tanda en el celular que en escritorio: en mobile la grilla es
+// de UNA columna, así que 9 cards son 9 pantallazos de scroll. En escritorio son
+// 3 columnas → 9 entran en tres filas prolijas.
+const PASO_MOBILE = 6;
+const PASO_DESKTOP = 9;
 
 const OPERACIONES = [
   { value: "venta", label: "En venta" },
@@ -169,8 +176,12 @@ export function CatalogoBrowser({
   const [f, setF] = useState<Filters>(initial);
   // Panel de filtros colapsable en mobile (en desktop siempre visible).
   const [filtrosOpen, setFiltrosOpen] = useState(false);
-  // Cuántas cards mostramos AHORA (scroll infinito). Se resetea al filtrar.
-  const [visibles, setVisibles] = useState(PAGE_SIZE);
+  // Cuántas tandas EXTRA pidió el usuario con "Ver más". El total visible se
+  // DERIVA de esto y del paso, no se guarda: así el paso puede cambiar al rotar
+  // el teléfono (mobile ↔ desktop) sin quedar desincronizado con el estado.
+  const [tandasExtra, setTandasExtra] = useState(0);
+  const esDesktop = useMediaQuery("(min-width: 640px)");
+  const paso = esDesktop ? PASO_DESKTOP : PASO_MOBILE;
 
   const sync = useCallback((next: Filters) => {
     const p = new URLSearchParams();
@@ -228,32 +239,14 @@ export function CatalogoBrowser({
   const [itemsPrevios, setItemsPrevios] = useState(items);
   if (items !== itemsPrevios) {
     setItemsPrevios(items);
-    setVisibles(PAGE_SIZE);
+    setTandasExtra(0);
   }
 
+  // Total visible DERIVADO: primera tanda + las que el usuario haya pedido.
+  const visibles = Math.min(paso * (1 + tandasExtra), items.length);
   const mostrados = useMemo(() => items.slice(0, visibles), [items, visibles]);
   const hayMas = visibles < items.length;
-
-  // Sentinel + IntersectionObserver: cuando el centinela se acerca al viewport,
-  // sumamos otra tanda. `rootMargin` adelanta la carga ~600px antes de llegar.
-  // Dependemos de `visibles` para re-evaluar tras cada tanda: si el sentinel
-  // sigue dentro del margen (viewport alto / pocas cards), encadena la siguiente.
-  const sentinel = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (!hayMas) return;
-    const el = sentinel.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          setVisibles((v) => Math.min(v + PAGE_SIZE, items.length));
-        }
-      },
-      { rootMargin: "600px 0px" },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [hayMas, visibles, items.length]);
+  const restantes = items.length - visibles;
 
   const hasFilters =
     f.q !== "" ||
@@ -322,16 +315,26 @@ export function CatalogoBrowser({
         </p>
 
         {/* Toggle de filtros: solo en mobile/tablet (en lg+ los filtros viven siempre abiertos). */}
+        {/* Botón de filtros mobile — pasa a ser un CTA de verdad.
+            Era un chip discreto de 32px de alto sobre fondo claro: en el celular
+            no se leía como "acá filtrás" y el catálogo parecía una lista sin
+            controles. Ahora tiene el rojo de marca cuando hay filtros activos,
+            44px de alto y dice qué hace. */}
         <button
           type="button"
           onClick={() => setFiltrosOpen((o) => !o)}
           aria-expanded={filtrosOpen}
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium transition-colors hover:border-brand/40 lg:hidden"
+          aria-controls="panel-filtros"
+          className={`inline-flex h-11 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors lg:hidden ${
+            activosCount > 0
+              ? "border border-brand bg-brand text-brand-foreground"
+              : "border border-brand/45 bg-white/60 text-brand-text hover:border-brand"
+          }`}
         >
           <SlidersHorizontal className="size-4" aria-hidden="true" />
-          Filtros
+          {filtrosOpen ? "Ocultar filtros" : "Filtrar"}
           {activosCount > 0 && (
-            <span className="inline-flex size-5 items-center justify-center rounded-full bg-brand text-xs font-semibold text-brand-foreground">
+            <span className="inline-flex size-5 items-center justify-center rounded-full bg-brand-foreground text-xs font-bold text-brand">
               {activosCount}
             </span>
           )}
@@ -339,22 +342,29 @@ export function CatalogoBrowser({
       </div>
 
       {/* Filtros (instantáneos). En mobile se colapsan; en lg+ siempre visibles. */}
+      {/* `grid-cols-2` en mobile: los selects de una columna dejaban el panel
+          larguísimo y había que scrollear dentro del panel para ver los últimos
+          filtros. De a dos entra todo de un vistazo. El buscador y el orden
+          ocupan la fila completa (`col-span-2`, más abajo). */}
       <div
-        className={`${filtrosOpen ? "grid" : "hidden"} gap-3 rounded-2xl border border-border bg-card p-3 lg:flex lg:flex-wrap lg:items-center`}
+        id="panel-filtros"
+        className={`${filtrosOpen ? "grid" : "hidden"} grid-cols-2 gap-2.5 rounded-2xl border border-border bg-card p-3 sm:gap-3 lg:flex lg:flex-wrap lg:items-center`}
       >
-        <div className="flex items-center gap-2 rounded-lg border border-input bg-transparent px-2.5 lg:min-w-56 lg:flex-1">
+        {/* El buscador ocupa la fila entera en mobile: es el filtro que más se
+            usa y de media columna no entraba el placeholder. */}
+        <div className="col-span-2 flex items-center gap-2 rounded-lg border border-input bg-transparent px-2.5 lg:col-span-1 lg:min-w-56 lg:flex-1">
           <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
           <input
             type="search"
             value={f.q}
             onChange={(e) => set("q", e.target.value)}
-            placeholder="Buscar por título, barrio, ciudad..."
-            className="h-9 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            placeholder="Barrio, ciudad o palabra clave"
+            className="h-11 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground lg:h-9"
           />
         </div>
 
         <Select value={f.operacion} onValueChange={(v) => set("operacion", String(v))}>
-          <SelectTrigger className="h-9 w-full lg:w-36"><SelectValue>{(v) => (!v || v === "all" ? "Operación" : labelOperacion(v as "venta" | "alquiler"))}</SelectValue></SelectTrigger>
+          <SelectTrigger className="h-11 lg:h-9 w-full lg:w-36"><SelectValue>{(v) => (!v || v === "all" ? "Operación" : labelOperacion(v as "venta" | "alquiler"))}</SelectValue></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Venta y alquiler</SelectItem>
             {OPERACIONES.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}
@@ -362,7 +372,7 @@ export function CatalogoBrowser({
         </Select>
 
         <Select value={f.tipo} onValueChange={(v) => set("tipo", String(v))}>
-          <SelectTrigger className="h-9 w-full lg:w-40"><SelectValue>{(v) => (!v || v === "all" ? "Tipo" : String(v))}</SelectValue></SelectTrigger>
+          <SelectTrigger className="h-11 lg:h-9 w-full lg:w-40"><SelectValue>{(v) => (!v || v === "all" ? "Tipo" : String(v))}</SelectValue></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los tipos</SelectItem>
             {tipos.map((t) => (<SelectItem key={t} value={t}>{t}</SelectItem>))}
@@ -370,7 +380,7 @@ export function CatalogoBrowser({
         </Select>
 
         <Select value={f.barrio} onValueChange={(v) => set("barrio", String(v))}>
-          <SelectTrigger className="h-9 w-full lg:w-44"><SelectValue>{(v) => (!v || v === "all" ? "Zona / Barrio" : String(v))}</SelectValue></SelectTrigger>
+          <SelectTrigger className="h-11 lg:h-9 w-full lg:w-44"><SelectValue>{(v) => (!v || v === "all" ? "Zona / Barrio" : String(v))}</SelectValue></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas las zonas</SelectItem>
             {barrios.map((b) => (<SelectItem key={b} value={b}>{b}</SelectItem>))}
@@ -378,7 +388,7 @@ export function CatalogoBrowser({
         </Select>
 
         <Select value={f.dormitorios} onValueChange={(v) => set("dormitorios", String(v))}>
-          <SelectTrigger className="h-9 w-full lg:w-32"><SelectValue>{(v) => (!v || v === "all" ? "Dorm." : DORMITORIOS.find((d) => d.value === v)?.label ?? "Dorm.")}</SelectValue></SelectTrigger>
+          <SelectTrigger className="h-11 lg:h-9 w-full lg:w-32"><SelectValue>{(v) => (!v || v === "all" ? "Dorm." : DORMITORIOS.find((d) => d.value === v)?.label ?? "Dorm.")}</SelectValue></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Dormitorios</SelectItem>
             {DORMITORIOS.map((d) => (<SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>))}
@@ -386,7 +396,7 @@ export function CatalogoBrowser({
         </Select>
 
         <Select value={f.banos} onValueChange={(v) => set("banos", String(v))}>
-          <SelectTrigger className="h-9 w-full lg:w-32"><SelectValue>{(v) => (!v || v === "all" ? "Baños" : BANOS.find((b) => b.value === v)?.label ?? "Baños")}</SelectValue></SelectTrigger>
+          <SelectTrigger className="h-11 lg:h-9 w-full lg:w-32"><SelectValue>{(v) => (!v || v === "all" ? "Baños" : BANOS.find((b) => b.value === v)?.label ?? "Baños")}</SelectValue></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Baños</SelectItem>
             {BANOS.map((b) => (<SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>))}
@@ -420,7 +430,7 @@ export function CatalogoBrowser({
         </div>
 
         <Select value={f.superficie_min} onValueChange={(v) => set("superficie_min", String(v))}>
-          <SelectTrigger className="h-9 w-full lg:w-36"><SelectValue>{(v) => (!v || v === "all" ? "Superficie" : SUPERFICIES.find((s) => s.value === v)?.label ?? "Superficie")}</SelectValue></SelectTrigger>
+          <SelectTrigger className="h-11 lg:h-9 w-full lg:w-36"><SelectValue>{(v) => (!v || v === "all" ? "Superficie" : SUPERFICIES.find((s) => s.value === v)?.label ?? "Superficie")}</SelectValue></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Cualquier superficie</SelectItem>
             {SUPERFICIES.map((s) => (<SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>))}
@@ -428,7 +438,7 @@ export function CatalogoBrowser({
         </Select>
 
         <Select value={f.orden} onValueChange={(v) => set("orden", String(v))}>
-          <SelectTrigger className="h-9 w-full lg:w-40"><SelectValue>{(v) => ORDENES.find((o) => o.value === v)?.label ?? "Orden"}</SelectValue></SelectTrigger>
+          <SelectTrigger className="h-11 lg:h-9 w-full lg:w-40"><SelectValue>{(v) => ORDENES.find((o) => o.value === v)?.label ?? "Orden"}</SelectValue></SelectTrigger>
           <SelectContent>
             {ORDENES.map((o) => (<SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>))}
           </SelectContent>
@@ -497,18 +507,24 @@ export function CatalogoBrowser({
             ))}
           </div>
 
-          {/* Sentinel + estados de carga del scroll infinito. */}
+          {/* VER MÁS explícito. Muestra cuántas quedan: sin ese número el
+              usuario no sabe si faltan 3 o 130, y decide a ciegas si seguir. */}
           {hayMas ? (
-            <div
-              ref={sentinel}
-              className="mt-10 flex items-center justify-center gap-2 text-sm text-muted-foreground"
-              aria-live="polite"
-            >
-              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-              Cargando más propiedades…
+            <div className="mt-10 flex flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setTandasExtra((t) => t + 1)}
+                className="glow-brand inline-flex h-13 items-center gap-2 rounded-full bg-brand px-8 text-sm font-semibold text-brand-foreground transition hover:brightness-110 active:scale-[0.98]"
+              >
+                Ver más propiedades
+                <ChevronDown className="size-4" aria-hidden="true" />
+              </button>
+              <p className="text-xs text-muted-foreground" aria-live="polite">
+                Mostrando {visibles} de {items.length} · quedan {restantes}
+              </p>
             </div>
           ) : (
-            items.length > PAGE_SIZE && (
+            items.length > paso && (
               <p className="mt-10 text-center text-sm text-muted-foreground" aria-live="polite">
                 Viste las {items.length} propiedades. ¿No encontraste lo que buscás?{" "}
                 <span className="font-medium text-foreground">Escribinos por WhatsApp</span> y te

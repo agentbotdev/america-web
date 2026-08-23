@@ -31,10 +31,16 @@ export function WhatsappButton({
   fullWidth,
   className,
 }: WhatsappButtonProps) {
+  // El CTA de WhatsApp es la acción más importante del sitio: es por donde entra
+  // el lead. El cliente marcó que en el celular se veía "muy finito" de altura.
+  // `md` sube de 44px a 52px y `lg` de 52 a 56. No es sólo estética: un botón
+  // más alto es más difícil de errar con el pulgar, y éste es EL botón que no
+  // se puede errar. `sm` queda igual — se usa en la barra del header, donde
+  // convive con otros controles y crecer descolocaría la fila.
   const sizes = {
     sm: "h-9 px-3 text-sm gap-1.5",
-    md: "h-11 px-5 text-sm gap-2",
-    lg: "h-13 px-7 text-base gap-2.5",
+    md: "h-13 px-5 text-sm gap-2",
+    lg: "h-14 px-7 text-base gap-2.5",
   };
   const variants = {
     solid: "bg-whatsapp text-white hover:brightness-95",

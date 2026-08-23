@@ -130,7 +130,11 @@ function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
               numero={AGENCIA.whatsapp}
               mensaje={mensajePropiedad(AGENCIA, p)}
               label="Consultar"
-              size="sm"
+              // `md` (52px) y no `sm` (36px): es el CTA por el que entra el lead
+              // desde el catálogo, que es la pantalla más usada en el celular.
+              // A 36px quedaba una tira finita difícil de acertar con el pulgar
+              // — el cliente lo marcó puntualmente.
+              size="md"
               variant="outline"
               fullWidth
             />

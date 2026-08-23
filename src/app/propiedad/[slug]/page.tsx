@@ -9,6 +9,8 @@ import { FichaTecnica } from "@/components/propiedades/ficha-tecnica";
 import { PropertyMap } from "@/components/propiedades/property-map";
 import { FavoriteButton } from "@/components/favoritos/favorite-button";
 import { PropertyBrochure } from "@/components/propiedades/property-brochure";
+import { MapsButton } from "@/components/propiedades/maps-button";
+import { DescripcionCard } from "@/components/propiedades/descripcion-card";
 import { Badge } from "@/components/ui/badge";
 import { formatPrecio, labelOperacion, tituloPropiedad } from "@/lib/format";
 
@@ -157,15 +159,18 @@ export default async function PropiedadPage({
               </div>
               <FavoriteButton id={p.id} variant="inline" className="h-12 w-12" />
             </div>
+            {/* CÓMO LLEGAR — abre la app de mapas del celular con la ubicación
+                ya cargada. En una inmobiliaria es la segunda pregunta después
+                del precio: "¿dónde queda?". */}
+            <MapsButton propiedad={p} variant="outline" fullWidth className="mt-2" />
           </div>
 
+          {/* Descripción en CARD y colapsable (pedido del cliente): los textos
+              de Tokko a veces son larguísimos y empujaban la ficha técnica y el
+              mapa fuera de la pantalla. Ahora se muestra un bloque acotado con
+              "Ver más". */}
           {p.descripcion?.trim() && (
-            <div className="mt-10">
-              <h2 className="text-lg font-semibold">Descripción</h2>
-              <p className="mt-3 whitespace-pre-line text-pretty leading-relaxed text-muted-foreground">
-                {p.descripcion}
-              </p>
-            </div>
+            <DescripcionCard texto={p.descripcion} />
           )}
 
           <FichaTecnica propiedad={p} />
