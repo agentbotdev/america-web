@@ -20,5 +20,12 @@ export function propiedadSlug(titulo: string, id: string): string {
 
 /** Extrae el tokko_id del final del slug. */
 export function idFromSlug(slug: string): string {
+  // Las propiedades cargadas a mano en el CRM (post-Tokko) tienen tokko_id
+  // "manual-<uuid>" — CON guiones. El split de abajo se quedaba solo con el último
+  // pedazo del uuid y la ficha daba 404 para TODAS las manuales (23 al 18/09).
+  // El patrón exacto al final del slug evita falsos positivos con títulos que
+  // contengan la palabra "manual".
+  const manual = slug.match(/manual-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+  if (manual) return manual[0];
   return slug.split("-").pop() ?? slug;
 }
