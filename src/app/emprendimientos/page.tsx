@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Building2, TrendingUp, KeyRound, PencilRuler, MapPin } from "lucide-react";
 import { Reveal, RevealGroup, RevealItem } from "@/components/ui/reveal";
+import { VideoYoutube } from "@/components/video-youtube";
 import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
 import { AGENCIA } from "@/data/agencia";
 import { EMPRENDIMIENTOS } from "@/data/emprendimientos";
@@ -95,7 +96,12 @@ export default function EmprendimientosPage() {
               <RevealItem key={e.id} className="h-full">
                 <article className="card-glow card-topline card-premium flex h-full flex-col overflow-hidden rounded-3xl">
                   <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                    {e.imagen ? (
+                    {e.video ? (
+                      // Video del render/recorrido (reunión 18/09): fachada con
+                      // play — el iframe carga recién al click. La imagen del
+                      // proyecto (si hay) hace de portada.
+                      <VideoYoutube url={e.video} titulo={e.nombre} poster={e.imagen} />
+                    ) : e.imagen ? (
                       <Image
                         src={e.imagen}
                         alt={`${e.nombre} — ${e.ubicacion}`}
@@ -108,8 +114,10 @@ export default function EmprendimientosPage() {
                         <Building2 className="size-12 opacity-90" aria-hidden />
                       </div>
                     )}
+                    {/* pointer-events-none: sobre el video, el badge no debe
+                        robarle el click al botón de play que tiene debajo. */}
                     <span
-                      className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-xs font-semibold ${ESTADO_BADGE[e.estado] ?? "bg-foreground/8 text-foreground"}`}
+                      className={`pointer-events-none absolute left-3 top-3 rounded-full px-2.5 py-1 text-xs font-semibold ${ESTADO_BADGE[e.estado] ?? "bg-foreground/8 text-foreground"}`}
                     >
                       {e.estado}
                     </span>

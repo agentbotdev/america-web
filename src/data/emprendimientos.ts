@@ -17,6 +17,10 @@ export interface Emprendimiento {
   descripcion: string;
   /** Ruta dentro de /public (ej. "/emprendimientos/torre-moreno.webp"). */
   imagen?: string;
+  /** URL de YouTube del render/recorrido (reunión 18/09: los emprendimientos
+   *  llevan video). Con video, la card lo muestra con play; `imagen` queda de
+   *  portada. */
+  video?: string;
   /** Unidades / tipologías, ej. "Monoambientes y 2 ambientes". */
   tipologias?: string;
 }
@@ -30,5 +34,17 @@ export interface Emprendimiento {
 //   descripcion: "Unidades con balcón y amenities, a metros de la estación.",
 //   imagen: "/emprendimientos/torre-ejemplo.webp",
 //   tipologias: "Monoambientes, 2 y 3 ambientes",
+// },
+// Ejemplo con video (reunión 18/09 — los emprendimientos llevan el render/
+// recorrido en video; la card muestra la portada con play y el player de
+// YouTube carga recién al click):
+// {
+//   id: "torre-ejemplo",
+//   nombre: "Torre Ejemplo",
+//   estado: "En obra",
+//   ubicacion: "Moreno Centro, Buenos Aires",
+//   descripcion: "Unidades con balcón y amenities.",
+//   imagen: "/emprendimientos/torre-ejemplo.webp",
+//   video: "https://www.youtube.com/watch?v=XXXXXXXXXXX",
 // },
 export const EMPRENDIMIENTOS: Emprendimiento[] = [];
