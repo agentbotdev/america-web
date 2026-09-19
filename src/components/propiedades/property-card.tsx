@@ -5,7 +5,7 @@ import { FavoriteButton } from "../favoritos/favorite-button";
 import { WhatsappButton } from "../whatsapp/whatsapp-button";
 import { AGENCIA } from "@/data/agencia";
 import { mensajePropiedad } from "@/lib/whatsapp";
-import { formatPrecio, formatM2, labelOperacion, tituloPropiedad } from "@/lib/format";
+import { formatPrecio, formatM2, labelOperacion, tituloPropiedad, suavizarMayusculas } from "@/lib/format";
 import type { Propiedad } from "@/types";
 
 // Card del catálogo: 100% clickeable. El link-overlay absoluto (z-10) cubre toda
@@ -31,7 +31,17 @@ function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
   // El peso (≈125 KB vs ≈10 KB) lo contiene el lazy-loading: sólo bajan las
   // cards que entran en pantalla, no las 109 del catálogo.
   const portadaSrc = portada?.url ?? portada?.thumbnail;
-  const ubicacion = [p.barrio, p.ciudad].filter(Boolean).join(", ");
+  // Reunión 18/09 (Tatiana: "con la dirección es con lo que más identificamos";
+  // Moria: "donde está Moreno ponemos la dirección, y arriba sobre la foto
+  // ponemos Moreno"): la ZONA sube a la foto en una tarjetita con fondo (por
+  // las fotos oscuras) y la línea de ubicación pasa a mostrar la DIRECCIÓN.
+  // Sin dirección pública cargada (1 de 138), fallback al formato anterior.
+  const zonaCard = suavizarMayusculas(p.ciudad ?? p.barrio ?? p.zona);
+  const direccion = suavizarMayusculas(p.direccion_publica);
+  const barrioCard = suavizarMayusculas(p.barrio);
+  const ubicacion = direccion
+    ? [direccion, barrioCard !== zonaCard ? barrioCard : null].filter(Boolean).join(" · ")
+    : [p.barrio, p.ciudad].filter(Boolean).join(", ");
   const m2 = formatM2(p.superficie_total ?? p.superficie_cubierta ?? p.metros_cubiertos);
   // Título LINDO (no el crudo de Tokko en mayúsculas con barras).
   const titulo = tituloPropiedad(p);
@@ -69,6 +79,15 @@ function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
             </span>
           )}
         </div>
+        {/* ZONA sobre la foto (reunión 18/09): tarjetita con fondo glass para
+            que se lea también sobre fotos oscuras (lo marcó Tatiana). Abajo a
+            la izquierda, sobre el velo — arriba viven los badges de operación. */}
+        {zonaCard && (
+          <span className="glass pointer-events-none absolute bottom-3 left-3 z-20 inline-flex max-w-[80%] items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold text-foreground">
+            <MapPin className="size-3 shrink-0" aria-hidden="true" />
+            <span className="truncate">{zonaCard}</span>
+          </span>
+        )}
       </div>
 
       {/* Accionable por encima del overlay (z-20) → no navega al togglear. */}

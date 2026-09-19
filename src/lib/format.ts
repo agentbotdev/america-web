@@ -48,6 +48,25 @@ export function tituloPropiedad(p: {
   return partes.join(" ");
 }
 
+// Conectores del español que quedan en minúscula al title-casear.
+const CONECTORES = new Set(["de", "del", "la", "las", "los", "el", "y", "e", "al"]);
+
+/**
+ * "SANTIAGO DERQUI 482" → "Santiago Derqui 482". Solo actúa si el texto viene
+ * TODO en mayúsculas (así llega de la carga del CRM); uno ya bien escrito se
+ * respeta tal cual. Para direcciones y nombres de lugar en las cards — en
+ * mayúsculas gritaban al lado del resto de la tipografía.
+ */
+export function suavizarMayusculas(texto: string | null | undefined): string | null {
+  const limpio = (texto ?? "").trim();
+  if (!limpio) return null;
+  if (limpio !== limpio.toUpperCase()) return limpio;
+  const out = limpio
+    .toLowerCase()
+    .replace(/\p{L}+/gu, (w) => (CONECTORES.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)));
+  return out.charAt(0).toUpperCase() + out.slice(1);
+}
+
 const LABELS: Record<string, string> = {
   venta: "Venta",
   alquiler: "Alquiler",
