@@ -5,6 +5,18 @@ const nextConfig: NextConfig = {
   // contador de issues abajo a la izquierda). Es SOLO de desarrollo — en
   // producción no existe — pero molesta al revisar el diseño.
   devIndicators: false,
+  async redirects() {
+    return [
+      {
+        // Reunión 18/09 (Moria): la sección "Nosotros" pasa a llamarse
+        // "Administración" — el quiénes somos ahora convive con el servicio
+        // de administración de alquileres. La URL vieja redirige permanente.
+        source: "/nosotros",
+        destination: "/administracion",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     // SRCSET RECORTADO — pesa en el HTML, no en las imágenes.
@@ -29,6 +41,13 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "kywossjvyttklegvqgtt.supabase.co",
         pathname: "/storage/v1/object/public/**",
+      },
+      {
+        // Thumbnails de YouTube: portada de los videos de emprendimientos
+        // cuando el proyecto no tiene imagen propia cargada.
+        protocol: "https",
+        hostname: "i.ytimg.com",
+        pathname: "/vi/**",
       },
       {
         // QR del brochure. Registrado acá para poder servirlo a través del

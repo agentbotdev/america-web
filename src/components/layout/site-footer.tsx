@@ -47,7 +47,7 @@ const NAV = [
   { href: "/credito-hipotecario", label: "Financiamos" },
   { href: "/calculadora-alquiler", label: "Calculadora de alquiler" },
   { href: "/vende-tu-propiedad", label: "Vendé tu propiedad" },
-  { href: "/nosotros", label: "Nosotros" },
+  { href: "/administracion", label: "Administración" },
 ];
 
 export function SiteFooter() {

@@ -22,13 +22,15 @@ import { cn } from "@/lib/utils";
 
 // Solapas en MAYÚSCULA (pedido de la dueña, tipografía como la del footer).
 // Renombres: Propiedades→INMUEBLES, Crédito→FINANCIAMOS. Nueva: EMPRENDIMIENTOS.
+// Reunión 18/09: "Calculadora" sale del nav (vive DENTRO de Financiamos, con
+// sub-navegación cruzada entre las dos herramientas) y "Nosotros" pasa a
+// llamarse "Administración" (quiénes somos + cómo administramos, pedido de Moria).
 const NAV = [
   { href: "/propiedades", label: "Inmuebles" },
   { href: "/emprendimientos", label: "Emprendimientos" },
   { href: "/credito-hipotecario", label: "Financiamos" },
-  { href: "/calculadora-alquiler", label: "Calculadora" },
   { href: "/vende-tu-propiedad", label: "Vendé tu propiedad" },
-  { href: "/nosotros", label: "Nosotros" },
+  { href: "/administracion", label: "Administración" },
 ];
 
 // Accesos rápidos SIEMPRE VISIBLES en mobile (pedido del cliente: los pills

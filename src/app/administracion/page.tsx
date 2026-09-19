@@ -11,22 +11,30 @@ import {
   ShieldCheck,
   HeartHandshake,
   Award,
+  UserCheck,
+  FileText,
+  Banknote,
+  CalendarCheck,
 } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
 import { AGENCIA } from "@/data/agencia";
 import { mensajeGeneral } from "@/lib/whatsapp";
 
+// Reunión 18/09 (Moria): la sección pasa de "Nosotros" a "Administración" —
+// el servicio de administración de alquileres al frente, y "de paso la gente
+// lee todo lo nuestro" (quiénes somos, valores, servicios). /nosotros redirige
+// acá (next.config.ts).
 export const metadata: Metadata = {
-  title: "Nosotros",
+  title: "Administración",
   description:
-    "América Cardozo: venta, alquiler, tasaciones y asesoría inmobiliaria en todo el país, con más de 20 años de experiencia. Conocé cómo trabajamos.",
-  alternates: { canonical: "/nosotros" },
+    "Administración de alquileres y estudio inmobiliario integral: contratos, cobranza y seguimiento de tu propiedad. Más de 20 años de experiencia en todo el país.",
+  alternates: { canonical: "/administracion" },
   openGraph: {
-    title: "Nosotros | América Cardozo",
+    title: "Administración | América Cardozo",
     description:
-      "Más de 20 años en el mercado inmobiliario. Venta, alquiler, tasaciones y asesoría en todo el país.",
-    url: "/nosotros",
+      "Administramos tu propiedad en alquiler de principio a fin. Más de 20 años en el mercado inmobiliario.",
+    url: "/administracion",
   },
 };
 
@@ -50,6 +58,31 @@ const SERVICIOS = [
     icon: Scale,
     title: "Asesoría legal",
     desc: "Te acompañamos en la documentación y los aspectos legales de cada operación.",
+  },
+];
+
+// Cómo administramos (reunión 18/09): el servicio que da nombre a la solapa.
+// Solo lo que la inmobiliaria HACE — sin métricas ni promesas inventadas.
+const ADMINISTRACION = [
+  {
+    icon: UserCheck,
+    title: "Publicación y selección",
+    desc: "Difundimos tu propiedad, coordinamos visitas y verificamos garantías e ingresos para elegir bien al inquilino.",
+  },
+  {
+    icon: FileText,
+    title: "Contratos claros",
+    desc: "Redacción y renovación de contratos con respaldo legal: condiciones, ajustes y garantías sin letra chica.",
+  },
+  {
+    icon: Banknote,
+    title: "Cobranza y liquidación",
+    desc: "Seguimos los pagos mes a mes y te liquidamos el alquiler: vos cobrás, nosotros nos ocupamos del resto.",
+  },
+  {
+    icon: CalendarCheck,
+    title: "Seguimiento del inmueble",
+    desc: "Vencimientos, ajustes del contrato y estado de la propiedad, con comunicación directa con vos y el inquilino.",
   },
 ];
 
@@ -99,6 +132,46 @@ export default function NosotrosPage() {
             </p>
           </Reveal>
         </div>
+      </section>
+
+      {/* Administración de alquileres — el servicio que da nombre a la solapa
+          (reunión 18/09). Quien entra por "Administración" busca ESTO; lo
+          institucional queda a un scroll de distancia. */}
+      <section className="mx-auto max-w-6xl px-4 pt-16 sm:px-6 lg:px-8" aria-labelledby="administracion">
+        <Reveal>
+          <h2 id="administracion" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            Administración de alquileres
+          </h2>
+        </Reveal>
+        <Reveal delay={0.08}>
+          <p className="mt-3 max-w-2xl text-balance text-muted-foreground">
+            Administramos tu propiedad de principio a fin: inquilino verificado,
+            contrato en regla, cobranza al día y seguimiento del inmueble. Vos
+            cobrás tu alquiler; nosotros nos ocupamos del resto.
+          </p>
+        </Reveal>
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {ADMINISTRACION.map((s, i) => (
+            <Reveal key={s.title} delay={i * 0.06}>
+              <div className="card-premium h-full rounded-2xl p-5">
+                <span className="flex size-11 items-center justify-center rounded-xl bg-brand/10 text-brand">
+                  <s.icon className="size-5" />
+                </span>
+                <h3 className="mt-4 text-base font-semibold">{s.title}</h3>
+                <p className="mt-1.5 text-sm text-muted-foreground">{s.desc}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+        <Reveal delay={0.1}>
+          <div className="mt-6">
+            <WhatsappButton
+              numero={AGENCIA.whatsapp}
+              mensaje="¡Hola América Cardozo! 👋 Tengo una propiedad y quiero que me cuenten cómo trabajan la administración de alquileres."
+              label="Quiero que administren mi propiedad"
+            />
+          </div>
+        </Reveal>
       </section>
 
       {/* Quiénes somos */}

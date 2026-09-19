@@ -15,7 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/credito-hipotecario`, lastModified: ahora, changeFrequency: "monthly", priority: 0.6 },
     { url: `${BASE}/calculadora-alquiler`, lastModified: ahora, changeFrequency: "monthly", priority: 0.6 },
     { url: `${BASE}/vende-tu-propiedad`, lastModified: ahora, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE}/nosotros`, lastModified: ahora, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${BASE}/administracion`, lastModified: ahora, changeFrequency: "monthly", priority: 0.5 },
   ];
 
   const propiedades = await getPropiedades();
