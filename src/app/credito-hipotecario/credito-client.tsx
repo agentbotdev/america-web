@@ -10,6 +10,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { FinanciacionTabs } from "@/components/financiacion-tabs";
 import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
 import { simularHipoteca } from "@/lib/cotizador";
 import { formatPrecio } from "@/lib/format";
@@ -91,6 +92,8 @@ export function CreditoHipotecarioClient() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+      {/* Las dos herramientas de Financiación, hermanadas (reunión 18/09). */}
+      <FinanciacionTabs activa="/credito-hipotecario" />
       <header className="max-w-2xl">
         <p className="flex items-center gap-2 text-sm font-medium text-brand">
           <Landmark className="size-4" /> Financiamos

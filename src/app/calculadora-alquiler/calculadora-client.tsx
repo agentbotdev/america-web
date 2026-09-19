@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { Calculator, AlertTriangle, KeyRound } from "lucide-react";
+import { FinanciacionTabs } from "@/components/financiacion-tabs";
 import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
 import { formatPrecio } from "@/lib/format";
 import { AGENCIA } from "@/data/agencia";
@@ -149,6 +150,8 @@ export function CalculadoraAlquilerClient() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+      {/* Las dos herramientas de Financiación, hermanadas (reunión 18/09). */}
+      <FinanciacionTabs activa="/calculadora-alquiler" />
       <header className="max-w-2xl">
         <p className="flex items-center gap-2 text-sm font-medium text-brand">
           <KeyRound className="size-4" /> Calculadora de alquiler
