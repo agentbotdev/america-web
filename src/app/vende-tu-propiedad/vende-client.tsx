@@ -108,7 +108,7 @@ export function VendeTuPropiedadClient() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
       <header className="max-w-2xl">
-        <p className="flex items-center gap-2 text-sm font-medium text-brand">
+        <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-text">
           <Home className="size-4" /> Vendé o alquilá con nosotros
         </p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -122,7 +122,7 @@ export function VendeTuPropiedadClient() {
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         {BENEFICIOS.map((b) => (
-          <div key={b.title} className="card-premium rounded-2xl p-5">
+          <div key={b.title} className="card-premium rounded-lg p-5">
             <span className="flex size-10 items-center justify-center rounded-xl bg-brand/10 text-brand">
               <b.icon className="size-5" />
             </span>
@@ -134,7 +134,7 @@ export function VendeTuPropiedadClient() {
 
       <form
         onSubmit={handleSubmit}
-        className="panel-glass mt-8 rounded-3xl p-6 sm:p-8"
+        className="panel-glass mt-8 rounded-lg p-6 sm:p-8"
         noValidate
       >
         {/* Operación */}
@@ -263,7 +263,7 @@ export function VendeTuPropiedadClient() {
 
         <button
           type="submit"
-          className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-whatsapp px-7 text-base font-medium text-white transition-all hover:brightness-95 active:scale-[0.98]"
+          className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-whatsapp px-7 text-base font-medium text-white transition-all hover:brightness-95 active:scale-[0.98]"
         >
           <MessageSquare className="size-5" />
           {enviado ? "Reenviar por WhatsApp" : "Enviar por WhatsApp"}

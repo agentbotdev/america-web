@@ -38,10 +38,10 @@ export function ProcessSection() {
     <section id="proceso" className="relative overflow-hidden">
       <div className="relative mx-auto max-w-7xl px-4 py-14 sm:py-20 lg:px-8">
         <Reveal className="max-w-2xl">
-          <span className="glass inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium text-muted-foreground">
+          <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
             <span className="size-1.5 rounded-full bg-brand" /> Cómo trabajamos
           </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+          <h2 className="mt-4 text-3xl font-semibold text-foreground sm:text-4xl lg:text-5xl">
             De la búsqueda a las llaves,
             <br className="hidden sm:block" /> en 4 pasos sin fricción.
           </h2>
@@ -69,20 +69,20 @@ export function ProcessSection() {
                       el piso seguro — el ícono blanco queda en 3.56 y el umbral
                       WCAG para elementos gráficos es 3.0. Más transparencia que
                       esa y el ícono deja de leerse. */}
-                  <span className="transition-transform duration-300 group-hover:scale-[1.08] glow-brand relative flex size-14 shrink-0 items-center justify-center rounded-2xl bg-brand/85 text-white ring-1 ring-brand/25"
+                  <span className="relative flex size-14 shrink-0 items-center justify-center rounded-md bg-brand text-white"
                   >
                     <p.icon className="size-6" />
-                    <span className="absolute -right-1.5 -top-1.5 flex size-6 items-center justify-center rounded-full border border-border bg-card font-mono text-xs font-semibold text-brand-text">
+                    <span className="absolute -right-1.5 -top-1.5 flex size-6 items-center justify-center rounded-full border border-border bg-card font-heading text-xs font-semibold text-brand-text">
                       {i + 1}
                     </span>
                   </span>
                 </div>
 
                 {/* Card */}
-                <div className="card-premium rounded-2xl p-5 transition-all duration-300 group-hover:-translate-y-1 group-hover:border-brand/40 group-hover:shadow-xl group-hover:shadow-brand/15">
-                  <h3 className="text-lg font-bold text-foreground">{p.title}</h3>
+                <div className="card-premium rounded-lg p-5 transition-all duration-300 group-hover:-translate-y-1">
+                  <h3 className="text-lg font-semibold text-foreground">{p.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{p.desc}</p>
-                  <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-brand/12 px-2.5 py-1 text-[11px] font-medium text-brand-text">
+                  <span className="mt-4 inline-flex items-center gap-1.5 rounded-sm bg-brand/10 px-2.5 py-1 text-[11px] font-medium text-brand-text">
                     <BadgeCheck className="size-3" /> {p.chip}
                   </span>
                 </div>

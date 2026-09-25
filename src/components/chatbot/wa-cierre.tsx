@@ -56,13 +56,13 @@ export function WaCierre({
         transition={{ type: "spring", stiffness: 240, damping: 16, delay: 0.1 }}
         whileHover={reduce ? undefined : { scale: 1.04, y: -2 }}
         whileTap={{ scale: 0.97 }}
-        className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-whatsapp px-4 py-4 text-sm font-bold text-white shadow-xl shadow-emerald-900/50"
+        className="group relative flex items-center justify-center gap-2 overflow-hidden rounded-lg bg-whatsapp px-4 py-4 text-sm font-semibold text-white shadow-xl shadow-emerald-900/50"
         style={{ transformStyle: "preserve-3d" }}
       >
         {!reduce && (
           <motion.span
             aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-2xl"
+            className="pointer-events-none absolute inset-0 rounded-lg"
             animate={{ boxShadow: ["0 0 0 0 rgba(16,185,129,0.55)", "0 0 0 12px rgba(16,185,129,0)"] }}
             transition={{ duration: 1.9, repeat: Infinity }}
           />

@@ -57,7 +57,7 @@ export function MapsButton({
       rel="noopener noreferrer"
       aria-label={`Ver la ubicación de ${p.titulo} en el mapa`}
       className={cn(
-        "inline-flex h-13 items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all active:scale-[0.98]",
+        "inline-flex h-13 items-center justify-center gap-2 rounded-md text-sm font-semibold transition-all active:scale-[0.98]",
         variant === "solid" &&
           "bg-foreground text-background hover:brightness-125",
         variant === "outline" &&

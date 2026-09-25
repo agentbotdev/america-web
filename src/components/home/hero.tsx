@@ -67,11 +67,12 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
             en mobile (pedido del cliente); centrado recién en lg. */}
         <div className="col-start-1 row-start-1 max-w-2xl self-start pt-2 lg:self-center lg:pt-0">
           <div className="hero-in" style={{ "--i": 0 } as React.CSSProperties}>
-            {/* En columnas angostas el badge no entra: aparece desde sm. */}
-            <span className="glass hidden items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium text-muted-foreground sm:inline-flex">
+            {/* Eyebrow editorial (sin caja): mayúsculas espaciadas + ícono rojo.
+                En columnas angostas no entra: aparece desde sm. */}
+            <span className="hidden items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:inline-flex">
               <ShieldCheck className="size-3.5 text-brand" />
-              <span className="font-semibold text-foreground">+{a.anios_experiencia} años</span>
-              <span aria-hidden className="text-muted-foreground">·</span>
+              <span className="text-foreground">+{a.anios_experiencia} años</span>
+              <span aria-hidden className="text-brand">·</span>
               Operamos en todo el país
             </span>
           </div>
@@ -79,17 +80,17 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
           <h1
             // Título MÁS GRANDE en mobile: la columna tenía aire de sobra
             // (feedback del cliente marcando el espacio desaprovechado).
-            className="hero-in text-balance text-3xl font-semibold leading-[1.08] tracking-tight text-foreground min-[440px]:text-4xl sm:mt-5 sm:leading-[1.06] lg:text-5xl xl:text-6xl"
+            className="hero-in text-balance text-3xl font-semibold leading-[1.12] text-foreground min-[440px]:text-4xl sm:mt-5 sm:leading-[1.1] lg:text-5xl xl:text-6xl"
            style={{ "--i": 1 } as React.CSSProperties}>
             Tu próxima propiedad
             <br />
             <span className="relative inline-block">
               te está esperando
-              {/* Subrayado rojo de marca como firma visual del titular */}
+              {/* Raya roja plana: la firma del logo (sin glow ni redondeo). */}
               <span
                 aria-hidden
-                className="absolute -bottom-1 left-0 h-[4px] w-full rounded-full sm:h-[5px]"
-                style={{ background: "var(--brand)", boxShadow: "0 0 22px -4px var(--brand)" }}
+                className="absolute -bottom-1.5 left-0 h-[3px] w-full"
+                style={{ background: "var(--brand)" }}
               />
             </span>
           </h1>
@@ -114,7 +115,7 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
             action="/propiedades" method="get"
             // Sin mt: la separación la da el gap del grid (la descripción ya
             // no vive arriba de este bloque — se mudó a la columna del título).
-            className="hero-in glass flex max-w-xl items-center gap-2 rounded-full p-2 shadow-[0_18px_44px_-26px_rgba(60,50,25,0.5)] focus-within:border-brand/60"
+            className="hero-in flex max-w-xl items-center gap-2 rounded-lg border border-foreground/15 bg-white p-2 shadow-[0_14px_36px_-26px_rgba(60,50,25,0.45)] focus-within:border-brand/60"
            style={{ "--i": 3 } as React.CSSProperties}>
             <Search className="ml-3 size-5 shrink-0 text-muted-foreground" />
             <input
@@ -127,7 +128,7 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
             />
             <button
               type="submit"
-              className="glow-brand inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full bg-brand px-6 text-sm font-semibold text-brand-foreground transition hover:brightness-110 active:scale-[0.98]"
+              className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-md bg-brand px-6 text-sm font-semibold text-brand-foreground transition hover:brightness-110 active:scale-[0.98]"
             >
               Buscar
             </button>
@@ -142,7 +143,7 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
               <Link
                 key={f.label}
                 href={f.href}
-                className="glass inline-flex items-center rounded-full px-3.5 py-1.5 text-xs font-medium text-foreground transition hover:border-brand/60 hover:text-brand-text"
+                className="inline-flex items-center rounded-md border border-foreground/15 bg-white px-3.5 py-1.5 text-xs font-medium text-foreground transition hover:border-brand/60 hover:text-brand-text"
               >
                 {f.label}
               </Link>
@@ -161,7 +162,7 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
                 // SIN relleno de fondo: un tinte rojo sobre la banda crema da un
                 // durazno (#f9d4b0) que baja el contraste del texto a 4.24 (< AA).
                 // Sobre el crema limpio, `brand-text` da 4.74 y pasa.
-                className="group/link inline-flex items-center gap-1.5 rounded-full border border-brand/35 px-3.5 py-1.5 text-xs font-semibold text-brand-text transition hover:border-brand hover:bg-brand hover:text-brand-foreground"
+                className="group/link inline-flex items-center gap-1.5 rounded-md border border-brand/35 px-3.5 py-1.5 text-xs font-semibold text-brand-text transition hover:border-brand hover:bg-brand hover:text-brand-foreground"
               >
                 <l.icon className="size-3.5" aria-hidden />
                 {l.label}
@@ -177,7 +178,7 @@ export function Hero({ deck = [] }: { deck?: DeckItem[] }) {
             <WhatsappButton numero={a.whatsapp} mensaje={mensajeGeneral(a)} label="Asesoría por WhatsApp" size="lg" />
             <Link
               href="/propiedades"
-              className="glass inline-flex h-13 items-center gap-1.5 rounded-full px-7 text-base font-medium text-foreground transition hover:border-brand/50 hover:text-brand-text"
+              className="inline-flex h-13 items-center gap-1.5 rounded-md border border-foreground/20 bg-white px-7 text-base font-medium text-foreground transition hover:border-brand/60 hover:text-brand-text"
             >
               Ver propiedades <ArrowRight className="size-4" />
             </Link>

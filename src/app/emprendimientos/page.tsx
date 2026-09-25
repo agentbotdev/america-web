@@ -70,7 +70,7 @@ export default function EmprendimientosPage() {
       {/* Encabezado */}
       <Reveal>
         <div className="max-w-2xl">
-          <span className="text-sm font-medium text-brand-text">American Group</span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-text">American Group</span>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
             Emprendimientos y desarrollos
           </h1>
@@ -94,7 +94,7 @@ export default function EmprendimientosPage() {
           <RevealGroup className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" stagger={0.08}>
             {EMPRENDIMIENTOS.map((e) => (
               <RevealItem key={e.id} className="h-full">
-                <article className="card-glow card-topline card-premium flex h-full flex-col overflow-hidden rounded-3xl">
+                <article className="card-premium flex h-full flex-col overflow-hidden rounded-xl">
                   <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                     {e.video ? (
                       // Video del render/recorrido (reunión 18/09): fachada con
@@ -117,7 +117,7 @@ export default function EmprendimientosPage() {
                     {/* pointer-events-none: sobre el video, el badge no debe
                         robarle el click al botón de play que tiene debajo. */}
                     <span
-                      className={`pointer-events-none absolute left-3 top-3 rounded-full px-2.5 py-1 text-xs font-semibold ${ESTADO_BADGE[e.estado] ?? "bg-foreground/8 text-foreground"}`}
+                      className={`pointer-events-none absolute left-3 top-3 rounded-sm px-2.5 py-1 text-xs font-semibold ${ESTADO_BADGE[e.estado] ?? "bg-foreground/8 text-foreground"}`}
                     >
                       {e.estado}
                     </span>
@@ -144,7 +144,7 @@ export default function EmprendimientosPage() {
           <Reveal>
             {/* Estado "en preparación": honesto (sin proyectos inventados) y
                 con captura por WhatsApp mientras se cargan los reales. */}
-            <div className="card-premium mt-6 rounded-3xl px-6 py-12 text-center sm:px-12">
+            <div className="card-premium mt-6 rounded-xl px-6 py-12 text-center sm:px-12">
               <Building2 className="mx-auto size-10 text-brand" aria-hidden />
               <h3 className="mt-4 text-lg font-semibold">
                 Estamos preparando la presentación de nuestros proyectos
@@ -180,8 +180,8 @@ export default function EmprendimientosPage() {
         <RevealGroup className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4" stagger={0.08}>
           {ETAPAS.map((e) => (
             <RevealItem key={e.title} className="h-full">
-              <div className="card-premium h-full rounded-3xl p-5">
-                <span className="flex size-11 items-center justify-center rounded-2xl bg-brand/12 text-brand ring-1 ring-brand/25">
+              <div className="card-premium h-full rounded-lg p-5">
+                <span className="flex size-11 items-center justify-center rounded-md bg-brand/10 text-brand ring-1 ring-brand/20">
                   <e.icon className="size-5" aria-hidden />
                 </span>
                 <h3 className="mt-4 font-heading text-base font-semibold">{e.title}</h3>
@@ -194,7 +194,7 @@ export default function EmprendimientosPage() {
 
       {/* CTA de cierre */}
       <Reveal>
-        <div className="mt-16 flex flex-col items-center gap-4 rounded-3xl border border-brand/25 bg-brand/8 px-6 py-10 text-center">
+        <div className="mt-16 flex flex-col items-center gap-4 rounded-xl border border-brand/25 bg-brand/5 px-6 py-10 text-center">
           <h2 className="text-balance text-xl font-semibold sm:text-2xl">
             ¿Querés invertir en un desarrollo?
           </h2>

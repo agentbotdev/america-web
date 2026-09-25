@@ -69,8 +69,8 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
       {/* Sin banda ni border-b: fondo uniforme (feedback previo del cliente). */}
       <div className="mx-auto grid max-w-7xl items-center gap-x-8 px-4 py-10 sm:px-6 md:grid-cols-[1.15fr_0.85fr] lg:px-8">
         <div>
-          <p className="text-sm font-medium text-brand-text">Catálogo · Todo el país</p>
-          <h1 className="mt-1 text-4xl font-bold tracking-tight sm:text-5xl">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-text">Catálogo · Todo el país</p>
+          <h1 className="mt-2 text-4xl font-semibold sm:text-5xl">
             Encontrá tu próximo inmueble
           </h1>
           <p className="mt-3 max-w-prose text-muted-foreground">

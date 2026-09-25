@@ -177,7 +177,7 @@ export function HeroDeck({ items }: { items: DeckItem[] }) {
                 // superpuestos = ilegible). El blanco corta eso de raíz y además
                 // hace que el deck resalte como el foco del hero.
                 // NO usa `.card-premium`: esa clase ahora lleva blur y velo.
-                className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-3xl border border-[rgba(60,50,25,0.10)] bg-white shadow-[0_30px_70px_-30px_rgba(60,45,20,0.45)] transition-shadow hover:shadow-[0_34px_80px_-30px_color-mix(in_oklch,var(--brand)_50%,transparent)]"
+                className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-[rgba(60,50,25,0.12)] bg-white shadow-[0_24px_56px_-32px_rgba(60,45,20,0.4)] transition-shadow hover:shadow-[0_28px_64px_-32px_rgba(60,45,20,0.5)]"
               >
                 <div className="pointer-events-none relative aspect-[4/3] shrink-0 overflow-hidden bg-muted">
                   {/* TODAS las cartas con `priority`: son 4 imágenes above-the-fold
@@ -193,7 +193,7 @@ export function HeroDeck({ items }: { items: DeckItem[] }) {
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                  <span className="glass absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-medium text-foreground sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-xs">
+                  <span className="glass absolute left-2 top-2 rounded-sm px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-foreground sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-[11px]">
                     {item.operacion}
                   </span>
                 </div>
@@ -236,7 +236,7 @@ export function HeroDeck({ items }: { items: DeckItem[] }) {
                         </span>
                       )}
                     </div>
-                    <p className="whitespace-nowrap font-mono text-xs font-semibold tracking-tight sm:text-lg">
+                    <p className="whitespace-nowrap text-xs font-semibold tabular-nums tracking-tight sm:text-lg">
                       {item.precio}
                     </p>
                   </div>

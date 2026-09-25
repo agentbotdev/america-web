@@ -91,7 +91,7 @@ export function FavoritesSheet() {
               </p>
               <Link
                 href="/propiedades"
-                className="glow-brand inline-flex items-center justify-center rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-white transition hover:brightness-110"
+                className="inline-flex items-center justify-center rounded-md bg-brand px-5 py-2.5 text-sm font-medium text-white transition hover:brightness-110"
               >
                 Explorar propiedades
               </Link>
@@ -166,7 +166,7 @@ export function FavoritesSheet() {
             />
             <Link
               href="/favoritos"
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border border-border text-sm font-medium transition hover:bg-secondary"
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-border text-sm font-medium transition hover:bg-secondary"
             >
               <FileDown className="size-4" /> Ver selección y exportar PDF
             </Link>

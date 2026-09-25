@@ -25,7 +25,7 @@ export function WhatsappFloat() {
       </svg>
 
       {/* Tooltip en desktop al pasar el cursor */}
-      <span className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-full bg-foreground px-3 py-1.5 text-xs font-medium text-background opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 lg:block">
+      <span className="pointer-events-none absolute left-full ml-3 hidden whitespace-nowrap rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 lg:block">
         Escribinos por WhatsApp
       </span>
     </a>

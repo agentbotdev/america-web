@@ -7,7 +7,6 @@ import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select";
 import PropertyCard from "@/components/propiedades/property-card";
-import { Tilt } from "@/components/ui/tilt";
 import { labelOperacion } from "@/lib/format";
 import type { Propiedad } from "@/types";
 
@@ -325,7 +324,7 @@ export function CatalogoBrowser({
           onClick={() => setFiltrosOpen((o) => !o)}
           aria-expanded={filtrosOpen}
           aria-controls="panel-filtros"
-          className={`inline-flex h-11 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors lg:hidden ${
+          className={`inline-flex h-11 shrink-0 items-center gap-2 rounded-md px-4 text-sm font-semibold transition-colors lg:hidden ${
             activosCount > 0
               ? "border border-brand bg-brand text-brand-foreground"
               : "border border-brand/45 bg-white/60 text-brand-text hover:border-brand"
@@ -348,7 +347,7 @@ export function CatalogoBrowser({
           ocupan la fila completa (`col-span-2`, más abajo). */}
       <div
         id="panel-filtros"
-        className={`${filtrosOpen ? "grid" : "hidden"} grid-cols-2 gap-2.5 rounded-2xl border border-border bg-card p-3 sm:gap-3 lg:flex lg:flex-wrap lg:items-center`}
+        className={`${filtrosOpen ? "grid" : "hidden"} grid-cols-2 gap-2.5 rounded-lg border border-border bg-card p-3 sm:gap-3 lg:flex lg:flex-wrap lg:items-center`}
       >
         {/* El buscador ocupa la fila entera en mobile: es el filtro que más se
             usa y de media columna no entraba el placeholder. */}
@@ -466,7 +465,7 @@ export function CatalogoBrowser({
               type="button"
               onClick={c.clear}
               aria-label={`Quitar filtro ${c.label}`}
-              className="inline-flex items-center gap-1 rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand-text transition-colors hover:bg-brand/20"
+              className="inline-flex items-center gap-1 rounded-sm border border-brand/30 bg-brand/10 px-3 py-1 text-xs font-medium text-brand-text transition-colors hover:bg-brand/20"
             >
               {c.label}
               <X className="size-3" aria-hidden="true" />
@@ -477,7 +476,7 @@ export function CatalogoBrowser({
 
       {/* Grid (instantáneo, sin recargar) */}
       {items.length === 0 ? (
-        <div className="mt-16 flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border bg-muted/50 px-6 py-16 text-center">
+        <div className="mt-16 flex flex-col items-center gap-4 rounded-lg border border-dashed border-border bg-muted/50 px-6 py-16 text-center">
           <span className="flex size-16 items-center justify-center rounded-full bg-brand/10 text-brand">
             <SearchX className="size-8" aria-hidden="true" />
           </span>
@@ -491,7 +490,7 @@ export function CatalogoBrowser({
             <button
               type="button"
               onClick={limpiar}
-              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-brand px-5 text-sm font-medium text-brand-foreground transition-all hover:brightness-110 active:scale-[0.98]"
+              className="inline-flex h-10 items-center gap-1.5 rounded-md bg-brand px-5 text-sm font-medium text-brand-foreground transition-all hover:brightness-110 active:scale-[0.98]"
             >
               <X className="size-4" aria-hidden="true" /> Limpiar filtros
             </button>
@@ -501,9 +500,9 @@ export function CatalogoBrowser({
         <>
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {mostrados.map((p) => (
-              <Tilt key={p.id} className="h-full">
+              <div key={p.id} className="h-full">
                 <PropertyCard propiedad={p} />
-              </Tilt>
+              </div>
             ))}
           </div>
 
@@ -514,7 +513,7 @@ export function CatalogoBrowser({
               <button
                 type="button"
                 onClick={() => setTandasExtra((t) => t + 1)}
-                className="glow-brand inline-flex h-13 items-center gap-2 rounded-full bg-brand px-8 text-sm font-semibold text-brand-foreground transition hover:brightness-110 active:scale-[0.98]"
+                className="inline-flex h-13 items-center gap-2 rounded-md bg-brand px-8 text-sm font-semibold text-brand-foreground transition hover:brightness-110 active:scale-[0.98]"
               >
                 Ver más propiedades
                 <ChevronDown className="size-4" aria-hidden="true" />

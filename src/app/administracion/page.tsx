@@ -112,16 +112,15 @@ export default function NosotrosPage() {
     <div>
       {/* Hero */}
       <section className="section-band relative overflow-hidden">
-        <div className="bg-grid pointer-events-none absolute inset-0 opacity-50" />
         <div className="relative mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 lg:px-8 lg:py-28">
           <Reveal>
-            <span className="glass inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
+            <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
               <Award className="size-3.5 text-brand" />
               +{a.anios_experiencia} años · Operamos en todo el país
             </span>
           </Reveal>
           <Reveal delay={0.08}>
-            <h1 className="mt-6 text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+            <h1 className="mt-6 text-balance text-4xl font-semibold leading-[1.1] text-foreground sm:text-5xl lg:text-6xl">
               {a.nombre}
             </h1>
           </Reveal>
@@ -139,7 +138,7 @@ export default function NosotrosPage() {
           institucional queda a un scroll de distancia. */}
       <section className="mx-auto max-w-6xl px-4 pt-16 sm:px-6 lg:px-8" aria-labelledby="administracion">
         <Reveal>
-          <h2 id="administracion" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h2 id="administracion" className="text-2xl font-semibold sm:text-3xl">
             Administración de alquileres
           </h2>
         </Reveal>
@@ -153,8 +152,8 @@ export default function NosotrosPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {ADMINISTRACION.map((s, i) => (
             <Reveal key={s.title} delay={i * 0.06}>
-              <div className="card-premium h-full rounded-2xl p-5">
-                <span className="flex size-11 items-center justify-center rounded-xl bg-brand/10 text-brand">
+              <div className="card-premium h-full rounded-lg p-5">
+                <span className="flex size-11 items-center justify-center rounded-md bg-brand/10 text-brand">
                   <s.icon className="size-5" />
                 </span>
                 <h3 className="mt-4 text-base font-semibold">{s.title}</h3>
@@ -177,7 +176,7 @@ export default function NosotrosPage() {
       {/* Quiénes somos */}
       <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
         <Reveal>
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h2 className="text-2xl font-semibold sm:text-3xl">
             Quiénes somos
           </h2>
         </Reveal>
@@ -205,7 +204,7 @@ export default function NosotrosPage() {
         <div className="grid gap-4 sm:grid-cols-3">
           {VALORES.map((v, i) => (
             <Reveal key={v.title} delay={i * 0.06}>
-              <div className="card-premium flex h-full items-start gap-4 rounded-2xl p-5">
+              <div className="card-premium flex h-full items-start gap-4 rounded-lg p-5">
                 <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
                   <v.icon className="size-5" />
                 </span>
@@ -222,15 +221,15 @@ export default function NosotrosPage() {
       {/* Servicios */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <Reveal>
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h2 className="text-2xl font-semibold sm:text-3xl">
             Nuestros servicios
           </h2>
         </Reveal>
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {SERVICIOS.map((s, i) => (
             <Reveal key={s.title} delay={i * 0.06}>
-              <div className="card-premium h-full rounded-2xl p-5">
-                <span className="flex size-11 items-center justify-center rounded-xl bg-brand/10 text-brand">
+              <div className="card-premium h-full rounded-lg p-5">
+                <span className="flex size-11 items-center justify-center rounded-md bg-brand/10 text-brand">
                   <s.icon className="size-5" />
                 </span>
                 <h3 className="mt-4 text-base font-semibold">{s.title}</h3>
@@ -243,9 +242,9 @@ export default function NosotrosPage() {
 
       {/* Cobertura */}
       <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
-        <div className="panel-glass rounded-3xl p-6 sm:p-8">
+        <div className="panel-glass rounded-lg p-6 sm:p-8">
           <Reveal>
-            <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+            <h2 className="flex items-center gap-2 text-2xl font-semibold sm:text-3xl">
               <MapPin className="size-6 text-brand" /> Dónde trabajamos
             </h2>
           </Reveal>
@@ -262,21 +261,16 @@ export default function NosotrosPage() {
 
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-4 py-12 pb-20 sm:px-6 lg:px-8">
-        <div
-          className="relative overflow-hidden rounded-3xl px-6 py-14 text-center shadow-[0_28px_70px_-32px_color-mix(in_oklch,var(--brand)_70%,transparent)] sm:px-12 sm:py-16"
-          style={{
-            background:
-              // Los porcentajes DEBEN sumar 100 (si no, queda alpha < 1).
-              "linear-gradient(135deg, var(--brand) 0%, color-mix(in oklch, var(--brand) 78%, black 22%) 100%)",
-          }}
-        >
-          <div className="bg-grid-invert pointer-events-none absolute inset-0 opacity-40" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+        {/* Banda charcoal (misma receta que la home): el negro del logo con la
+            raya roja de firma — el rojo a bloque completo quedó atrás. */}
+        <div className="relative overflow-hidden rounded-xl bg-[var(--ink)] px-6 py-14 text-center shadow-[0_28px_70px_-40px_rgba(20,16,10,0.75)] sm:px-12 sm:py-16">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
           <div className="relative mx-auto max-w-2xl">
-            <h2 className="text-balance text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            <span aria-hidden className="mx-auto block h-[3px] w-12 bg-brand" />
+            <h2 className="mt-6 text-balance text-3xl font-semibold text-white sm:text-4xl">
               Hablemos de tu próxima operación
             </h2>
-            <p className="mx-auto mt-4 max-w-lg text-balance text-white">
+            <p className="mx-auto mt-4 max-w-lg text-balance text-white/85">
               Comprá, vendé o alquilá con un equipo con más de {a.anios_experiencia}{" "}
               años de experiencia. Escribinos y te asesoramos sin compromiso.
             </p>
@@ -289,7 +283,7 @@ export default function NosotrosPage() {
               />
               <Link
                 href="/propiedades"
-                className="inline-flex h-13 items-center gap-1.5 rounded-full border border-white/45 px-7 text-base font-medium text-white transition hover:border-white hover:bg-white/15"
+                className="inline-flex h-13 items-center gap-1.5 rounded-md border border-white/30 px-7 text-base font-medium text-white transition hover:border-white hover:bg-white/10"
               >
                 Ver propiedades <ArrowRight className="size-4" />
               </Link>

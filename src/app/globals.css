@@ -55,35 +55,29 @@
   --animate-aurora: aurora 18s ease-in-out infinite;
 }
 
-/* LIGHT: la web es CLARA, fiel al branding real de América Cardozo.
-   Paleta verificada en el CSS de americacardozo.com.ar (sitio Tokko):
-   rojo #f02e19 + crema pastel #f7e6a6 + negro #000 + blanco #fff. */
+/* LENGUAJE VISUAL 2026-09: "editorial inmobiliaria" — sobrio, elegante, formal.
+   Reemplaza al tema anterior (fondo crema #f6e7a5 a pantalla completa + glass
+   + pills) por decisión del cliente: "no parece una inmobiliaria".
+   Bases del nuevo sistema:
+     · Fondo MARFIL casi blanco; el color de marca vive en acentos, no en el fondo.
+     · Superficies SÓLIDAS (blanco) con borde fino y sombra cálida suave — sin
+       backdrop-filter (bonus: desaparece el filtro más caro de GPU del sitio).
+     · Esquinas apenas redondeadas (--radius 0.4rem): rectangular con canto suave.
+     · Serif editorial en títulos (Fraunces, ver layout.tsx) — como el logo.
+     · Un solo acento saturado: el rojo de marca, administrado con cuentagotas. */
 :root {
-  --radius: 0.9rem;
+  /* Antes 0.9rem: cards globo. Ahora lg = 6.4px, xl ≈ 9px, 2xl ≈ 11.5px. */
+  --radius: 0.4rem;
 
-  /* Fondo: EL CREMA EXACTO DEL LOGO (#f6e7a5, sampleado del PNG real).
-     Decisión del cliente: el círculo del logo debe FUNDIRSE con la página sin
-     que se note la diferencia — la marca ES el fondo. Contrastes verificados
-     sobre este crema: foreground 14.0, muted-foreground 5.5, brand-text 4.76,
-     brand 3.31 (íconos) → todos pasan WCAG AA.
-     Las fotos de propiedades no se tiñen: viven dentro de cards BLANCAS. */
-  --background: oklch(0.9247 0.0854 96.9);   /* = #f6e7a5 crema del logo */
-  --foreground: oklch(0.218 0 0);            /* ≈ #1a1a1a — negro suave: el
-                                                negro puro sobre crema vibra */
+  /* Marfil cálido, casi blanco (≈ #faf8f1). Las fotos mandan; el fondo calla.
+     Contrastes sobre marfil: foreground ≈ 15:1, muted-foreground ≈ 6.9:1,
+     brand-text ≈ 5.2:1 → todos AA. */
+  --background: oklch(0.977 0.006 95);
+  --foreground: oklch(0.218 0 0); /* negro suave: el puro vibra sobre cálido */
 
-  /* Card CRISTAL, no velo blanco. Pedido del cliente: "que se vea como cristal".
-     Primer intento fue al 62% de blanco y se veía SUCIO — con razón: blanco
-     sobre un color saturado no lo aclara, lo LAVA (el crema perdía la mitad de
-     su croma: 0.085 → 0.043 en oklch, o sea medio color muerto).
-     Un cristal real no pinta encima: difumina lo que hay detrás. Por eso el
-     velo baja a 38% y el trabajo lo hace `--glass-filter` (blur) en las
-     clases. Legible igual: sobre el crema PELADO, sin nada encima, los
-     contrastes ya son foreground 14.0 / muted 5.5 / brand-text 4.76 → AA.
-     Las fotos NO se tiñen: son <img> opacas, el alpha de la card no las toca. */
-  --card: oklch(1 0 0 / 38%);
+  /* Superficies sólidas. El translúcido quedó solo para chips SOBRE FOTO. */
+  --card: oklch(1 0 0);
   --card-foreground: var(--foreground);
-  /* Popover SÍ queda opaco: los dropdowns/selects flotan sobre CONTENIDO
-     (texto, fotos), no sobre el fondo crema. Translúcido = ilegible. */
   --popover: oklch(1 0 0);
   --popover-foreground: var(--foreground);
 
@@ -94,122 +88,71 @@
      fallback fiel a esos HEX, para que no haya flash de un color distinto. */
   --brand: oklch(0.617 0.230 30);            /* ≈ #f02e19 rojo de marca */
   --brand-foreground: oklch(1 0 0);
-  /* Texto/links en rojo. El --brand puro da 3.3:1 sobre crema y 4.1:1 sobre
-     blanco → NO pasa WCAG AA. Éste da 5.7:1. Mismo hue, sólo más oscuro. */
+  /* Texto/links en rojo: variante oscurecida que pasa AA sobre marfil/blanco. */
   --brand-text: oklch(0.527 0.200 30);       /* ≈ #c41f0d */
-  --electric: oklch(0.660 0.222 32);         /* rojo más vivo (hover/glow) */
-  --accent-warm: oklch(0.924 0.084 95);      /* ≈ #f7e6a6 crema de marca */
-  --whatsapp: oklch(0.55 0.13 150);          /* oscurecido: legible en claro */
+  --electric: oklch(0.660 0.222 32);         /* rojo más vivo (hover puntual) */
+  --accent-warm: oklch(0.924 0.084 95);      /* ≈ #f7e6a6 crema de marca — ya
+                                                no es el fondo: es un acento */
+  --whatsapp: oklch(0.55 0.13 150);          /* verde pino: legible en claro */
   --success: oklch(0.55 0.13 152);
 
   --primary: var(--brand);
   --primary-foreground: var(--brand-foreground);
 
-  /* Superficies: crema muy diluido → dan jerarquía sin ensuciar. */
-  --secondary: oklch(0.962 0.024 95);
+  /* Superficies secundarias: beige clarísimo — jerarquía sin ensuciar. */
+  --secondary: oklch(0.958 0.012 95);
   --secondary-foreground: var(--foreground);
-  --muted: oklch(0.962 0.024 95);
-  --muted-foreground: oklch(0.47 0.015 90); /* ≈ #5f5a4f gris cálido → 6.6:1 */
-  --accent: oklch(0.948 0.034 95);
+  --muted: oklch(0.958 0.012 95);
+  --muted-foreground: oklch(0.47 0.015 90); /* gris cálido ≈ 6.9:1 */
+  --accent: oklch(0.945 0.016 95);
   --accent-foreground: var(--foreground);
 
   --destructive: oklch(0.55 0.21 25);
-  /* Bordes: negro translúcido (antes eran blancos, para el fondo oscuro). */
-  --border: oklch(0.218 0.01 90 / 12%);
-  --input: oklch(0.218 0.01 90 / 16%);
+  /* Hairlines negros translúcidos: el borde fino ES el sistema — reemplaza al
+     filo blanco especular del glass. */
+  --border: oklch(0.218 0.012 90 / 12%);
+  --input: oklch(0.218 0.012 90 / 16%);
   --ring: var(--brand);
 
-  /* Paleta de datos alineada a la marca: rojo → naranja → crema → grises.
-     Oscurecidas respecto del tema anterior para que se lean sobre claro. */
+  /* Paleta de datos alineada a la marca. */
   --chart-1: oklch(0.617 0.230 30);   /* rojo de marca */
   --chart-2: oklch(0.66 0.17 45);     /* rojo-naranja */
-  --chart-3: oklch(0.78 0.13 85);     /* dorado (el crema puro no se ve) */
+  --chart-3: oklch(0.78 0.13 85);     /* dorado */
   --chart-4: oklch(0.55 0.13 152);    /* verde (sólo data positiva) */
   --chart-5: oklch(0.55 0.02 60);     /* gris neutro cálido */
 
-  --sidebar: oklch(0.975 0.016 95);
+  --sidebar: oklch(0.975 0.008 95);
   --sidebar-foreground: var(--foreground);
   --sidebar-primary: var(--brand);
   --sidebar-primary-foreground: var(--brand-foreground);
-  --sidebar-accent: oklch(0.948 0.034 95);
+  --sidebar-accent: oklch(0.945 0.016 95);
   --sidebar-accent-foreground: var(--foreground);
-  --sidebar-border: oklch(0.218 0.01 90 / 10%);
+  --sidebar-border: oklch(0.218 0.012 90 / 10%);
   --sidebar-ring: var(--brand);
 
-  /* ---------- ESCALA GLASS: una sola fuente de verdad ----------
-     Antes cada clase (.glass, .card-premium, .panel-glass, la carta del deck)
-     hardcodeaba sus propios rgba() → cuatro "glass" distintos que había que
-     tocar de a uno. Ahora TODAS consumen estos tokens: subir o bajar la
-     transparencia de todo el sitio es cambiar un número acá.
+  /* ---------- SUPERFICIES: una sola fuente de verdad ----------
+     El sistema anterior tenía 4 niveles de "glass" (velos, blur, relieve,
+     filo especular). El nuevo tiene UNA receta: blanco + hairline + sombra
+     cálida corta. Los nombres de clase se conservan (.glass, .card-premium,
+     .panel-glass, .glass-float) para no tocar 30 archivos de una — pero lo
+     que pintan es sobrio y sólido. */
+  --surface-border: oklch(0.218 0.012 90 / 10%);
+  --surface-border-strong: oklch(0.218 0.012 90 / 16%);
+  /* Sombra cálida (marrón, no negra): sobre marfil el negro puro ensucia. */
+  --surface-shadow:
+    0 1px 2px rgba(60, 50, 25, 0.05),
+    0 14px 34px -24px rgba(60, 50, 25, 0.28);
+  --surface-shadow-lg:
+    0 1px 2px rgba(60, 50, 25, 0.05),
+    0 22px 48px -28px rgba(60, 50, 25, 0.32);
 
-     Dos niveles, porque no todas las superficies piden lo mismo:
-       · sheer  → cards y chips: dejan pasar el crema con ganas
-       · solid  → paneles grandes con mucho dato (cotizador, ficha técnica):
-                  más cuerpo para que tablas y números no compitan con el fondo
-     El borde es BLANCO (no negro): sobre crema, un filo blanco es lo que da la
-     lectura de "vidrio". Un borde oscuro lo devuelve a "caja con marco".
+  /* Charcoal de marca para las bandas oscuras (CTA). Sale del negro del logo,
+     entibiado para no chocar con el marfil. */
+  --ink: oklch(0.235 0.008 80);
+  --ink-foreground: oklch(0.965 0.008 95);
 
-     VELO MÍNIMO — el cristal no pinta, refracta.
-     Estos valores estaban en 0.74/0.44 y el resultado se veía SUCIO. Motivo
-     técnico: el blanco sobre un color saturado no lo aclara, lo DESATURA. El
-     crema #f6e7a5 (oklch chroma 0.085) con blanco al 44% encima cae a chroma
-     0.043 → pierde la mitad del color y queda lechoso, no cristalino.
-     Ahora el velo casi no existe y el volumen lo dan `--glass-filter` + el filo
-     especular. Se puede bajar tanto porque el texto YA es legible sobre el
-     crema pelado (contrastes AA verificados arriba, en --background).
-
-     ELECCIÓN DEL CLIENTE: se le mostraron 6 tratamientos ópticos lado a lado
-     (página /lab-cristal, ya borrada) y eligió "mezcla entre 1 y 5, me gusta
-     más la 1". O sea: la base translúcida y limpia de la 1, sumándole de la 5
-     el RELIEVE — ver `--glass-relief` más abajo. Los velos quedan casi como
-     estaban (0.34/0.20 → 0.36/0.19): el volumen nuevo lo aportan las sombras,
-     no más blanco. */
-  --glass-sheer-top: rgba(255, 255, 255, 0.36);
-  --glass-sheer-bottom: rgba(255, 255, 255, 0.19);
-  --glass-solid-top: rgba(255, 255, 255, 0.48);
-  --glass-solid-bottom: rgba(255, 255, 255, 0.31);
-
-  /* VIDRIO ESMERILADO. `blur` es lo que lo define — es el efecto que la gente
-     reconoce como "glass". Requiere la textura de fondo del body (ver ahí): sin
-     algo detrás que difuminar, el blur no hace absolutamente nada.
-
-     SIN `saturate` alto, y esto es una corrección de un error anterior:
-     estuvo en saturate(115–185%) y el cliente lo rechazó — "se ve un amarillo
-     muy fake". Tenía razón. `saturate` no revela el amarillo del fondo: lo
-     INVENTA, sube el croma por encima del de la marca (a 185% llegaba a 1.63x
-     el croma de #f6e7a5) y el ojo lee un color que no existe en ningún lado del
-     branding. Un vidrio real no tiñe lo que atraviesa: lo difumina.
-     Queda en 104% — apenas compensa lo poco que desatura el velo, nada más.
-
-     El blur es el filtro CARO (muestrea la vecindad de cada pixel, a diferencia
-     de saturate que es por-pixel). 18px es el mínimo donde el esmerilado se lee
-     claramente; bajarlo abarata pero lo devuelve a "capa translúcida".
-     19px y saturate 110% = punto medio 1↔5 con el peso en la 1 (la 1 tenía
-     18px/104%, la 5 tenía 20px/125%). */
-  --glass-filter: blur(19px) saturate(110%);
-
-  /* Filo especular: con el velo casi en cero, el borde es lo que DIBUJA el
-     canto del vidrio. Por eso sube de 0.72 a casi opaco. */
-  --glass-border: rgba(255, 255, 255, 0.75);
-  --glass-border-top: rgba(255, 255, 255, 1);
-  /* Sombra cálida (marrón, no negra): sobre crema el negro puro ensucia. */
-  --glass-shadow: 0 20px 48px -28px rgba(60, 50, 25, 0.42);
-
-  /* RELIEVE — lo que la variante 5 aportó a la mezcla, y la razón por la que
-     una card se lee como vidrio CON ESPESOR y no como una lámina pegada.
-     Son dos sombras internas que simulan cómo la luz trata un canto real:
-       1. línea de luz en el borde de arriba, donde la luz pega de frente
-       2. sombra difusa subiendo desde abajo, el canto opuesto en penumbra
-     Van suavizadas respecto de la 5 original (que usaba 2px y 0.30 de sombra)
-     porque el cliente pidió más peso de la 1: se busca el volumen, no el
-     relieve marcado que hacía ver la card despegada del fondo. */
-  --glass-relief:
-    inset 0 1.5px 0 0 rgba(255, 255, 255, 1),
-    inset 0 -14px 26px -20px rgba(110, 90, 45, 0.22);
-  --glass-inset: inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
-
-  /* Alias legacy — hay llamadas viejas a --glass-bg. */
-  --glass-bg: var(--glass-sheer-top);
+  /* Alias legacy — quedan llamadas viejas a --glass-bg en componentes. */
+  --glass-bg: rgba(255, 255, 255, 0.92);
 }
 
 @layer base {
@@ -221,87 +164,26 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* TEXTURA DE FONDO — requisito técnico del vidrio esmerilado, no decoración.
-     `backdrop-filter: blur()` difumina lo que hay DETRÁS del elemento. Sobre un
-     color plano no cambia un solo pixel: difuminar liso da liso. El
-     glassmorphism de iOS se ve porque siempre hay un wallpaper con detalle
-     atrás. Sin esto, las cards con blur se leerían como pintura blanca.
-     Son glows MUY diluidos del propio crema de marca + un rojo casi
-     imperceptible: no inventan un color nuevo, modulan el que ya está.
+  /* (La textura de puntos + glows del body::before se fue con el glass: existía
+     únicamente para darle "algo que difuminar" al backdrop-filter. Sin blur,
+     el marfil liso es el fondo — más limpio y más barato de componer.) */
 
-     ⚠️ VA EN UN PSEUDO-ELEMENTO `position: fixed`, NO en `background-attachment:
-     fixed` del body. Esa primera versión era una causa directa del scroll lento
-     que reportó el cliente: `background-attachment: fixed` obliga al navegador a
-     RE-PINTAR el fondo en cada frame de scroll (no puede cachearlo como capa), y
-     encima de eso hay ~60 elementos con backdrop-filter que dependen de él.
-     Un elemento fijo aparte se rasteriza UNA vez y después solo se compone:
-     mismo efecto visual (el fondo no scrollea, las cards van difuminando zonas
-     distintas), sin el repaint por frame. Bonus: iOS Safari ignora
-     `background-attachment: fixed` pero sí respeta `position: fixed`, así que
-     ahora el efecto también funciona en iPhone. */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    /* La PRIMERA capa es la que hace posible el vidrio esmerilado, y el motivo
-       es de procesamiento de señal, no de gusto: `blur()` es un filtro pasa-bajos
-       — destruye ALTA frecuencia espacial y apenas toca la baja.
-       Un gradiente suave es baja frecuencia: difuminarlo lo deja casi idéntico
-       (medido: los glows de abajo varían Δ11/255 → el blur no se notaba nada).
-       Una trama de puntos finos es alta frecuencia: el blur la funde en un velo
-       uniforme, y ESE contraste entre "puntos nítidos afuera / fundido adentro"
-       es exactamente lo que el ojo lee como vidrio esmerilado.
-       CALIBRADA, no a ojo. Se buscó el punto donde el contraste LOCAL alcance
-       para verse (rango ≥18/255) sin que el promedio ensucie el crema. Medido:
-         alpha 0.09 / 22px → rango 10 (3.9%)  ← imperceptible, no servía
-         alpha 0.13 / 22px → rango 15 (5.9%)  ← justo
-         alpha 0.20 / 20px → rango 22 (8.6%)  ← ESTE
-         alpha 0.26 / 20px → rango 29 (11.4%) ← ya se lee como textura sucia
-       No ensucia porque puntos de 1px cada 20px cubren <1% del área: el
-       oscurecimiento PROMEDIO es 0.2/255. Todo el efecto es contraste local. */
-    background-image:
-      radial-gradient(circle at 1px 1px, rgba(60, 50, 25, 0.20) 1px, transparent 0),
-      radial-gradient(1000px 700px at 50% -12%, color-mix(in oklch, var(--accent-warm) 55%, transparent), transparent 62%),
-      radial-gradient(760px 620px at 88% 18%, color-mix(in oklch, var(--brand) 7%, transparent), transparent 60%),
-      radial-gradient(900px 700px at 6% 42%, color-mix(in oklch, var(--accent-warm) 78%, transparent), transparent 64%),
-      radial-gradient(820px 640px at 78% 74%, color-mix(in oklch, var(--accent-warm) 62%, transparent), transparent 62%),
-      radial-gradient(680px 560px at 22% 92%, color-mix(in oklch, var(--brand) 5%, transparent), transparent 58%);
-    background-size: 20px 20px, auto, auto, auto, auto, auto;
-  }
   html {
     @apply font-sans antialiased;
     /* Corta el scroll horizontal accidental. El cliente reportó partes "apenas
        corridas" y "margen de scroll" en mobile: eso pasa cuando UN elemento se
-       pasa unos pocos px del viewport (una sombra ancha, un `w-screen` dentro de
-       un contenedor con padding, un blob decorativo posicionado con valores
-       negativos) y el navegador habilita el scroll lateral de toda la página.
-       El síntoma es que TODO se puede correr, no solo el elemento culpable.
-       Va en <html> y no en <body>: en iOS Safari el overflow del body no alcanza.
-       `overflow-x: clip` en vez de `hidden` para no crear un contenedor de
-       scroll — `hidden` rompería el `position: sticky` del header. */
+       pasa unos pocos px del viewport y el navegador habilita el scroll lateral
+       de toda la página. Va en <html> y no en <body>: en iOS Safari el overflow
+       del body no alcanza. `clip` y no `hidden` para no romper el sticky. */
     overflow-x: clip;
-    /* Corta el REBOTE lateral. Aunque la página ya no tenga scroll horizontal
-       (verificado: scrollWidth == viewport), al arrastrar de costado en mobile
-       el navegador hace "rubber band" y despega el contenido, dejando ver una
-       franja de fondo vacío. El cliente lo describió como "si hacés slide de
-       costado aparece una parte de fondo solo".
-       `contain` bloquea el rebote de la página pero NO el de los carruseles
-       internos, que siguen deslizándose normal. */
+    /* Corta el REBOTE lateral en mobile (rubber band que despegaba el fondo). */
     overscroll-behavior-x: contain;
-    /* Evita que iOS y Android agranden el texto solos al rotar el teléfono a
-       horizontal — un "text inflation" que rompe layouts pensados al detalle. */
+    /* Evita el "text inflation" de iOS/Android al rotar el teléfono. */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
 
-  /* SAFE AREAS de iPhone (notch / isla dinámica / barra de gestos).
-     Los elementos fijos del sitio viven pegados a los bordes: en un iPhone
-     moderno el de abajo cae DEBAJO de la barra de gestos, que se lo come, y en
-     horizontal los laterales quedan tapados por el notch.
-     `env(safe-area-inset-*)` vale 0px en cualquier pantalla sin recortes, así
-     que no cambia nada en el resto de los dispositivos. */
+  /* SAFE AREAS de iPhone (notch / isla dinámica / barra de gestos). */
   @supports (padding: env(safe-area-inset-bottom)) {
     .fixed.bottom-5 {
       bottom: calc(1.25rem + env(safe-area-inset-bottom));
@@ -313,49 +195,90 @@
       right: calc(1.25rem + env(safe-area-inset-right));
     }
   }
+
+  /* Títulos en serif editorial (Fraunces). El tracking negativo fuerte era del
+     sans geométrico anterior: una serif se aprieta mucho menos. */
   h1, h2, h3, h4 {
-    @apply font-heading font-bold;
-    letter-spacing: -0.03em;
-    /* `balance` reparte las palabras entre las líneas de un título en vez de
-       dejar una sola colgando abajo ("viuda"). Se nota justo en las anchuras
-       intermedias —tablet, celulares grandes— donde un título de dos líneas
-       queda con cinco palabras arriba y una sola abajo. */
+    @apply font-heading font-semibold;
+    letter-spacing: -0.01em;
     text-wrap: balance;
   }
-  /* Párrafos: `pretty` sólo evita la palabra huérfana en la última línea, sin
-     reequilibrar todo el bloque (que en textos largos es caro y además cambia
-     el ritmo de lectura). */
   p, li {
     text-wrap: pretty;
   }
 }
 
-/* ---------- Capa épica: glass, glow, profundidad (CSS plano) ---------- */
+/* ---------- Superficies sobrias (los nombres glass son legacy) ---------- */
 
-/* Glass premium EN CLARO: blanco translúcido + saturate. El highlight ya no va
-   arriba (eso era para el dark): acá el volumen lo da una sombra suave y cálida.
-   `.glass-dark` se mantiene como alias para no romper llamadas existentes. */
-/* SIN backdrop-filter (antes blur 22px): sobre el fondo crema LISO el blur no
-   aporta nada visible, y cada elemento glass era una capa de composición que
-   la GPU recalculaba al scrollear — con badge + buscador + chips + CTAs eran
-   ~10 capas. El look glass lo da el gradiente translúcido + borde luminoso. */
-/* `.glass` son las piezas CHICAS (badges, pills, chips del buscador): hay ~25
-   por página. Usan un blur de 9px en vez de los 19px de las cards, y no es un
-   recorte arbitrario: el costo de un blur crece con el RADIO (más pixeles
-   vecinos que muestrear por cada pixel de salida), y en una pastilla de 28px de
-   alto un radio de 19px ya difumina más que el propio elemento — el resultado
-   visible es idéntico al de 9px. Se paga una fracción por el mismo efecto.
-   Las cards grandes sí conservan el radio completo. */
+/* `.glass` = chips y pastillas, muchas veces SOBRE FOTO: blanco casi opaco con
+   hairline. Sin blur — la opacidad alta ya garantiza la legibilidad. */
 .glass,
 .glass-dark {
-  background: linear-gradient(180deg, var(--glass-sheer-top), var(--glass-sheer-bottom));
-  -webkit-backdrop-filter: blur(9px) saturate(110%);
-  backdrop-filter: blur(9px) saturate(110%);
-  border: 1px solid var(--glass-border);
-  border-top-color: var(--glass-border-top);
-  box-shadow:
-    var(--glass-relief),
-    0 12px 32px -14px rgba(60, 50, 25, 0.22);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(26, 26, 26, 0.08);
+  box-shadow: 0 1px 2px rgba(60, 50, 25, 0.08);
+}
+
+/* Superficie flotante SOBRE CONTENIDO (chatbot, tooltips). Blanco pleno:
+   flota sobre texto y fotos, cualquier translucidez la vuelve ilegible. */
+.glass-float {
+  background: #ffffff;
+  border: 1px solid var(--surface-border-strong);
+  box-shadow: var(--surface-shadow-lg);
+}
+
+/* Panel grande (ficha técnica, cotizador, crédito, filtros). */
+.panel-glass {
+  background: var(--card);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--surface-shadow);
+}
+
+/* Tarjeta estándar (catálogo, stats, beneficios): blanco sólido, hairline,
+   sombra cálida corta. La elegancia está en lo que NO hace: ni velo, ni blur,
+   ni relieve, ni filo especular. */
+.card-premium {
+  background: var(--card);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--surface-shadow);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+.card-premium:hover {
+  border-color: var(--surface-border-strong);
+  box-shadow: var(--surface-shadow-lg);
+}
+
+/* Banda de sección: transparente — el fondo de la página es UN color uniforme
+   (feedback del cliente: las franjas alternadas se leían como "cortes"). */
+.section-band {
+  background: transparent;
+  color: var(--foreground);
+}
+
+/* Glow de marca: reducido a un anillo fino — en el lenguaje sobrio los halos
+   quedaron afuera. */
+.glow-brand {
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--brand) 25%, transparent);
+}
+/* Texto sólido (nunca gradiente de color): la tipografía manda. */
+.text-gradient {
+  color: var(--foreground);
+}
+
+/* Grillas de fondo — sin uso en el lenguaje sobrio; se conservan por si queda
+   alguna llamada suelta, con presencia mínima. */
+.bg-grid,
+.bg-grid-dark {
+  background-image:
+    linear-gradient(to right, rgba(26, 26, 26, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(26, 26, 26, 0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+.bg-grid-invert {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 64px 64px;
 }
 
 /* ---------- SCROLL-REVEAL EN CSS (reemplaza a motion/react) ----------
@@ -374,8 +297,6 @@
   transition:
     opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
     transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
-  /* `will-change` sólo mientras está por entrar: al terminar se libera abajo,
-     para no dejar 26 capas de GPU vivas el resto de la sesión. */
   will-change: opacity, transform;
 }
 .js-reveal .reveal.is-visible {
@@ -385,8 +306,7 @@
 }
 
 /* Escalonado de `RevealGroup`: cada hijo calcula su delay a partir de su
-   posición, sin orquestador en JS. `nth-child` hasta 12 cubre las grillas del
-   sitio; del 13 en adelante entran sin delay extra (imperceptible). */
+   posición, sin orquestador en JS. */
 .js-reveal .reveal-item:nth-child(1) { transition-delay: calc(var(--reveal-delay-base, 0s) + var(--reveal-stagger, 0.09s) * 0); }
 .js-reveal .reveal-item:nth-child(2) { transition-delay: calc(var(--reveal-delay-base, 0s) + var(--reveal-stagger, 0.09s) * 1); }
 .js-reveal .reveal-item:nth-child(3) { transition-delay: calc(var(--reveal-delay-base, 0s) + var(--reveal-stagger, 0.09s) * 2); }
@@ -397,8 +317,7 @@
 .js-reveal .reveal-item:nth-child(8) { transition-delay: calc(var(--reveal-delay-base, 0s) + var(--reveal-stagger, 0.09s) * 7); }
 .js-reveal .reveal-item:nth-child(n + 9) { transition-delay: calc(var(--reveal-delay-base, 0s) + var(--reveal-stagger, 0.09s) * 8); }
 
-/* Reduced-motion: el contenido aparece igual, sin desplazamiento ni espera.
-   Nunca se queda invisible. */
+/* Reduced-motion: el contenido aparece igual, sin desplazamiento ni espera. */
 @media (prefers-reduced-motion: reduce) {
   .js-reveal .reveal {
     opacity: 1;
@@ -408,141 +327,26 @@
   }
 }
 
-/* DIFERIR RENDER FUERA DE PANTALLA — para items que se repiten en listas largas.
-   Motivo concreto: el catálogo tiene 141 propiedades con scroll infinito, y cada
-   card lleva `backdrop-filter: blur(19px)`. Sin esto, al scrollear un rato el
-   navegador termina componiendo el blur de las 141 a la vez — el blur es el
-   filtro caro (muestrea la vecindad de cada pixel) y ese es exactamente el jank
-   que el CSS de este proyecto ya había documentado una vez.
-   Con `content-visibility: auto` el navegador saltea layout, paint Y el
-   backdrop-filter de todo lo que está fuera del viewport: el costo pasa a ser
-   proporcional a lo que se ve, no a lo que hay cargado.
-
-   `contain-intrinsic-size: auto 520px`: 520px es la altura estimada de una card
-   (foto 4:3 de ~389px de ancho ≈ 292px + cuerpo ≈ 228px). El `auto` hace que el
-   navegador RECUERDE la altura real una vez que la midió, así el scrollbar no
-   salta. Sin un tamaño intrínseco la barra de scroll pegaría saltos al entrar
-   y salir cada card. */
+/* DIFERIR RENDER FUERA DE PANTALLA — para items que se repiten en listas largas
+   (el catálogo llega a 141 cards con scroll infinito). El navegador saltea
+   layout y paint de lo que no está en viewport: el costo pasa a ser
+   proporcional a lo que se ve, no a lo que hay cargado. */
 .list-defer {
   content-visibility: auto;
-  /* ⚠️ SÓLO LA ALTURA. Acá hubo un bug real que rompía el mobile:
-     `contain-intrinsic-size: auto 520px` aplica el valor a las DOS dimensiones,
-     así que además del alto le declaraba 520px de ANCHO a cada card. En mobile
-     la grilla de una columna leía ese tamaño intrínseco y armaba una columna de
-     521px dentro de un contenedor de 343px: la card se salía 162px de pantalla.
-     Eso era lo que el cliente veía como la card cortada, o como el navegador
-     alejando la página y descuadrando la barra de arriba.
-     `contain-intrinsic-height` estima sólo el alto (que es lo que hace falta
-     para que el scrollbar no salte) y deja que el ancho lo resuelva la grilla.
-     El `auto` hace que, una vez medida la card de verdad, recuerde su alto real. */
+  /* ⚠️ SÓLO LA ALTURA. `contain-intrinsic-size: auto 520px` declaraba 520px
+     también de ANCHO y en la grilla de una columna del mobile la card se salía
+     162px de pantalla (bug real ya pagado). `contain-intrinsic-height` estima
+     sólo el alto y deja que el ancho lo resuelva la grilla. */
   contain-intrinsic-height: auto 520px;
 }
 
-/* Superficie flotante SOBRE CONTENIDO (chatbot, tooltips, PiP).
-   Tercer nivel, y no es capricho: `sheer` y `solid` asumen que atrás está el
-   fondo crema LISO. Estas flotan sobre texto y fotos, o sea sobre cualquier
-   color. Con el velo de una card (6–20%) una foto oscura detrás daba 3.9:1 de
-   contraste → por debajo de AA, conversación ilegible.
-   Acá el `blur` SÍ va (único lugar del sitio): destruye el detalle de atrás,
-   que es justo lo que hace falta. El costo de GPU es despreciable porque son
-   2-3 elementos fijos, no 42 cards scrolleando en grilla. */
-.glass-float {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.90), rgba(255, 255, 255, 0.82));
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid var(--glass-border);
-  border-top-color: var(--glass-border-top);
-}
-
-/* Panel grande (ficha técnica, cotizador, crédito, filtros).
-   ANTES: `background: var(--card)` con --card en blanco PURO → de "glass" no
-   tenía nada, era una caja blanca maciza que tapaba el crema. El nombre mentía.
-   AHORA: glass de verdad, en el nivel `solid` porque estos paneles cargan
-   tablas, cuotas y números — necesitan más cuerpo que una card suelta. */
-.panel-glass {
-  background: linear-gradient(180deg, var(--glass-solid-top), var(--glass-solid-bottom));
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
-  border: 1px solid var(--glass-border);
-  border-top-color: var(--glass-border-top);
-  box-shadow:
-    var(--glass-relief),
-    0 16px 42px -26px rgba(60, 50, 25, 0.38);
-}
-
-/* Banda de sección: el CREMA de marca. Es lo que le da ritmo a la página —
-   alterna con el fondo blanco cálido de las secciones de catálogo.
-   (Antes se llamaba .section-dark y pintaba negro; el nombre ya mentía.) */
-/* ANTES era una banda crema con gradiente → la página se veía "cortada" en
-   franjas alternadas (crema / blanco-hueso) y el usuario lo marcó. Ahora el
-   fondo es UN SOLO color uniforme (--background) en toda la página; la calidez
-   la ponen las cards blancas, el rojo de marca y los glows locales (spotlight
-   del deck, auroras), que se funden sin bordes. */
-.section-band {
-  background: transparent;
-  color: var(--foreground);
-}
-
-/* Glow de marca: en claro un halo fuerte ENSUCIA. Anillo nítido + sombra corta. */
-.glow-brand {
-  box-shadow:
-    0 0 0 1px color-mix(in oklch, var(--brand) 35%, transparent),
-    0 8px 22px -12px color-mix(in oklch, var(--brand) 55%, transparent);
-}
-/* iOS-clean: texto SÓLIDO (sin gradiente de color). La tipografía manda, no el color. */
-.text-gradient {
-  color: var(--foreground);
-}
-
-/* Tarjeta premium en claro: blanco puro + sombra cálida (la profundidad la da la
-   sombra, no un borde luminoso — eso era del dark). */
-/* GLASS translúcido, no blanco macizo (pedido del cliente: "las cards blancas
-   se ven raras, hacelas tipo glass"). Deja pasar el crema del fondo — misma
-   estética que la carta del deck del hero. Sin backdrop-filter (perf).
-   Arrancaba en 0.92 → el tope seguía leyéndose blanco. Después pasó a 0.74/0.44
-   y seguía sucio (el blanco desatura el crema). Ahora el velo es casi cero y el
-   efecto lo da `--glass-filter`: el crema atraviesa la card AVIVADO. */
-.card-premium {
-  background: linear-gradient(180deg, var(--glass-sheer-top), var(--glass-sheer-bottom));
-  -webkit-backdrop-filter: var(--glass-filter);
-  backdrop-filter: var(--glass-filter);
-  border: 1px solid var(--glass-border);
-  border-top-color: var(--glass-border-top);
-  box-shadow:
-    var(--glass-relief),
-    var(--glass-shadow);
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease, border-color 0.4s ease;
-}
-
-/* Grilla de fondo: líneas NEGRAS sutiles (antes blancas, para el fondo oscuro).
-   `.bg-grid-dark` queda como alias para no romper llamadas existentes. */
-.bg-grid,
-.bg-grid-dark {
-  background-image:
-    linear-gradient(to right, rgba(26, 26, 26, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(26, 26, 26, 0.05) 1px, transparent 1px);
-  background-size: 64px 64px;
-}
-/* Grilla BLANCA: para superficies de color saturado (el bloque rojo del CTA),
-   donde las líneas negras desaparecen. */
-.bg-grid-invert {
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.14) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
-  background-size: 64px 64px;
-}
-
-/* ---------- Documento exportable a PDF (brochure de favoritos) ----------
-   El documento es CLARO a propósito: un PDF se imprime / comparte y los
-   navegadores NO imprimen fondos oscuros por defecto. print-color-adjust
-   fuerza que los acentos rojos de marca SÍ se impriman. */
+/* ---------- Documento exportable a PDF (brochure de favoritos) ---------- */
 .doc-print {
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
 
 @media print {
-  /* Fuera todo el chrome del sitio: header, footer, chatbot, toolbars */
   header,
   footer,
   [data-no-print] { display: none !important; }
@@ -553,7 +357,6 @@
   }
   main { flex: none !important; }
 
-  /* El documento ocupa la hoja sin caja/sombra/padding extra (usa @page margin) */
   .doc-shell { padding: 0 !important; max-width: none !important; }
   .doc-print {
     padding: 0 !important;
@@ -561,24 +364,18 @@
     box-shadow: none !important;
   }
 
-  /* Un vehículo por hoja */
   .doc-page { break-before: page; }
   .doc-page:first-of-type { break-before: auto; }
   .doc-page { margin-bottom: 0 !important; }
 
-  /* Bloques que NO deben partirse a la mitad */
   .doc-avoid { break-inside: avoid; }
-  /* Títulos no quedan huérfanos al pie de página */
   .doc-print h1, .doc-print h2, .doc-print h3 { break-after: avoid; }
-  /* La foto nunca empuja todo a otra hoja */
   .doc-print img { max-height: 8.5cm; }
 
   @page { margin: 12mm; }
 }
 
-/* ---------- Marquee infinito (rueda de logos / garantías) ----------
-   Patrón canónico: el contenido se renderiza 2 veces y se traslada -50%
-   → loop perfecto sin cortes, con gap uniforme. */
+/* ---------- Marquee infinito (rueda de beneficios) ---------- */
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
@@ -586,34 +383,19 @@
 .animate-marquee {
   animation: marquee var(--marquee-duration, 34s) linear infinite;
 }
-/* Difumina los bordes para un loop limpio y suave */
 .marquee-mask {
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
 }
 
-/* Tilt 3D de las cards (ver components/ui/tilt.tsx). El ángulo llega por las
-   custom properties que escribe el pointermove; la suavidad la da esta
-   transición, no un spring en JS. */
+/* Tilt 3D — fuera del lenguaje sobrio: la clase queda neutralizada por si
+   resta alguna llamada (ver components/ui/tilt.tsx). */
 .tilt-3d {
-  transform-style: preserve-3d;
-  transform: rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-@media (prefers-reduced-motion: reduce) {
-  .tilt-3d {
-    transform: none;
-    transition: none;
-  }
+  transform: none;
 }
 
-/* ENTRADA DEL HERO en cascada — reemplaza las variantes `fadeUp` de motion.
-   Es una animación de CARGA (no depende del scroll), así que basta un keyframe
-   con `both`: no hace falta observer ni JS. Cada bloque declara su turno con
-   `--i` y el delay sale de ahí.
-   `both` deja el estado final aplicado al terminar, y el `from` en opacity:0
-   sólo existe mientras la animación corre: si el CSS no cargara, no hay riesgo
-   de contenido invisible permanente. */
+/* ENTRADA DEL HERO en cascada — animación de carga en CSS puro. `both` deja el
+   estado final aplicado: si el CSS no cargara, no hay contenido invisible. */
 @keyframes hero-in {
   from {
     opacity: 0;
@@ -628,8 +410,6 @@
   animation: hero-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
   animation-delay: calc(var(--i, 0) * 0.08s);
 }
-/* Entrada del deck: aparece con un zoom mínimo, un toque más lenta que el
-   texto para que se lea como el foco visual del hero. */
 @keyframes hero-zoom {
   from {
     opacity: 0;
@@ -651,12 +431,8 @@
   }
 }
 
-/* Vuelo de la carta que deja el frente en el deck del hero.
-   Sale hacia la izquierda, baja apenas, se desvanece y aterriza atrás. El dip
-   de opacidad del medio tapa el cambio instantáneo de z-index.
-   Estaba hecho con keyframes de motion en JS; acá lo corre el compositor, que
-   es lo que saca el lag que reportó el cliente. Los valores en % son relativos
-   a la propia carta, así el abanico escala igual en mobile y en escritorio. */
+/* Vuelo de la carta que deja el frente en el deck del hero. Corre en el
+   compositor (CSS), no en JS. Los % son relativos a la propia carta. */
 @keyframes deck-vuela {
   0% {
     transform: translate(0%, 0%) rotate(0deg) scale(1);
@@ -684,12 +460,7 @@
   50% { transform: translate(-3%, 3%) scale(1.08); opacity: 0.95; }
 }
 
-/* PERFORMANCE — estas tres animaciones corren INFINITAS mientras la página está
-   abierta. Sin `will-change` el navegador re-rasteriza el elemento (y su blur,
-   que en los blobs del hero es enorme) en cada frame, y el scroll se traba.
-   Con `will-change` cada una vive en su propia capa de GPU: se rasteriza una
-   vez y después sólo se compone. Es el caso de uso exacto de `will-change`:
-   elementos animados de forma permanente, no transiciones puntuales. */
+/* Animaciones infinitas: capa de GPU propia para que el scroll no las pague. */
 .animate-aurora,
 .animate-float,
 .animate-marquee {
@@ -698,20 +469,16 @@
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
-  /* Movimientos decorativos SUAVES y continuos que SÍ deben seguir (decisión de marca):
-     cinta de marcas/beneficios, glow rojo del fondo y flote del hero. Son lentos y sutiles. */
+  /* La cinta de beneficios sigue (lenta y sutil, decisión de marca). */
   .animate-marquee { animation-duration: var(--marquee-duration, 34s) !important; animation-iteration-count: infinite !important; }
-  .animate-aurora { animation-duration: 22s !important; animation-iteration-count: infinite !important; }
-  .animate-float { animation-duration: 6s !important; animation-iteration-count: infinite !important; }
 }
 
 /* ---------- Wordmark de marca (header / footer / menú mobile) ----------
-   "AMÉRICA CARDOZO" en serif bold BLANCO con una RAYA ROJA debajo (evoca el logo
-   real: serif negro sobre amarillo con líneas rojas + "VENDE" en rojo).
-   El detalle rojo es la firma visual; el blanco da elegancia sobre el dark. */
+   "AMÉRICA CARDOZO" en la serif editorial con una raya roja al costado —
+   evoca el logo real (serif + líneas rojas + "VENDE" en rojo). */
 .wordmark {
-  font-family: Georgia, "Times New Roman", "Playfair Display", serif;
-  font-weight: 700;
+  font-family: var(--font-heading), Georgia, "Times New Roman", serif;
+  font-weight: 600;
   letter-spacing: 0.01em;
   line-height: 1;
   color: var(--foreground);
@@ -719,7 +486,6 @@
 .wordmark-rule {
   position: relative;
 }
-/* Raya roja: a la izquierda del wordmark (acento vertical, como el logo) */
 .wordmark-rule::before {
   content: "";
   position: absolute;
@@ -728,12 +494,10 @@
   height: 1.15em;
   width: 3px;
   transform: translateY(-50%);
-  border-radius: 9999px;
   background: var(--brand);
-  box-shadow: 0 0 12px -2px color-mix(in oklch, var(--brand) 70%, transparent);
 }
 
-/* Underline rojo animado para nav links (microinteracción premium) */
+/* Underline rojo animado para nav links: la firma visual del sitio. */
 .nav-underline {
   position: relative;
 }
@@ -744,7 +508,6 @@
   bottom: -0.4rem;
   height: 2px;
   width: 100%;
-  border-radius: 9999px;
   background: var(--brand);
   transform: scaleX(0);
   transform-origin: left;
@@ -755,90 +518,8 @@
   transform: scaleX(1);
 }
 
-/* Spotlight detrás de la casa del hero. En claro el rojo fuerte quema: el halo
-   lo da el CREMA de marca, con un corazón rojo apenas insinuado. */
+/* Halo del deck del hero: apenas un respiro cálido, casi imperceptible. */
 .hero-spotlight {
   background:
-    radial-gradient(60% 60% at 50% 40%, color-mix(in oklch, var(--brand) 14%, transparent), transparent 62%),
-    radial-gradient(72% 72% at 50% 45%, color-mix(in oklch, var(--accent-warm) 85%, transparent), transparent 72%);
-}
-
-/* ---------- Microinteracciones premium (cards / CTAs) ----------
-   Todo CSS plano: sin JS, sin libs. Se activa al hover del .group contenedor.
-   Respeta reduced-motion (las transiciones casi se anulan, sin movimiento brusco). */
-
-/* Glow rojo de marca que "respira" desde el interior de la card al hover. La
-   card es overflow-hidden (zoom de imagen + radio), así que el resplandor vive
-   DENTRO con un radial top→bottom que tiñe sutilmente el borde superior. No toca
-   el layout (pointer-events:none) ni roba clicks. */
-.card-glow::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  background: radial-gradient(
-    120% 80% at 50% -10%,
-    color-mix(in oklch, var(--brand) 12%, transparent),
-    transparent 55%
-  );
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.group:hover .card-glow::before,
-.card-glow:hover::before {
-  opacity: 1;
-}
-
-/* Línea de luz superior que se "ilumina" al hover (top highlight animado). */
-.card-topline::after {
-  content: "";
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in oklch, var(--brand) 75%, transparent),
-    transparent
-  );
-  opacity: 0;
-  transform: scaleX(0.4);
-  transform-origin: center;
-  transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.group:hover .card-topline::after {
-  opacity: 1;
-  transform: scaleX(1);
-}
-
-/* Shine: una banda diagonal que CRUZA el botón al hover (sensación premium). */
-.cta-shine {
-  position: relative;
-  overflow: hidden;
-}
-.cta-shine::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    115deg,
-    transparent 25%,
-    rgba(255, 255, 255, 0.22) 50%,
-    transparent 75%
-  );
-  transform: translateX(-130%);
-  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-  pointer-events: none;
-}
-.cta-shine:hover::after {
-  transform: translateX(130%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card-glow::before,
-  .card-topline::after { transition: opacity 0.2s ease; }
-  .cta-shine::after { display: none; }
+    radial-gradient(64% 64% at 50% 42%, color-mix(in oklch, var(--accent-warm) 40%, transparent), transparent 70%);
 }

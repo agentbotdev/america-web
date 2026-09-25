@@ -51,8 +51,8 @@ export function StatsSection() {
       {/* (sin grilla de fondo: el fondo de la página es un solo color liso) */}
       <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <Reveal className="mx-auto max-w-2xl text-center" blur={10}>
-          <span className="text-sm font-medium text-brand-text">Por qué confiar en nosotros</span>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-text">Por qué confiar en nosotros</span>
+          <h2 className="mt-2 text-3xl font-semibold text-foreground sm:text-4xl">
             Trayectoria que se traduce en resultados
           </h2>
         </Reveal>
@@ -63,11 +63,11 @@ export function StatsSection() {
         >
           {STATS.map((s) => (
             <RevealItem key={s.label}>
-              <div className="card-glow card-topline card-premium group relative h-full overflow-hidden rounded-3xl p-6 text-center hover:-translate-y-1.5 hover:border-brand/40">
-                <span className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-brand/12 text-brand ring-1 ring-brand/25 transition-transform duration-500 group-hover:scale-110">
+              <div className="card-premium group relative h-full overflow-hidden rounded-xl p-6 text-center hover:-translate-y-1">
+                <span className="mx-auto mb-4 flex size-12 items-center justify-center rounded-md bg-brand/10 text-brand ring-1 ring-brand/20">
                   <s.icon className="size-6" />
                 </span>
-                <p className="font-heading text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+                <p className="font-heading text-4xl font-semibold text-foreground sm:text-5xl">
                   <CountUp to={s.to} prefix={s.prefix} suffix={s.suffix} />
                 </p>
                 <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-brand-text">

@@ -40,7 +40,7 @@ export function MiniPropiedad({
       whileTap={{ scale: 0.97 }}
       onClick={() => onSeleccionar(p)}
       aria-label={`Ver ${p.titulo}`}
-      className="group flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-border bg-card p-2 text-left transition hover:border-brand/45 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+      className="group flex w-full items-center gap-3 overflow-hidden rounded-lg border border-border bg-card p-2 text-left transition hover:border-brand/45 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
     >
       <span className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-gradient-to-b from-white/10 to-transparent">
         <PropertyImage
@@ -63,13 +63,13 @@ export function MiniPropiedad({
         <span className="mt-1 flex items-center gap-2">
           <span className="font-mono text-sm font-semibold text-foreground">{precioMini(p)}</span>
           {m2 && (
-            <span className="inline-flex items-center gap-0.5 rounded-full bg-brand/20 px-1.5 py-0.5 text-[10px] font-medium text-electric">
+            <span className="inline-flex items-center gap-0.5 rounded-sm bg-brand/20 px-1.5 py-0.5 text-[10px] font-medium text-electric">
               <Ruler className="size-2.5" />
               {m2}
             </span>
           )}
           {!m2 && p.dormitorios ? (
-            <span className="inline-flex items-center gap-0.5 rounded-full bg-brand/20 px-1.5 py-0.5 text-[10px] font-medium text-electric">
+            <span className="inline-flex items-center gap-0.5 rounded-sm bg-brand/20 px-1.5 py-0.5 text-[10px] font-medium text-electric">
               <BedDouble className="size-2.5" />
               {p.dormitorios}
             </span>

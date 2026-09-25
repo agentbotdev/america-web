@@ -163,7 +163,7 @@ function BrochureDoc({ p, onClose }: { p: Propiedad; onClose: () => void }) {
             apunta acá y no al overlay, para que el fondo oscuro no entre. */}
         <div
           ref={docRef}
-          className="doc-print rounded-3xl bg-white p-6 text-[#0f172a] shadow-2xl shadow-black/40 sm:p-9"
+          className="doc-print rounded-xl bg-white p-6 text-[#0f172a] shadow-2xl shadow-black/40 sm:p-9"
         >
           <article className="doc-page" style={{ color: INK }}>
             {/* Cabecera con wordmark de marca */}

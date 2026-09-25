@@ -30,10 +30,10 @@ export function PropertyMap({ propiedad: p }: { propiedad: Propiedad }) {
     <section className="mt-14">
       <div className="mb-6">
         <span className="text-sm font-medium text-brand-text">Dónde está</span>
-        <h2 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Ubicación</h2>
+        <h2 className="mt-2 text-2xl font-semibold sm:text-3xl">Ubicación</h2>
       </div>
 
-      <div className="card-premium overflow-hidden rounded-2xl">
+      <div className="card-premium overflow-hidden rounded-lg">
         <div className="flex items-center gap-2 border-b border-border px-5 py-3.5">
           <MapPin className="size-4 shrink-0 text-brand" />
           <p className="text-sm font-medium text-foreground">{ubicacion}</p>

@@ -23,11 +23,11 @@ export default function Loading() {
         {/* Contador + toggle de filtros (mobile) */}
         <div className="mb-6 flex items-center justify-between gap-3">
           <div className="h-5 w-48 animate-pulse rounded bg-foreground/10" />
-          <div className="h-9 w-24 animate-pulse rounded-full bg-foreground/[0.06] lg:hidden" />
+          <div className="h-9 w-24 animate-pulse rounded-md bg-foreground/[0.06] lg:hidden" />
         </div>
 
         {/* Barra de filtros (visible en lg+) */}
-        <div className="hidden gap-3 rounded-2xl border border-border bg-card p-3 lg:flex lg:flex-wrap">
+        <div className="hidden gap-3 rounded-lg border border-border bg-card p-3 lg:flex lg:flex-wrap">
           <div className="h-9 flex-1 animate-pulse rounded-lg bg-foreground/[0.06] lg:min-w-56" />
           {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="h-9 w-36 animate-pulse rounded-lg bg-foreground/[0.06]" />
@@ -37,7 +37,7 @@ export default function Loading() {
         {/* Grid de cards: primera tanda del scroll infinito (12). */}
         <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="card-premium overflow-hidden rounded-3xl">
+            <div key={i} className="card-premium overflow-hidden rounded-xl">
               <div className="aspect-[4/3] animate-pulse bg-foreground/[0.06]" />
               <div className="space-y-3 p-4">
                 <div className="h-4 w-3/4 animate-pulse rounded bg-foreground/10" />
@@ -47,7 +47,7 @@ export default function Loading() {
                   <div className="h-3 w-full animate-pulse rounded bg-foreground/[0.06]" />
                 </div>
                 <div className="h-6 w-1/3 animate-pulse rounded bg-foreground/10" />
-                <div className="h-9 w-full animate-pulse rounded-full bg-foreground/[0.06]" />
+                <div className="h-9 w-full animate-pulse rounded-md bg-foreground/[0.06]" />
               </div>
             </div>
           ))}

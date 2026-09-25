@@ -95,7 +95,7 @@ export function CreditoHipotecarioClient() {
       {/* Las dos herramientas de Financiación, hermanadas (reunión 18/09). */}
       <FinanciacionTabs activa="/credito-hipotecario" />
       <header className="max-w-2xl">
-        <p className="flex items-center gap-2 text-sm font-medium text-brand">
+        <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-text">
           <Landmark className="size-4" /> Financiamos
         </p>
         {/* Título y copy EXACTOS de la dueña (se quita "tasa" de los ajustables
@@ -112,7 +112,7 @@ export function CreditoHipotecarioClient() {
 
       <div className="mt-8 grid gap-5 lg:grid-cols-[1.1fr_1fr]">
         {/* Inputs */}
-        <div className="panel-glass rounded-3xl p-6 sm:p-7">
+        <div className="panel-glass rounded-lg p-6 sm:p-7">
           {/* Moneda */}
           <div className="mb-6">
             <span className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -218,7 +218,7 @@ export function CreditoHipotecarioClient() {
         </div>
 
         {/* Resultado */}
-        <div className="card-premium flex flex-col rounded-3xl p-6 sm:p-7">
+        <div className="card-premium flex flex-col rounded-lg p-6 sm:p-7">
           <p className="text-sm text-muted-foreground">Cuota mensual estimada</p>
           <motion.p
             key={Math.round(sim.cuotaMensual)}
@@ -298,7 +298,7 @@ export function CreditoHipotecarioClient() {
               pantalla lo anuncien como advertencia y no como texto suelto. */}
           <div
             role="note"
-            className="mt-5 rounded-2xl border-2 border-brand bg-brand/10 p-4 text-center"
+            className="mt-5 rounded-lg border border-brand/60 bg-brand/10 p-4 text-center"
           >
             <p className="flex items-center justify-center gap-2 text-sm font-bold uppercase leading-tight tracking-wide text-brand-text sm:text-base">
               <AlertTriangle className="size-5 shrink-0" aria-hidden />

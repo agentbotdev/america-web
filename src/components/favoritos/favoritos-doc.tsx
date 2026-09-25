@@ -300,7 +300,7 @@ export function FavoritosDoc() {
       </div>
 
       {/* Documento claro imprimible */}
-      <div className="doc-print rounded-3xl bg-white p-6 text-[#0f172a] shadow-2xl shadow-black/40 sm:p-10">
+      <div className="doc-print rounded-xl bg-white p-6 text-[#0f172a] shadow-2xl shadow-black/40 sm:p-10">
         {/* Encabezado del documento */}
         <header
           className="mb-8 flex flex-wrap items-end justify-between gap-3 border-b pb-5"

@@ -13,7 +13,7 @@ const TABS = [
 export function FinanciacionTabs({ activa }: { activa: (typeof TABS)[number]["href"] }) {
   return (
     <nav aria-label="Herramientas de financiación" className="mb-8">
-      <div className="inline-flex flex-wrap gap-1.5 rounded-2xl border border-border bg-white/50 p-1.5">
+      <div className="inline-flex flex-wrap gap-1.5 rounded-lg border border-border bg-white p-1.5">
         {TABS.map((t) => {
           const esActiva = t.href === activa;
           return (
@@ -22,7 +22,7 @@ export function FinanciacionTabs({ activa }: { activa: (typeof TABS)[number]["hr
               href={t.href}
               aria-current={esActiva ? "page" : undefined}
               className={cn(
-                "inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors",
+                "inline-flex h-10 items-center gap-2 rounded-md px-4 text-sm font-semibold transition-colors",
                 esActiva
                   ? "bg-brand text-brand-foreground shadow-sm"
                   : "text-muted-foreground hover:bg-secondary hover:text-foreground",

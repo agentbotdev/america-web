@@ -94,7 +94,7 @@ export function SiteFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
-                  className="inline-flex size-9 items-center justify-center rounded-full border border-border transition-colors hover:bg-background"
+                  className="inline-flex size-9 items-center justify-center rounded-md border border-border transition-colors hover:border-foreground/30 hover:bg-background"
                 >
                   <InstagramGlyph className="size-4" />
                 </a>
@@ -105,7 +105,7 @@ export function SiteFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
-                  className="inline-flex size-9 items-center justify-center rounded-full border border-border transition-colors hover:bg-background"
+                  className="inline-flex size-9 items-center justify-center rounded-md border border-border transition-colors hover:border-foreground/30 hover:bg-background"
                 >
                   <FacebookGlyph className="size-4" />
                 </a>
@@ -116,7 +116,7 @@ export function SiteFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="YouTube"
-                  className="inline-flex size-9 items-center justify-center rounded-full border border-border transition-colors hover:bg-background"
+                  className="inline-flex size-9 items-center justify-center rounded-md border border-border transition-colors hover:border-foreground/30 hover:bg-background"
                 >
                   <YoutubeGlyph className="size-4" />
                 </a>
@@ -127,7 +127,7 @@ export function SiteFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="TikTok"
-                  className="inline-flex size-9 items-center justify-center rounded-full border border-border transition-colors hover:bg-background"
+                  className="inline-flex size-9 items-center justify-center rounded-md border border-border transition-colors hover:border-foreground/30 hover:bg-background"
                 >
                   <TiktokGlyph className="size-4" />
                 </a>

@@ -140,13 +140,13 @@ export default async function PropiedadPage({
             </div>
             {/* <h1> semántico ÚNICO de la página (visible en mobile, presente en el
                 DOM en desktop). El aside repite el título como <p> para no duplicar h1. */}
-            <h1 className="font-heading mt-3 text-2xl font-bold leading-tight">{titulo}</h1>
+            <h1 className="font-heading mt-3 text-2xl font-semibold leading-tight">{titulo}</h1>
             {ubicacion && (
               <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                 <MapPin className="size-3.5 shrink-0" aria-hidden="true" /> {ubicacion}
               </p>
             )}
-            <p className="mt-3 font-mono text-3xl font-semibold tracking-tight text-brand">{precio}</p>
+            <p className="mt-3 text-3xl font-semibold tabular-nums tracking-tight text-brand-text">{precio}</p>
             {p.expensas != null && p.expensas > 0 && (
               <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Building2 className="size-3.5 shrink-0" aria-hidden="true" />
@@ -180,7 +180,7 @@ export default async function PropiedadPage({
 
         {/* Columna derecha (sticky) */}
         <aside className="hidden lg:sticky lg:top-20 lg:block lg:h-fit">
-          <div className="panel-glass rounded-2xl p-5 sm:p-6">
+          <div className="panel-glass rounded-lg p-5 sm:p-6">
             <div className="flex flex-wrap gap-1.5">
               <Badge>{labelOperacion(p.tipo_operacion)}</Badge>
               {p.destacada_web && <Badge variant="secondary">Destacada</Badge>}
@@ -196,7 +196,7 @@ export default async function PropiedadPage({
               </p>
             )}
 
-            <p className="mt-4 font-mono text-3xl font-semibold tracking-tight text-brand">{precio}</p>
+            <p className="mt-4 text-3xl font-semibold tabular-nums tracking-tight text-brand-text">{precio}</p>
 
             {p.expensas != null && p.expensas > 0 && (
               <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">

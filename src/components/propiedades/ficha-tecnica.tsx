@@ -25,8 +25,8 @@ export function FichaTecnica({ propiedad }: { propiedad: Propiedad }) {
   return (
     <section id="ficha-tecnica" className="mt-14">
       <div className="mb-6">
-        <span className="text-sm font-medium text-brand">Especificaciones</span>
-        <h2 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-text">Especificaciones</span>
+        <h2 className="mt-2 text-2xl font-semibold sm:text-3xl">
           Ficha técnica
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -46,15 +46,15 @@ export function FichaTecnica({ propiedad }: { propiedad: Propiedad }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.5, delay: (i % 2) * 0.06, ease: [0.22, 1, 0.36, 1] }}
-              className="card-premium group overflow-hidden rounded-2xl transition-colors duration-300 hover:border-brand/40"
+              className="card-premium group overflow-hidden rounded-lg"
             >
               {/* Encabezado de la categoría */}
               <div className="flex items-center gap-3 border-b border-border bg-gradient-to-r from-brand/[0.08] to-transparent px-5 py-3.5">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand/12 text-brand ring-1 ring-brand/30">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-brand/10 text-brand ring-1 ring-brand/20">
                   <Icon className="size-5" />
                 </span>
                 <h3 className="font-semibold">{c.titulo}</h3>
-                <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                <span className="ml-auto rounded-sm bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                   {count}
                 </span>
               </div>
@@ -65,7 +65,7 @@ export function FichaTecnica({ propiedad }: { propiedad: Propiedad }) {
                   {c.chips!.map((chip) => (
                     <li
                       key={chip}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1.5 text-sm text-foreground"
+                      className="inline-flex items-center gap-1.5 rounded-sm border border-border bg-muted px-3 py-1.5 text-sm text-foreground"
                     >
                       <Check className="size-3.5 shrink-0 text-brand" />
                       {chip}

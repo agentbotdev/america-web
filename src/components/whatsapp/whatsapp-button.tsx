@@ -37,10 +37,13 @@ export function WhatsappButton({
   // más alto es más difícil de errar con el pulgar, y éste es EL botón que no
   // se puede errar. `sm` queda igual — se usa en la barra del header, donde
   // convive con otros controles y crecer descolocaría la fila.
+  // `min-h` y no `h` fija: en anchos intermedios el label largo baja a dos
+  // líneas y con altura fija el texto se salía del botón (visto en la ficha
+  // a ~800px). Con min-h el botón crece lo que haga falta.
   const sizes = {
-    sm: "h-9 px-3 text-sm gap-1.5",
-    md: "h-13 px-5 text-sm gap-2",
-    lg: "h-14 px-7 text-base gap-2.5",
+    sm: "min-h-9 px-3 py-1.5 text-sm gap-1.5",
+    md: "min-h-13 px-5 py-2 text-sm gap-2",
+    lg: "min-h-14 px-7 py-2.5 text-base gap-2.5",
   };
   const variants = {
     solid: "bg-whatsapp text-white hover:brightness-95",
@@ -54,7 +57,9 @@ export function WhatsappButton({
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "inline-flex items-center justify-center rounded-full font-medium transition-all active:scale-[0.98]",
+        // `rounded-md` (≈5px): rectangular con canto suave — el lenguaje sobrio
+        // del restyling 2026-09. La pastilla redonda era parte del look "app".
+        "inline-flex items-center justify-center rounded-md font-medium transition-all active:scale-[0.98]",
         sizes[size],
         variants[variant],
         fullWidth && "w-full",

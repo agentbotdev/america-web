@@ -87,9 +87,10 @@ export function SiteHeader() {
     // 2) Al ser sticky, su backdrop-filter obligaba a recomponer todo lo que
     //    pasa por detrás en CADA frame: era el mayor costo de scroll de la web.
     // Sólido resuelve las dos de una: se ve mejor y no cuesta nada.
-    // Mismo color que la página, SIN línea de borde: el header se funde con el
-    // fondo uniforme (el usuario marcó los "cortes" horizontales de la página).
-    <header className="sticky top-0 z-50 bg-background">
+    // Hairline inferior: en el lenguaje sobrio el borde fino ES la estructura.
+    // (No es el caso de los "cortes" que marcó el cliente — aquello eran bandas
+    // de color distinto entre secciones, no una línea de 1px bajo el header.)
+    <header className="sticky top-0 z-50 border-b border-foreground/[0.07] bg-background">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Logo />
 
@@ -117,7 +118,11 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-1.5">
           <FavoritesSheet />
-          <div className="hidden sm:block">
+          {/* `lg:` y no `sm:`: a 768–1023px las 6 solapas + el corazón ya llenan
+              la fila y este botón era EL elemento que desbordaba el viewport
+              (medido: scrollWidth 802 vs 768 — quedaba cortado por el clip).
+              En ese rango el WhatsApp vive en el FAB flotante y en cada card. */}
+          <div className="hidden lg:block">
             <WhatsappButton
               numero={AGENCIA.whatsapp}
               mensaje={mensajeGeneral(AGENCIA)}
@@ -135,7 +140,7 @@ export function SiteHeader() {
                 como un botón y el área táctil pasa de 40 a 44px. */}
             <SheetTrigger
               aria-label="Abrir menú"
-              className="inline-flex size-11 items-center justify-center rounded-xl border border-foreground/15 bg-white/60 text-foreground shadow-sm transition-colors hover:bg-white md:hidden"
+              className="inline-flex size-11 items-center justify-center rounded-md border border-foreground/15 bg-white text-foreground shadow-sm transition-colors hover:border-foreground/30 md:hidden"
             >
               <Menu className="size-[26px]" strokeWidth={2.25} />
             </SheetTrigger>
@@ -228,7 +233,7 @@ export function SiteHeader() {
             // `min-w-0` + `truncate`: si algún label creciera, se corta con
             // puntos suspensivos en vez de desbordar la columna y reventar la
             // grilla (que es como aparecían los cortes laterales).
-            className="inline-flex h-11 min-w-0 items-center justify-center gap-1.5 rounded-full border border-brand/45 bg-white/55 px-2 text-xs font-semibold text-brand-text transition-colors hover:border-brand hover:bg-brand hover:text-brand-foreground"
+            className="inline-flex h-11 min-w-0 items-center justify-center gap-1.5 rounded-md border border-brand/40 bg-white px-2 text-xs font-semibold text-brand-text transition-colors hover:border-brand hover:bg-brand hover:text-brand-foreground"
           >
             <l.icon className="size-4 shrink-0" aria-hidden />
             <span className="truncate">{l.corto}</span>

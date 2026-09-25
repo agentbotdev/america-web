@@ -32,7 +32,7 @@ export function DescripcionCard({ texto }: { texto: string }) {
         Descripción
       </h2>
 
-      <div className="card-premium mt-3 rounded-2xl p-5">
+      <div className="card-premium mt-3 rounded-lg p-5">
         <p
           className="whitespace-pre-line text-pretty leading-relaxed text-muted-foreground"
           style={
@@ -54,7 +54,7 @@ export function DescripcionCard({ texto }: { texto: string }) {
             type="button"
             onClick={() => setAbierta((v) => !v)}
             aria-expanded={abierta}
-            className="mt-3 inline-flex h-10 items-center gap-1.5 rounded-full border border-brand/40 px-4 text-sm font-semibold text-brand-text transition-colors hover:border-brand hover:bg-brand hover:text-brand-foreground"
+            className="mt-3 inline-flex h-10 items-center gap-1.5 rounded-md border border-brand/40 px-4 text-sm font-semibold text-brand-text transition-colors hover:border-brand hover:bg-brand hover:text-brand-foreground"
           >
             {abierta ? "Ver menos" : "Ver más"}
             <ChevronDown

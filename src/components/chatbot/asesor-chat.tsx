@@ -200,7 +200,7 @@ export function AsesorChat() {
             // (texto, fotos), no sobre el fondo crema liso. Con el velo de una
             // card normal, una foto oscura detrás dejaba el texto en 3.9:1 →
             // por debajo de AA. `.glass-float` lleva blur + más cuerpo.
-            className="flex h-[32rem] w-[min(90vw,23rem)] flex-col overflow-hidden rounded-3xl shadow-2xl shadow-[rgba(60,50,25,0.35)] glass-float"
+            className="flex h-[32rem] w-[min(90vw,23rem)] flex-col overflow-hidden rounded-xl shadow-2xl shadow-[rgba(60,50,25,0.35)] glass-float"
           >
             {/* Header: barra ROJA sólida — el chat es el CTA más fuerte de la web. */}
             <div className="flex items-center gap-3 border-b border-black/10 bg-brand px-4 py-3">
@@ -256,7 +256,7 @@ export function AsesorChat() {
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: i * 0.05 }}
                       onClick={() => elegir(pasoActual, op)}
-                      className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand hover:bg-brand/10 hover:text-brand-text active:scale-95"
+                      className="rounded-md border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-brand hover:bg-brand/10 hover:text-brand-text active:scale-95"
                     >
                       {op.emoji ? `${op.emoji} ` : ""}
                       {op.label}
@@ -285,7 +285,7 @@ export function AsesorChat() {
                     placeholder={pasoActual.input.placeholder}
                     aria-label={pasoActual.input.placeholder}
                     autoComplete="off"
-                    className="min-w-0 flex-1 rounded-full border border-border bg-card px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                    className="min-w-0 flex-1 rounded-md border border-border bg-card px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                   />
                   <button
                     type="submit"
@@ -313,7 +313,7 @@ export function AsesorChat() {
             onClick={() => setModo("abierto")}
             aria-label="Agrandar el asesor"
             // `.glass-float`: flota sobre contenido, ver nota en el panel.
-            className="glass-float flex w-[min(68vw,17rem)] items-center gap-2.5 rounded-2xl px-3 py-2.5 text-left shadow-2xl shadow-[rgba(60,50,25,0.3)]"
+            className="glass-float flex w-[min(68vw,17rem)] items-center gap-2.5 rounded-lg px-3 py-2.5 text-left shadow-2xl shadow-[rgba(60,50,25,0.3)]"
           >
             <span className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-brand text-white">
               <Sparkles className="size-3.5" />
@@ -358,7 +358,7 @@ export function AsesorChat() {
               setTip(false);
             }}
             // `.glass-float`: flota sobre contenido, ver nota en el panel.
-            className="glass-float hidden max-w-[14rem] rounded-2xl rounded-br-md px-3.5 py-2 text-left text-xs text-foreground shadow-xl lg:block"
+            className="glass-float hidden max-w-[14rem] rounded-lg rounded-br-sm px-3.5 py-2 text-left text-xs text-foreground shadow-xl lg:block"
           >
             👋 ¿Te ayudo a encontrar tu próxima propiedad?
           </motion.button>

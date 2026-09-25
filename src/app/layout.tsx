@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Sora } from "next/font/google";
+import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 // `MotionConfig` se eliminó: existía para forzar `reducedMotion="never"` sobre
 // todo el árbol y evitar un hydration mismatch de motion. Ya no hace falta —
 // hero, deck, reveals, contadores, tilt y el proceso corren en CSS, donde la
@@ -22,11 +22,14 @@ const SITE_URL =
 
 const geistSans = Geist({ variable: "--font-sans", subsets: ["latin"], display: "swap" });
 const geistMono = Geist_Mono({ variable: "--font-mono", subsets: ["latin"], display: "swap" });
-const sora = Sora({
+// Serif editorial para títulos: la marca ES serif (el logo). Sora (geométrica,
+// "tech") era gran parte del "no parece una inmobiliaria" que marcó el cliente.
+// Variable + eje óptico: en cuerpos grandes Fraunces afina los trazos sola.
+const fraunces = Fraunces({
   variable: "--font-heading",
   subsets: ["latin"],
   display: "swap",
-  weight: ["500", "600", "700"],
+  axes: ["opsz"],
 });
 
 export const metadata: Metadata = {
@@ -83,10 +86,10 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
 };
 
-// Web CLARA (branding real): la barra del navegador (mobile) acompaña con el
-// crema de marca. `colorScheme: light` evita que el navegador auto-oscurezca.
+// Web CLARA: la barra del navegador (mobile) acompaña con el marfil del fondo.
+// `colorScheme: light` evita que el navegador auto-oscurezca.
 export const viewport: Viewport = {
-  themeColor: "#f7e6a6",
+  themeColor: "#faf8f1",
   colorScheme: "light",
 };
 
@@ -96,7 +99,7 @@ export default function RootLayout({
   return (
     <html
       lang="es-AR"
-      className={`${geistSans.variable} ${geistMono.variable} ${sora.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable}`}
       suppressHydrationWarning
     >
       <body className="flex min-h-screen flex-col" style={brandStyle(AGENCIA)}>

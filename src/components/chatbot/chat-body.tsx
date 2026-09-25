@@ -42,7 +42,7 @@ export const ChatBody = forwardRef<HTMLDivElement, Props>(function ChatBody(
           >
             <span
               className={
-                "max-w-[85%] rounded-2xl px-3.5 py-2 text-sm leading-snug " +
+                "max-w-[85%] rounded-lg px-3.5 py-2 text-sm leading-snug " +
                 (b.de === "user"
                   ? "rounded-br-md bg-brand text-white"
                   : "rounded-bl-md bg-muted text-foreground")
@@ -56,7 +56,7 @@ export const ChatBody = forwardRef<HTMLDivElement, Props>(function ChatBody(
 
       {escribiendo && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-          <span className="flex gap-1 rounded-2xl rounded-bl-md bg-muted px-3.5 py-3">
+          <span className="flex gap-1 rounded-lg rounded-bl-sm bg-muted px-3.5 py-3">
             {[0, 1, 2].map((d) => (
               <motion.span
                 key={d}

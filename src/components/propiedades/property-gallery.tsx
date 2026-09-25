@@ -36,7 +36,7 @@ export function PropertyGallery({ fotos, titulo, tipo, tieneVideo }: PropertyGal
 
   return (
     <div>
-      <div className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-border bg-muted">
+      <div className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-border bg-muted">
         <PropertyImage
           foto={current}
           titulo={titulo}
@@ -65,7 +65,7 @@ export function PropertyGallery({ fotos, titulo, tipo, tieneVideo }: PropertyGal
               <ChevronRight className="size-5" aria-hidden="true" />
             </button>
             {/* Contador de fotos */}
-            <span className="absolute right-3 top-3 z-10 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
+            <span className="absolute right-3 top-3 z-10 rounded-sm bg-black/60 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
               {idx + 1} / {total}
             </span>
           </>
@@ -73,18 +73,18 @@ export function PropertyGallery({ fotos, titulo, tipo, tieneVideo }: PropertyGal
 
         {/* Estado sin fotos: mensaje claro (el ícono del tipo lo pone PropertyImage). */}
         {!hasFotos && (
-          <span className="absolute bottom-3 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/45 px-3 py-1.5 text-xs font-medium text-white/90 backdrop-blur-sm">
+          <span className="absolute bottom-3 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-sm bg-black/45 px-3 py-1.5 text-xs font-medium text-white/90 backdrop-blur-sm">
             <ImageOff className="size-4" aria-hidden="true" /> Sin fotos disponibles
           </span>
         )}
 
         {current?.es_plano && (
-          <span className="absolute bottom-3 left-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 text-xs font-medium text-white">
+          <span className="absolute bottom-3 left-3 z-10 inline-flex items-center gap-1.5 rounded-sm bg-black/70 px-3 py-1.5 text-xs font-medium text-white">
             <Map className="size-4" aria-hidden="true" /> Plano
           </span>
         )}
         {tieneVideo && (
-          <span className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 text-xs font-medium text-white">
+          <span className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-sm bg-black/70 px-3 py-1.5 text-xs font-medium text-white">
             <Video className="size-4" aria-hidden="true" /> Video disponible
           </span>
         )}

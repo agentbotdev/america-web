@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import PropertyCard from "@/components/propiedades/property-card";
-import { Tilt } from "@/components/ui/tilt";
 import { Reveal, RevealGroup, RevealItem } from "@/components/ui/reveal";
 import { AGENCIA } from "@/data/agencia";
 import type { Propiedad } from "@/types";
@@ -44,8 +43,8 @@ export function FeaturedProperties({ propiedades }: { propiedades: Propiedad[] }
       <Reveal>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-xl">
-            <span className="text-sm font-medium text-brand-text">Propiedades destacadas</span>
-            <h2 className="mt-1 text-3xl font-semibold tracking-tight sm:text-4xl">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-text">Propiedades destacadas</span>
+            <h2 className="mt-2 text-3xl font-semibold sm:text-4xl">
               Selección en {AGENCIA.zona_operacion}
             </h2>
             <p className="mt-2 text-balance text-muted-foreground">
@@ -63,12 +62,12 @@ export function FeaturedProperties({ propiedades }: { propiedades: Propiedad[] }
         </div>
       </Reveal>
 
+      {/* Sin Tilt 3D: el efecto de inclinación era parte del look "app
+          juguetona" que el cliente rechazó — la card queda quieta. */}
       <RevealGroup className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" stagger={0.1}>
         {destacadas.map((p) => (
           <RevealItem key={p.id} className="h-full">
-            <Tilt className="h-full">
-              <PropertyCard propiedad={p} />
-            </Tilt>
+            <PropertyCard propiedad={p} />
           </RevealItem>
         ))}
       </RevealGroup>

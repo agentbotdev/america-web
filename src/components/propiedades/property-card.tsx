@@ -52,7 +52,7 @@ function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
   // cada una lleva backdrop-filter. Difiere layout/paint/blur de las que están
   // fuera del viewport (ver globals.css).
   return (
-    <article className="card-glow card-topline card-premium list-defer group relative flex h-full flex-col overflow-hidden rounded-3xl hover:-translate-y-2 hover:border-brand/45 hover:shadow-[0_28px_60px_-26px_color-mix(in_oklch,var(--brand)_45%,transparent)]">
+    <article className="card-premium list-defer group relative flex h-full flex-col overflow-hidden rounded-xl hover:-translate-y-1">
       {/* Link-overlay: cubre TODA la card por encima del contenido → 1 click
           desde cualquier punto. Los CTAs lo "perforan" con z-20. */}
       <Link href={href} className="absolute inset-0 z-10" aria-label={`Ver ${titulo}`} />
@@ -69,11 +69,11 @@ function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
         {/* Velo inferior para legibilidad de los badges y profundidad al hover. */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-70 transition-opacity duration-500 group-hover:opacity-90" />
         <div className="pointer-events-none absolute left-3 top-3 z-20 flex flex-wrap gap-1.5">
-          <span className="glass rounded-full px-2.5 py-1 text-xs font-medium text-foreground">
+          <span className="glass rounded-sm px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-foreground">
             {labelOperacion(p.tipo_operacion)}
           </span>
           {p.destacada_web && (
-            <span className="glass inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium text-brand-text">
+            <span className="glass inline-flex items-center gap-1 rounded-sm px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-brand-text">
               <Star className="size-3 fill-brand text-brand" aria-hidden="true" />
               Destacada
             </span>
@@ -83,7 +83,7 @@ function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
             que se lea también sobre fotos oscuras (lo marcó Tatiana). Abajo a
             la izquierda, sobre el velo — arriba viven los badges de operación. */}
         {zonaCard && (
-          <span className="glass pointer-events-none absolute bottom-3 left-3 z-20 inline-flex max-w-[80%] items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold text-foreground">
+          <span className="glass pointer-events-none absolute bottom-3 left-3 z-20 inline-flex max-w-[80%] items-center gap-1 rounded-sm px-2.5 py-1 text-xs font-semibold text-foreground">
             <MapPin className="size-3 shrink-0" aria-hidden="true" />
             <span className="truncate">{zonaCard}</span>
           </span>
@@ -136,9 +136,9 @@ function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
         {/* Empuja el precio + CTA al fondo para que todas las cards alineen. */}
         <div className="mt-auto pt-4">
           <div className="flex items-end justify-between gap-2">
-            <p className="font-mono text-xl font-semibold tracking-tight">{precio}</p>
+            <p className="text-xl font-semibold tabular-nums tracking-tight">{precio}</p>
             {aptoCredito && (
-              <span className="rounded-full bg-brand/12 px-2 py-0.5 text-xs font-medium text-brand-text">
+              <span className="rounded-sm bg-brand/10 px-2 py-0.5 text-xs font-medium text-brand-text">
                 Apto crédito
               </span>
             )}

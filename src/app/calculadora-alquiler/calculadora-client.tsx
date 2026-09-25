@@ -153,7 +153,7 @@ export function CalculadoraAlquilerClient() {
       {/* Las dos herramientas de Financiación, hermanadas (reunión 18/09). */}
       <FinanciacionTabs activa="/calculadora-alquiler" />
       <header className="max-w-2xl">
-        <p className="flex items-center gap-2 text-sm font-medium text-brand">
+        <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-text">
           <KeyRound className="size-4" /> Calculadora de alquiler
         </p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -168,7 +168,7 @@ export function CalculadoraAlquilerClient() {
 
       <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_1fr]">
         {/* Inputs */}
-        <div className="panel-glass rounded-3xl p-6 sm:p-7">
+        <div className="panel-glass rounded-lg p-6 sm:p-7">
           <div className="space-y-6">
             <CampoNumero
               id="alquiler"
@@ -233,7 +233,7 @@ export function CalculadoraAlquilerClient() {
         </div>
 
         {/* Resultado */}
-        <div className="card-premium flex flex-col rounded-3xl p-6 sm:p-7">
+        <div className="card-premium flex flex-col rounded-lg p-6 sm:p-7">
           <p className="flex items-center gap-2 text-sm font-medium">
             <Calculator className="size-4 text-brand" /> Desglose estimado
           </p>
@@ -274,7 +274,7 @@ export function CalculadoraAlquilerClient() {
               gris chiquito al pie y pasaba desapercibido. */}
           <div
             role="note"
-            className="mt-5 rounded-2xl border-2 border-brand bg-brand/10 p-4 text-center"
+            className="mt-5 rounded-lg border border-brand/60 bg-brand/10 p-4 text-center"
           >
             <p className="flex items-center justify-center gap-2 text-sm font-bold uppercase leading-tight tracking-wide text-brand-text sm:text-base">
               <AlertTriangle className="size-5 shrink-0" aria-hidden />
