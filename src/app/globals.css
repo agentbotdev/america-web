@@ -18,7 +18,12 @@
   --color-success: var(--success);
 
   --font-sans: var(--font-sans);
-  --font-heading: var(--font-heading);
+  /* VERSIÓN 2 ("Apple"): los títulos usan la MISMA sans del cuerpo (Geist,
+     prima hermana de SF Pro). La jerarquía la dan tamaño, peso y tracking
+     apretado — no un cambio de familia. El `.wordmark` NO se toca: su
+     var(--font-heading) cruda ya no existe y cae al fallback Georgia, así
+     el menú sigue evocando la serif del logo. */
+  --font-heading: var(--font-sans);
   --font-mono: var(--font-mono);
 
   /* Paleta de datos como utilidades (`bg-chart-3`, `text-chart-2`, …). */
@@ -69,10 +74,12 @@
   /* Antes 0.9rem: cards globo. Ahora lg = 6.4px, xl ≈ 9px, 2xl ≈ 11.5px. */
   --radius: 0.4rem;
 
-  /* Marfil cálido, casi blanco (≈ #faf8f1). Las fotos mandan; el fondo calla.
-     Contrastes sobre marfil: foreground ≈ 15:1, muted-foreground ≈ 6.9:1,
-     brand-text ≈ 5.2:1 → todos AA. */
-  --background: oklch(0.977 0.006 95);
+  /* VERSIÓN 2: crema dorado suave (≈ #f7f0d5) — punto medio entre el marfil
+     de la v1 y el crema saturado del logo (#f6e7a5, chroma 0.085): acá el
+     chroma es 0.034, o sea 40% del original. Se nota cálido sin teñir las
+     fotos. Contrastes: foreground ≈ 14:1, muted-foreground ≈ 6.4:1,
+     brand-text ≈ 4.9:1 → todos AA. */
+  --background: oklch(0.958 0.034 96);
   --foreground: oklch(0.218 0 0); /* negro suave: el puro vibra sobre cálido */
 
   /* Superficies sólidas. El translúcido quedó solo para chips SOBRE FOTO. */
@@ -196,11 +203,11 @@
     }
   }
 
-  /* Títulos en serif editorial (Fraunces). El tracking negativo fuerte era del
-     sans geométrico anterior: una serif se aprieta mucho menos. */
+  /* VERSIÓN 2: títulos en la sans (Geist) con tracking apretado — la receta
+     tipográfica de Apple: misma familia en todo, jerarquía por peso y tamaño. */
   h1, h2, h3, h4 {
     @apply font-heading font-semibold;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.025em;
     text-wrap: balance;
   }
   p, li {

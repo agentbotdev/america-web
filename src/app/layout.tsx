@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 // `MotionConfig` se eliminó: existía para forzar `reducedMotion="never"` sobre
 // todo el árbol y evitar un hydration mismatch de motion. Ya no hace falta —
 // hero, deck, reveals, contadores, tilt y el proceso corren en CSS, donde la
@@ -22,15 +22,9 @@ const SITE_URL =
 
 const geistSans = Geist({ variable: "--font-sans", subsets: ["latin"], display: "swap" });
 const geistMono = Geist_Mono({ variable: "--font-mono", subsets: ["latin"], display: "swap" });
-// Serif editorial para títulos: la marca ES serif (el logo). Sora (geométrica,
-// "tech") era gran parte del "no parece una inmobiliaria" que marcó el cliente.
-// Variable + eje óptico: en cuerpos grandes Fraunces afina los trazos sola.
-const fraunces = Fraunces({
-  variable: "--font-heading",
-  subsets: ["latin"],
-  display: "swap",
-  axes: ["opsz"],
-});
+// VERSIÓN 2 ("Apple"): sin fuente de títulos aparte — los headings usan Geist
+// vía `--font-heading: var(--font-sans)` en globals.css. Una sola familia,
+// jerarquía por peso/tamaño/tracking.
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -89,7 +83,7 @@ export const metadata: Metadata = {
 // Web CLARA: la barra del navegador (mobile) acompaña con el marfil del fondo.
 // `colorScheme: light` evita que el navegador auto-oscurezca.
 export const viewport: Viewport = {
-  themeColor: "#faf8f1",
+  themeColor: "#f7f0d5",
   colorScheme: "light",
 };
 
@@ -99,7 +93,7 @@ export default function RootLayout({
   return (
     <html
       lang="es-AR"
-      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
       <body className="flex min-h-screen flex-col" style={brandStyle(AGENCIA)}>
