@@ -24,11 +24,13 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
-      <TrustStrip />
-      {/* Instituciones de las que forma parte la martillera. */}
+      {/* UNA sola cinta bajo el hero (feedback del cliente: dos marquees
+          seguidos ocupaban mucho espacio). Los beneficios (TrustStrip) se
+          mudaron abajo de la grilla de propiedades. */}
       <AlliesStrip />
       <StatsSection />
       <FeaturedProperties propiedades={destacadas} />
+      <TrustStrip />
       <ProcessSection />
       <CtaSection />
     </>
