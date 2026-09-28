@@ -62,9 +62,18 @@ export function HeroMapa({ puntos }: { puntos: PuntoMapa[] }) {
       });
       mapa.on("click", () => mapa?.scrollWheelZoom.enable());
 
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      // MISMA RECETA QUE EL MAPA DEL CRM (que carga bien): `{s}` rota los
+      // subdominios a/b/c → el navegador limita conexiones POR HOST, así que
+      // un solo host baja ~6 tiles a la vez y con tres hosts bajan ~18 en
+      // paralelo. Era la diferencia entre "anda bien en el CRM" y el fondo
+      // blanco con puntos que reportó el cliente acá.
+      // `keepBuffer` retiene tiles vecinos: panear no vuelve a mostrar blanco.
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        subdomains: "abc",
         maxZoom: 19,
+        keepBuffer: 4,
+        updateWhenIdle: false,
       }).addTo(mapa);
 
       const icono = L.divIcon({
@@ -123,9 +132,11 @@ export function HeroMapa({ puntos }: { puntos: PuntoMapa[] }) {
     // rounded-[20px]: pedido explícito del cliente — el mapa con más curva
     // que el resto de las cards.
     <div className="overflow-hidden rounded-[20px] border border-foreground/12 bg-white shadow-[0_24px_56px_-32px_rgba(60,45,20,0.4)]">
-      {/* React 19 eleva este link al <head>: el handshake con el servidor de
-          tiles arranca antes de que Leaflet pida el primer PNG. */}
-      <link rel="preconnect" href="https://tile.openstreetmap.org" />
+      {/* React 19 eleva estos links al <head>: el handshake con los TRES
+          subdominios de tiles arranca antes de que Leaflet pida el primer PNG. */}
+      <link rel="preconnect" href="https://a.tile.openstreetmap.org" />
+      <link rel="preconnect" href="https://b.tile.openstreetmap.org" />
+      <link rel="preconnect" href="https://c.tile.openstreetmap.org" />
       <div className="flex items-center gap-2 border-b border-border bg-white px-4 py-3">
         <MapPin className="size-4 shrink-0 text-brand" aria-hidden />
         <p className="text-sm font-semibold text-foreground">Explorá por el mapa</p>
@@ -136,10 +147,14 @@ export function HeroMapa({ puntos }: { puntos: PuntoMapa[] }) {
       {/* Altura EXPLÍCITA: Leaflet no mide nada si el contenedor no la tiene.
           bg-muted de base para que mientras llegan los tiles se vea una
           superficie, no un hueco blanco. */}
+      {/* SIN fade de espera: el contenedor se ve desde el primer frame (con
+          base beige) y los tiles van entrando — ocultarlo hasta "listo" hacía
+          que el mapa apareciera de golpe con tiles todavía blancos. */}
       <div
         ref={contRef}
         aria-label="Mapa de propiedades disponibles"
-        className={`h-[340px] w-full bg-muted transition-opacity duration-300 sm:h-[420px] lg:h-[500px] ${listo ? "opacity-100" : "opacity-0"}`}
+        data-listo={listo || undefined}
+        className="h-[340px] w-full bg-muted sm:h-[420px] lg:h-[500px]"
       />
     </div>
   );

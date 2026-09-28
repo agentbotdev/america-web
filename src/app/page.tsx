@@ -42,9 +42,17 @@ export default async function HomePage() {
       };
     });
 
+  // Selects del buscador del hero, derivados del stock real.
+  const tipos = [...new Set(todas.map((p) => p.tipo_propiedad).filter(Boolean))].sort(
+    (a, b) => a.localeCompare(b, "es"),
+  );
+  const ciudades = [...new Set(todas.map((p) => p.ciudad).filter((c): c is string => !!c))].sort(
+    (a, b) => a.localeCompare(b, "es"),
+  );
+
   return (
     <>
-      <Hero puntos={puntos} />
+      <Hero puntos={puntos} tipos={tipos} ciudades={ciudades} />
       {/* UNA sola cinta bajo el hero (feedback del cliente: dos marquees
           seguidos ocupaban mucho espacio). Los beneficios (TrustStrip) se
           mudaron abajo de la grilla de propiedades. */}
