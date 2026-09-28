@@ -67,7 +67,10 @@
      sobre este crema: foreground 14.0, muted-foreground 5.5, brand-text 4.76,
      brand 3.31 (íconos) → todos pasan WCAG AA.
      Las fotos de propiedades no se tiñen: viven dentro de cards BLANCAS. */
-  --background: oklch(0.9247 0.0854 96.9);   /* = #f6e7a5 crema del logo */
+  /* VERSIÓN 4-CLARA: mismo diseño original pero con el crema ACLARADO
+     (pedido del cliente: "amarillito pero más blanco"). Sube la luz y baja
+     el croma a ~la mitad del crema del logo (#f6e7a5 → ≈#f8f1d8). */
+  --background: oklch(0.955 0.045 96);       /* crema pastel claro */
   --foreground: oklch(0.218 0 0);            /* ≈ #1a1a1a — negro suave: el
                                                 negro puro sobre crema vibra */
 

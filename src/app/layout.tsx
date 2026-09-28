@@ -86,7 +86,7 @@ export const metadata: Metadata = {
 // Web CLARA (branding real): la barra del navegador (mobile) acompaña con el
 // crema de marca. `colorScheme: light` evita que el navegador auto-oscurezca.
 export const viewport: Viewport = {
-  themeColor: "#f7e6a6",
+  themeColor: "#f8f1d8",
   colorScheme: "light",
 };
 
