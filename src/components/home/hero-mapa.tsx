@@ -76,7 +76,7 @@ export function HeroMapa({ puntos }: { puntos: PuntoMapa[] }) {
         popupAnchor: [0, -8],
       });
 
-      const grupo = L.featureGroup(
+      L.featureGroup(
         puntos.map((p) =>
           L.marker([p.lat, p.lng], { icon: icono, title: p.titulo }).bindPopup(popupHtml(p), {
             closeButton: false,
@@ -85,7 +85,27 @@ export function HeroMapa({ puntos }: { puntos: PuntoMapa[] }) {
         ),
       ).addTo(mapa);
 
-      mapa.fitBounds(grupo.getBounds(), { padding: [28, 28], maxZoom: 12 });
+      // VISTA INICIAL: el CLUSTER PRINCIPAL, no el país entero. Con fitBounds
+      // sobre TODOS los pins (GBA oeste + Mar del Plata + Miramar + Pilar) el
+      // mapa arrancaba en zoom 6 —media Argentina— y el 90% de los pins caía
+      // apilado en una bolita ilegible (feedback del cliente: "horrible").
+      // Ahora: mediana de lat/lng = el corazón de la cartera, y se encuadran
+      // solo los pins a menos de ~50 km (0.45°) de ahí → arranca en el GBA
+      // oeste con las casas bien distribuidas. Alejando el zoom aparecen las
+      // plazas de la costa. Bonus: un área chica pide pocos tiles → carga
+      // rápida de entrada.
+      const lats = puntos.map((p) => p.lat).sort((a, b) => a - b);
+      const lngs = puntos.map((p) => p.lng).sort((a, b) => a - b);
+      const medLat = lats[Math.floor(lats.length / 2)];
+      const medLng = lngs[Math.floor(lngs.length / 2)];
+      const cluster = puntos.filter(
+        (p) => Math.abs(p.lat - medLat) < 0.45 && Math.abs(p.lng - medLng) < 0.45,
+      );
+      const base = cluster.length >= 3 ? cluster : puntos;
+      mapa.fitBounds(L.latLngBounds(base.map((p) => [p.lat, p.lng] as [number, number])), {
+        padding: [36, 36],
+        maxZoom: 13,
+      });
       setListo(true);
     })();
 
@@ -100,7 +120,12 @@ export function HeroMapa({ puntos }: { puntos: PuntoMapa[] }) {
   if (puntos.length === 0) return null;
 
   return (
-    <div className="overflow-hidden rounded-xl border border-foreground/12 bg-white shadow-[0_24px_56px_-32px_rgba(60,45,20,0.4)]">
+    // rounded-[20px]: pedido explícito del cliente — el mapa con más curva
+    // que el resto de las cards.
+    <div className="overflow-hidden rounded-[20px] border border-foreground/12 bg-white shadow-[0_24px_56px_-32px_rgba(60,45,20,0.4)]">
+      {/* React 19 eleva este link al <head>: el handshake con el servidor de
+          tiles arranca antes de que Leaflet pida el primer PNG. */}
+      <link rel="preconnect" href="https://tile.openstreetmap.org" />
       <div className="flex items-center gap-2 border-b border-border bg-white px-4 py-3">
         <MapPin className="size-4 shrink-0 text-brand" aria-hidden />
         <p className="text-sm font-semibold text-foreground">Explorá por el mapa</p>
@@ -108,11 +133,13 @@ export function HeroMapa({ puntos }: { puntos: PuntoMapa[] }) {
           {puntos.length} propiedades
         </span>
       </div>
-      {/* Altura EXPLÍCITA: Leaflet no mide nada si el contenedor no la tiene. */}
+      {/* Altura EXPLÍCITA: Leaflet no mide nada si el contenedor no la tiene.
+          bg-muted de base para que mientras llegan los tiles se vea una
+          superficie, no un hueco blanco. */}
       <div
         ref={contRef}
         aria-label="Mapa de propiedades disponibles"
-        className={`h-[340px] w-full transition-opacity duration-500 sm:h-[420px] lg:h-[500px] ${listo ? "opacity-100" : "opacity-0"}`}
+        className={`h-[340px] w-full bg-muted transition-opacity duration-300 sm:h-[420px] lg:h-[500px] ${listo ? "opacity-100" : "opacity-0"}`}
       />
     </div>
   );
