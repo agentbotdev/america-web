@@ -90,7 +90,7 @@ export function HeroMapa({ puntos }: { puntos: PuntoMapa[] }) {
       // mapa arrancaba en zoom 6 —media Argentina— y el 90% de los pins caía
       // apilado en una bolita ilegible (feedback del cliente: "horrible").
       // Ahora: mediana de lat/lng = el corazón de la cartera, y se encuadran
-      // solo los pins a menos de ~50 km (0.45°) de ahí → arranca en el GBA
+      // solo los pins a menos de ~25 km (0.22°) de ahí → arranca en el GBA
       // oeste con las casas bien distribuidas. Alejando el zoom aparecen las
       // plazas de la costa. Bonus: un área chica pide pocos tiles → carga
       // rápida de entrada.
@@ -99,7 +99,7 @@ export function HeroMapa({ puntos }: { puntos: PuntoMapa[] }) {
       const medLat = lats[Math.floor(lats.length / 2)];
       const medLng = lngs[Math.floor(lngs.length / 2)];
       const cluster = puntos.filter(
-        (p) => Math.abs(p.lat - medLat) < 0.45 && Math.abs(p.lng - medLng) < 0.45,
+        (p) => Math.abs(p.lat - medLat) < 0.22 && Math.abs(p.lng - medLng) < 0.22,
       );
       const base = cluster.length >= 3 ? cluster : puntos;
       mapa.fitBounds(L.latLngBounds(base.map((p) => [p.lat, p.lng] as [number, number])), {
