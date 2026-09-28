@@ -73,7 +73,6 @@ export function StatsSection() {
                 <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-brand-text">
                   {s.label}
                 </p>
-                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{s.sub}</p>
               </div>
             </RevealItem>
           ))}
