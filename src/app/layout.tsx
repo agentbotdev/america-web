@@ -83,7 +83,7 @@ export const metadata: Metadata = {
 // Web CLARA: la barra del navegador (mobile) acompaña con el marfil del fondo.
 // `colorScheme: light` evita que el navegador auto-oscurezca.
 export const viewport: Viewport = {
-  themeColor: "#f7f0d5",
+  themeColor: "#fcfbf8",
   colorScheme: "light",
 };
 

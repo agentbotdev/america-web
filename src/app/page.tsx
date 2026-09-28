@@ -14,16 +14,23 @@ import { getPropiedades } from "@/lib/supabase/queries";
 export const revalidate = 120;
 
 export default async function HomePage() {
-  // VERSIÓN 2: el hero ya no lleva deck de cartas — un solo fetch para las
-  // destacadas de la grilla.
+  // VERSIÓN 2: un solo fetch alimenta el buscador del hero (tipos y ciudades
+  // derivados del stock REAL) y la grilla de destacadas.
   const todas = await getPropiedades();
   const destacadas = todas
     .filter((p) => p.destacada_web)
     .sort((a, b) => scoreVidriera(b) - scoreVidriera(a));
 
+  const tipos = [...new Set(todas.map((p) => p.tipo_propiedad).filter(Boolean))].sort(
+    (a, b) => a.localeCompare(b, "es"),
+  );
+  const ciudades = [...new Set(todas.map((p) => p.ciudad).filter((c): c is string => !!c))].sort(
+    (a, b) => a.localeCompare(b, "es"),
+  );
+
   return (
     <>
-      <Hero />
+      <Hero tipos={tipos} ciudades={ciudades} />
       {/* UNA sola cinta bajo el hero (feedback del cliente: dos marquees
           seguidos ocupaban mucho espacio). Los beneficios (TrustStrip) se
           mudaron abajo de la grilla de propiedades. */}
