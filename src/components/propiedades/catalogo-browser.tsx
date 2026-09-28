@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { SearchX, Search, X, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { SearchX, Search, X, SlidersHorizontal, ChevronDown, Home, Building2, LandPlot, KeyRound } from "lucide-react";
 import { useMediaQuery } from "@/lib/use-client-hooks";
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
@@ -84,6 +84,16 @@ export const FILTROS_VACIOS: Filters = {
 };
 
 export type CatalogoFilters = Filters;
+
+// Búsquedas sugeridas (cards de un toque). Los valores de `tipo` matchean el
+// stock real (tipo_propiedad exacto); si un tipo saliera del stock, el filtro
+// da 0 resultados y el usuario lo quita con el chip — sin romper nada.
+const SUGERIDOS: { label: string; icon: typeof Home; parcial: Partial<Filters> }[] = [
+  { label: "Casas en venta", icon: Home, parcial: { tipo: "Casa", operacion: "venta" } },
+  { label: "Casas en alquiler", icon: KeyRound, parcial: { tipo: "Casa", operacion: "alquiler" } },
+  { label: "Departamentos", icon: Building2, parcial: { tipo: "Departamento", operacion: "all" } },
+  { label: "Terrenos", icon: LandPlot, parcial: { tipo: "Terreno", operacion: "all" } },
+];
 
 function superficieDe(p: Propiedad): number {
   return p.superficie_total ?? p.superficie_cubierta ?? p.metros_cubiertos ?? 0;
@@ -209,6 +219,13 @@ export function CatalogoBrowser({
 
   const limpiar = useCallback(() => {
     setF(FILTROS_VACIOS);
+  }, []);
+
+  // Varios campos DE UNA (sugeridos tipo "Casas en venta"): un solo setState
+  // con updater puro — dos set() seguidos también andarían, pero esto es un
+  // commit solo y la URL se sincroniza una única vez.
+  const setVarios = useCallback((parcial: Partial<Filters>) => {
+    setF((prev) => ({ ...prev, ...parcial }));
   }, []);
 
   // La URL se sincroniza DESPUÉS del commit, cuando los filtros ya cambiaron.
@@ -453,6 +470,23 @@ export function CatalogoBrowser({
             <X className="size-4" aria-hidden="true" /> Limpiar
           </button>
         )}
+      </div>
+
+      {/* BÚSQUEDAS SUGERIDAS en cards (pedido del cliente, como la web
+          original): un toque y el filtro queda aplicado al instante. */}
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium text-muted-foreground">Sugeridos:</span>
+        {SUGERIDOS.map((s) => (
+          <button
+            key={s.label}
+            type="button"
+            onClick={() => setVarios(s.parcial)}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3.5 py-2 text-xs font-semibold text-foreground shadow-sm transition hover:border-brand/60 hover:text-brand-text"
+          >
+            <s.icon className="size-3.5 text-brand" aria-hidden="true" />
+            {s.label}
+          </button>
+        ))}
       </div>
 
       {/* Chips de filtros activos: cada uno se quita individualmente. */}

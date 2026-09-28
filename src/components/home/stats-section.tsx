@@ -70,10 +70,11 @@ export function StatsSection() {
                 <p className="font-heading text-4xl font-semibold text-foreground sm:text-5xl">
                   <CountUp to={s.to} prefix={s.prefix} suffix={s.suffix} />
                 </p>
+                {/* Solo número + label rojo (pedido del cliente): sin el texto
+                    gris de abajo, la card queda finita y cuadrada. */}
                 <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-brand-text">
                   {s.label}
                 </p>
-                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{s.sub}</p>
               </div>
             </RevealItem>
           ))}

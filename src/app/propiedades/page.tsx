@@ -66,28 +66,15 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
 
   return (
     <>
-      {/* Sin banda ni border-b: fondo uniforme (feedback previo del cliente). */}
-      <div className="mx-auto grid max-w-7xl items-center gap-x-8 px-4 py-10 sm:px-6 md:grid-cols-[1.15fr_0.85fr] lg:px-8">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-text">Catálogo · Todo el país</p>
-          <h1 className="mt-2 text-4xl font-semibold sm:text-5xl">
-            Encontrá tu próximo inmueble
-          </h1>
-          <p className="mt-3 max-w-prose text-muted-foreground">
-            Casas, departamentos, PH, terrenos y locales en venta y alquiler en toda la Argentina.
-            Filtrá por operación, tipo, zona, dormitorios o precio, y consultá al instante por
-            WhatsApp. El equipo de América Cardozo te acompaña en cada paso.
-          </p>
-        </div>
-        {/* El deck de destacadas se QUITÓ de acá (pedido del cliente: "sacar en
-            la parte inmuebles las cards del hero, así no es tan repetitivo y
-            arranca de una").
-            Tenía sentido: quien entra a /propiedades ya decidió que quiere ver
-            el catálogo — mostrarle primero el mismo librito que ya vio en la
-            home lo hace bajar antes de llegar a lo que vino a buscar. Además
-            ahorra 4 imágenes `priority` que competían con el LCP del catálogo. */}
+      {/* HEADER COMPACTO (pedido del cliente): título → buscador → props.
+          Sin subtítulo ni columnas — el buscador completo arranca de una. */}
+      <div className="mx-auto max-w-7xl px-4 pb-2 pt-8 sm:px-6 lg:px-8">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-brand-text">Catálogo · Todo el país</p>
+        <h1 className="mt-2 text-4xl font-semibold sm:text-5xl">
+          Encontrá tu próximo inmueble
+        </h1>
       </div>
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 pb-10 pt-5 sm:px-6 lg:px-8">
         <CatalogoBrowser propiedades={todas} tipos={tipos} barrios={barrios} initial={initial} />
       </div>
     </>
