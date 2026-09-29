@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { Home, Building2, Trees, Store } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { esFotoPreOptimizada } from "@/lib/imagenes";
 import type { FotoPropiedad } from "@/types";
 
 // Imagen de propiedad con fallback premium: si no hay url o la foto no carga,
@@ -80,13 +81,11 @@ export function PropertyImage({
       fill
       sizes={sizes}
       priority={priority}
-      // SIN `unoptimized`: Next redimensiona la foto al ancho real de la card y
-      // la sirve en AVIF — 48 KB contra los 123 KB del JPG original, y encima se
-      // ve mejor. `unoptimized` fue un parche puesto cuando las cards salían sin
-      // foto, pero la causa real era otra (la query chocaba con el límite de
-      // 1000 filas de PostgREST, arreglado en el commit m6jUQbY). El parche
-      // quedó y hoy sólo agrega peso. Verificado: /_next/image devuelve 200
-      // image/avif para las URLs de static.tokkobroker.com.
+      // Las fotos de la migración (…_w800.webp en Supabase Storage) van
+      // DIRECTO al CDN, sin /_next/image: ya están redimensionadas y en WebP,
+      // y el optimizador solo agregaba latencia (MISS de 0,8-3s por variante).
+      // El resto de las imágenes (JPG originales, YouTube, etc.) sí se optimiza.
+      unoptimized={esFotoPreOptimizada(url)}
       onError={() => setFailed(true)}
       className={cn("object-cover", className)}
     />

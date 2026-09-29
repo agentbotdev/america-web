@@ -97,6 +97,11 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-screen flex-col" style={brandStyle(AGENCIA)}>
+        {/* Preconnect al CDN de fotos (Supabase Storage): las fotos de las
+            propiedades se sirven DIRECTO de ahí (ver lib/imagenes.ts) y abrir
+            la conexión temprano ahorra el handshake TLS en la primera foto.
+            React 19 lo eleva al <head>. */}
+        <link rel="preconnect" href="https://kywossjvyttklegvqgtt.supabase.co" />
         {/* `reducedMotion="never"` — decisión deliberada, con su porqué:
             1) Ramificar el render con `useReducedMotion()` provoca un hydration
                mismatch garantizado (el servidor no tiene navegador: devuelve
