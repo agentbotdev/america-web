@@ -49,7 +49,8 @@ export function StatsSection() {
   return (
     <section className="relative overflow-hidden">
       {/* (sin grilla de fondo: el fondo de la página es un solo color liso) */}
-      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      {/* py-10 (antes 16): sección más finita → menos scroll hasta las props. */}
+      <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
         <Reveal className="mx-auto max-w-2xl text-center" blur={10}>
           <span className="text-sm font-medium text-brand-text">Por qué confiar en nosotros</span>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
@@ -57,20 +58,23 @@ export function StatsSection() {
           </h2>
         </Reveal>
 
+        {/* Cards COMPACTAS (pedido del cliente: "les sobra espacio"): padding
+            corto, ícono chico y número un talle menos. La stat es un dato de
+            respaldo, no la protagonista — el espacio se lo damos a las props. */}
         <RevealGroup
-          className="mt-12 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4"
+          className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
           stagger={0.1}
         >
           {STATS.map((s) => (
             <RevealItem key={s.label}>
-              <div className="card-glow card-topline card-premium group relative h-full overflow-hidden rounded-3xl p-6 text-center hover:-translate-y-1.5 hover:border-brand/40">
-                <span className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-brand/12 text-brand ring-1 ring-brand/25 transition-transform duration-500 group-hover:scale-110">
-                  <s.icon className="size-6" />
+              <div className="card-glow card-topline card-premium group relative h-full overflow-hidden rounded-3xl px-3 py-4 text-center hover:-translate-y-1.5 hover:border-brand/40 sm:py-5">
+                <span className="mx-auto mb-2.5 flex size-9 items-center justify-center rounded-xl bg-brand/12 text-brand ring-1 ring-brand/25 transition-transform duration-500 group-hover:scale-110">
+                  <s.icon className="size-4" />
                 </span>
-                <p className="font-heading text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+                <p className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                   <CountUp to={s.to} prefix={s.prefix} suffix={s.suffix} />
                 </p>
-                <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-brand-text">
+                <p className="mt-0.5 text-xs font-semibold uppercase tracking-wide text-brand-text">
                   {s.label}
                 </p>
               </div>
