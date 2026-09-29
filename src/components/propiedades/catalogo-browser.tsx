@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/select";
 import PropertyCard from "@/components/propiedades/property-card";
 import { labelOperacion } from "@/lib/format";
+import { interpretarBusqueda } from "@/lib/buscador";
 import type { Propiedad } from "@/types";
 
 // Catálogo de propiedades: filtrado + orden 100% en memoria (instantáneo, sin
@@ -108,8 +109,11 @@ function filtrar(items: Propiedad[], f: Filters): Propiedad[] {
 
   const q = f.q.toLowerCase().trim();
   if (q) {
+    // Los TAGS entran en la búsqueda libre (reemplazan a la descripción, que
+    // ya no viaja al cliente): son datos estructurados de amenities/servicios
+    // ("Pileta", "Quincho", "Parrilla") — matchean mejor que la prosa.
     r = r.filter(({ p }) =>
-      `${p.titulo} ${p.barrio ?? ""} ${p.ciudad ?? ""} ${p.descripcion}`
+      `${p.titulo} ${p.barrio ?? ""} ${p.ciudad ?? ""} ${p.tags.join(" ")} ${p.descripcion}`
         .toLowerCase()
         .includes(q),
     );
@@ -222,6 +226,31 @@ export function CatalogoBrowser({
     }
     sync(f);
   }, [f, sync]);
+
+  // DEEP-LINKS SIN SERVIDOR: la página ahora es ESTÁTICA (se sirve del CDN,
+  // sin leer searchParams — leerlos la volvía dinámica y cada visita pagaba
+  // un render en el server). Los filtros de la URL (form del hero, links
+  // compartidos) se aplican acá, una sola vez tras el mount. La frase libre
+  // `q` pasa por interpretarBusqueda igual que antes ("casa en venta" →
+  // tipo + operación); los params explícitos tienen prioridad.
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    if ([...sp.keys()].length === 0) return;
+    const interpretada = interpretarBusqueda(sp.get("q") ?? "");
+    setF((prev) => ({
+      ...prev,
+      q: interpretada.texto,
+      operacion: sp.get("operacion") ?? interpretada.operacion ?? prev.operacion,
+      tipo: sp.get("tipo") ?? interpretada.tipo ?? prev.tipo,
+      barrio: sp.get("barrio") ?? prev.barrio,
+      dormitorios: sp.get("dormitorios") ?? prev.dormitorios,
+      banos: sp.get("banos") ?? prev.banos,
+      precio_min: sp.get("precio_min") ?? prev.precio_min,
+      precio_max: sp.get("precio_max") ?? prev.precio_max,
+      superficie_min: sp.get("superficie_min") ?? prev.superficie_min,
+      orden: sp.get("orden") ?? prev.orden,
+    }));
+  }, []);
 
   const items = useMemo(() => filtrar(propiedades, f), [propiedades, f]);
 
