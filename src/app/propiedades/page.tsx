@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { getPropiedades } from "@/lib/supabase/queries";
-import { CatalogoBrowser, FILTROS_VACIOS } from "@/components/propiedades/catalogo-browser";
-import { interpretarBusqueda } from "@/lib/buscador";
+import { CatalogoBrowser } from "@/components/propiedades/catalogo-browser";
 
-// ISR: el catálogo se regenera cada 120s. El filtrado/orden es 100% client-side
-// (en memoria), así que una sola página estática sirve a todas las combinaciones.
+// ISR REAL: el catálogo se regenera cada 120s y se sirve del CDN.
+// OJO — acá NO se lee `searchParams`: leerlo volvía la ruta DINÁMICA (un
+// render en el servidor por CADA visita: cache MISS + 2-3 queries a Supabase,
+// ~1-2s de TTFB medidos). Los filtros de la URL (deep-links del hero) los
+// aplica el cliente tras el mount, dentro de CatalogoBrowser.
 export const revalidate = 120;
 
 export const metadata: Metadata = {
@@ -24,10 +26,7 @@ export const metadata: Metadata = {
   },
 };
 
-type SP = Promise<Record<string, string | undefined>>;
-
-export default async function PropiedadesPage({ searchParams }: { searchParams: SP }) {
-  const sp = await searchParams;
+export default async function PropiedadesPage() {
   const todas = await getPropiedades();
 
   // Listas de filtros derivadas del stock real (orden alfabético).
@@ -38,31 +37,17 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
     (a, b) => a.localeCompare(b, "es"),
   );
 
-  // BÚSQUEDA COMBINADA (pedido del cliente: "poder poner varias cosas de filtro
-  // como casa en venta o depto en alquiler").
-  // El buscador del hero manda una frase libre en `q`. Antes se usaba como
-  // búsqueda literal sobre título/barrio/descripción, así que "casa en venta"
-  // daba CERO resultados: ninguna propiedad tiene esa frase escrita.
-  // Ahora la frase se interpreta y cada parte va al filtro que le corresponde.
-  // Los parámetros EXPLÍCITOS de la URL (?operacion=…&tipo=…) tienen prioridad:
-  // vienen de los chips de acceso rápido, que ya son inequívocos.
-  const interpretada = interpretarBusqueda(sp.q ?? "");
-
-  // Filtros iniciales desde el URL (deep-links del hero / búsquedas guardadas).
-  // A partir de la hidratación, el filtrado es client-side (instantáneo).
-  const initial = {
-    ...FILTROS_VACIOS,
-    q: interpretada.texto,
-    operacion: sp.operacion ?? interpretada.operacion ?? "all",
-    tipo: sp.tipo ?? interpretada.tipo ?? "all",
-    barrio: sp.barrio ?? "all",
-    dormitorios: sp.dormitorios ?? "all",
-    banos: sp.banos ?? "all",
-    precio_min: sp.precio_min ?? "",
-    precio_max: sp.precio_max ?? "",
-    superficie_min: sp.superficie_min ?? "all",
-    orden: sp.orden ?? "destacadas",
-  };
+  // PAYLOAD LIVIANO: CatalogoBrowser es client component, así que TODO lo que
+  // recibe viaja serializado en el HTML. Las descripciones completas eran ~70KB
+  // que la card no muestra (la búsqueda libre ahora matchea sobre los tags, que
+  // encima son datos estructurados: "pileta", "quincho"). El thumbnail de la
+  // portada tampoco se usa cuando hay `url`. La ficha sigue trayendo todo.
+  const livianas = todas.map((p) => ({
+    ...p,
+    descripcion: "",
+    location_full: undefined,
+    fotos: p.fotos.map((f) => (f.url ? { ...f, thumbnail: undefined } : f)),
+  }));
 
   return (
     <>
@@ -75,7 +60,7 @@ export default async function PropiedadesPage({ searchParams }: { searchParams: 
         </h1>
       </div>
       <div className="mx-auto max-w-7xl px-4 pb-10 pt-5 sm:px-6 lg:px-8">
-        <CatalogoBrowser propiedades={todas} tipos={tipos} barrios={barrios} initial={initial} />
+        <CatalogoBrowser propiedades={livianas} tipos={tipos} barrios={barrios} />
       </div>
     </>
   );
