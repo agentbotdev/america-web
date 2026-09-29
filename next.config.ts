@@ -18,7 +18,15 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
-    formats: ["image/avif", "image/webp"],
+    // SOLO WebP: el encode de AVIF tarda 2-4s en el primer pedido de cada
+    // variante (medido — era el grueso de "las fotos tardan 3 segundos").
+    // WebP codifica ~5× más rápido y pesa apenas más. Las fotos de propiedades
+    // ni siquiera pasan por acá (van `unoptimized`, ver lib/imagenes.ts):
+    // esto aplica al logo, el fondo del hero y los thumbs de YouTube.
+    formats: ["image/webp"],
+    // 31 días de caché para las optimizadas (el default corto re-optimizaba
+    // seguido). OJO: si se reemplaza una imagen de /public, renombrarla.
+    minimumCacheTTL: 2678400,
     // SRCSET RECORTADO — pesa en el HTML, no en las imágenes.
     // Next genera por defecto 8 deviceSizes + 8 imageSizes, o sea hasta 16
     // variantes por imagen, y cada URL `/_next/image?url=…&w=…&q=…` ocupa ~150
