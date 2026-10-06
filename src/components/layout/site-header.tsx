@@ -90,7 +90,8 @@ export function SiteHeader() {
     // Hairline inferior: en el lenguaje sobrio el borde fino ES la estructura.
     // (No es el caso de los "cortes" que marcó el cliente — aquello eran bandas
     // de color distinto entre secciones, no una línea de 1px bajo el header.)
-    <header className="sticky top-0 z-50 border-b border-foreground/[0.07] bg-background">
+    // `data-site-header`: el hero de la home mide este alto para quedar fijo justo debajo.
+    <header data-site-header className="sticky top-0 z-50 border-b border-foreground/[0.07] bg-background">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Logo />
 

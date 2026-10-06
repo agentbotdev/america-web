@@ -22,11 +22,15 @@ const TRUST = [
   { icon: Handshake, value: "Asesoría real", label: "te acompañamos de punta a punta" },
 ];
 
-// El video llega al final cuando se bajó la MITAD del alto del hero: así la
-// puerta abierta se ve con medio hero todavía en pantalla (con 0,7 se probó y el
-// final quedaba en una franja finita arriba), y no se agrega scroll extra antes de
-// las propiedades (pedido explícito de la iteración anterior).
-const RECORRIDO_DEL_VIDEO = 0.5;
+// HERO FIJO (estilo Apple): el hero queda quieto en pantalla mientras se scrollea
+// un recorrido de una pantalla de alto, y en ese tramo corre el video entero.
+// Recién después sigue la página. La versión anterior (el video corría mientras el
+// hero se iba) no agregaba scroll, pero el final —la puerta abierta— se veía con
+// medio hero ya fuera de la pantalla.
+//
+// El video llega a su último cuadro un poco antes de que el hero se suelte, para
+// que la puerta abierta quede quieta un instante antes de irse.
+const FIN_DEL_VIDEO = 0.9;
 // Qué fracción de la distancia al cuadro pedido se recorre en cada repintado.
 const SUAVIZADO = 0.2;
 
@@ -69,6 +73,8 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
   const a = AGENCIA;
   const [operacion, setOperacion] = useState<string>("venta");
   const seccionRef = useRef<HTMLElement>(null);
+  const fijoRef = useRef<HTMLDivElement>(null);
+  const recorridoRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoListo, setVideoListo] = useState(false);
 
@@ -89,9 +95,20 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
   useEffect(() => {
     const video = videoRef.current;
     const seccion = seccionRef.current;
-    if (!video || !seccion) return;
+    const fijo = fijoRef.current;
+    const recorridoEl = recorridoRef.current;
+    if (!video || !seccion || !fijo || !recorridoEl) return;
+    // Sin video (ahorro de datos, o el archivo no cargó) el recorrido no tiene nada
+    // que mostrar: se saca, para no obligar a scrollear una pantalla con el hero quieto.
+    const sinVideo = () => {
+      recorridoEl.style.height = "0px";
+    };
     const ahorroDeDatos = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
-    if (ahorroDeDatos) return;
+    if (ahorroDeDatos) {
+      sinVideo();
+      return;
+    }
+    video.addEventListener("error", sinVideo);
 
     video.muted = true;
     video.preload = "auto";
@@ -103,13 +120,30 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
     let objetivo = 0;
     let mostrado = 0;
     let cuadro = 0;
+    let alturaHeader = 0;
+    let topFijo = 0;
+
+    // Dónde queda fijo el hero: justo debajo del encabezado. Si el hero es más alto
+    // que lo que queda de pantalla (celulares), se fija cuando su borde de abajo
+    // toca el de la pantalla: así primero se ve entero (buscador incluido).
+    const medir = () => {
+      alturaHeader = document.querySelector<HTMLElement>("[data-site-header]")?.offsetHeight ?? 0;
+      seccion.style.setProperty("--hero-header", `${alturaHeader}px`);
+      topFijo = Math.min(alturaHeader, window.innerHeight - fijo.offsetHeight);
+      seccion.style.setProperty("--hero-top", `${topFijo}px`);
+    };
 
     const leerScroll = () => {
       const duracion = video.duration;
       if (!Number.isFinite(duracion) || duracion <= 0) return;
-      const finDelHero = seccion.getBoundingClientRect().bottom + window.scrollY;
-      const recorrido = Math.max(1, finDelHero * RECORRIDO_DEL_VIDEO);
-      const progreso = Math.min(1, Math.max(0, window.scrollY / recorrido));
+      // El video corre desde el primer pixel de scroll hasta casi el final del
+      // recorrido. En escritorio el hero ya arranca fijo (`alturaHeader === topFijo`)
+      // y todo el tramo es recorrido. En celulares se suma lo que el hero sube hasta
+      // fijarse: medido a 544px de ancho eran 324px de scroll con el video quieto.
+      const subida = alturaHeader - topFijo;
+      const tramo = Math.max(1, subida + recorridoEl.offsetHeight * FIN_DEL_VIDEO);
+      const avance = alturaHeader - seccion.getBoundingClientRect().top;
+      const progreso = Math.min(1, Math.max(0, avance / tramo));
       objetivo = progreso * (duracion - 0.05);
     };
 
@@ -135,145 +169,175 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
       leerScroll();
       if (!cuadro) cuadro = requestAnimationFrame(animar);
     };
+    const alCambiarTamano = () => {
+      medir();
+      alScrollear();
+    };
 
+    // El alto del hero cambia con el ancho (el texto se reacomoda) y con la barra
+    // de direcciones del celular: se re-mide cada vez.
+    const observador = new ResizeObserver(alCambiarTamano);
+    observador.observe(fijo);
     video.addEventListener("loadedmetadata", alScrollear);
     window.addEventListener("scroll", alScrollear, { passive: true });
-    window.addEventListener("resize", alScrollear);
-    alScrollear();
+    window.addEventListener("resize", alCambiarTamano);
+    alCambiarTamano();
     return () => {
+      observador.disconnect();
+      video.removeEventListener("error", sinVideo);
       video.removeEventListener("loadedmetadata", alScrollear);
       window.removeEventListener("scroll", alScrollear);
-      window.removeEventListener("resize", alScrollear);
+      window.removeEventListener("resize", alCambiarTamano);
       cancelAnimationFrame(cuadro);
     };
   }, []);
 
   return (
-    <section ref={seccionRef} className="relative overflow-hidden">
-      {/* La foto va siempre debajo: es lo primero que se pinta (LCP) y el video
-          aparece encima con un fundido recién cuando ya tiene su primer cuadro.
-          Como la foto ES ese primer cuadro, el cambio no se nota. */}
-      <Image
-        src="/hero-video-poster.webp"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover object-center"
-      />
-      <video
-        ref={videoRef}
-        muted
-        playsInline
-        preload="none"
-        disablePictureInPicture
-        aria-hidden
-        tabIndex={-1}
-        onLoadedData={() => setVideoListo(true)}
-        className={
-          "absolute inset-0 size-full object-cover object-center transition-opacity duration-500 " +
-          (videoListo ? "opacity-100" : "opacity-0")
-        }
+    // Sin `overflow-hidden` acá: un ancestro con overflow distinto de visible
+    // rompe el `sticky` del hero. El recorte va en el bloque fijo.
+    <section ref={seccionRef} className="relative">
+      <div
+        ref={fijoRef}
+        className="sticky flex flex-col justify-center overflow-hidden"
+        style={{
+          top: "var(--hero-top, 0px)",
+          minHeight: "calc(100svh - var(--hero-header, 0px))",
+        }}
       >
-        <source src="/hero-video.mp4" type="video/mp4" />
-      </video>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/35" />
-
-      <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 pb-16 pt-12 text-center sm:px-6 sm:pt-16 lg:pb-24 lg:pt-24">
-        <div className="hero-in" style={{ "--i": 0 } as React.CSSProperties}>
-          <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80">
-            <ShieldCheck className="size-3.5 text-accent-warm" />
-            <span className="text-white">+{a.anios_experiencia} años</span>
-            <span aria-hidden className="text-accent-warm">·</span>
-            Operamos en todo el país
-          </span>
+        {/* Capa de fondo propia (absolute): next/image con `fill` pide un padre
+            posicionado, y `sticky` no le alcanza. */}
+        <div className="absolute inset-0">
+          {/* La foto va siempre debajo: es lo primero que se pinta (LCP) y el video
+              aparece encima con un fundido recién cuando ya tiene su primer cuadro.
+              Como la foto ES ese primer cuadro, el cambio no se nota. */}
+          <Image
+            src="/hero-video-poster.webp"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          <video
+            ref={videoRef}
+            // `src` en el elemento y no en un <source>: así un error de carga llega
+            // al <video> y se puede sacar el recorrido (con <source> se dispara en el hijo).
+            muted
+            playsInline
+            preload="none"
+            disablePictureInPicture
+            aria-hidden
+            tabIndex={-1}
+            src="/hero-video.mp4"
+            onLoadedData={() => setVideoListo(true)}
+            className={
+              "absolute inset-0 size-full object-cover object-center transition-opacity duration-500 " +
+              (videoListo ? "opacity-100" : "opacity-0")
+            }
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/35" />
         </div>
 
-        <h1
-          className="hero-in mt-5 text-balance text-4xl font-semibold leading-[1.06] text-white min-[440px]:text-5xl sm:text-6xl"
-         style={{ "--i": 1 } as React.CSSProperties}>
-          Tu próxima propiedad
-          <br />
-          te está esperando
-        </h1>
-
-        <p
-          className="hero-in mt-4 max-w-xl text-balance text-base text-white/85 sm:text-lg"
-         style={{ "--i": 2 } as React.CSSProperties}>
-          Casas, departamentos, terrenos y locales en venta y alquiler en toda
-          Argentina. Tasaciones en 48 hs y asesoría real por WhatsApp.
-        </p>
-
-        {/* BUSCADOR PANEL (la pieza central, como en las referencias):
-            tabs de operación + tipo + ubicación + BUSCAR. */}
-        <form
-          action="/propiedades" method="get"
-          className="hero-in mt-9 w-full max-w-2xl rounded-lg bg-white p-3 text-left shadow-[0_28px_70px_-28px_rgba(0,0,0,0.8)] sm:p-4"
-         style={{ "--i": 3 } as React.CSSProperties}>
-          <div role="tablist" aria-label="Tipo de operación" className="flex flex-wrap gap-1.5">
-            {OPERACIONES.map((op) => {
-              const activa = operacion === op.value;
-              return (
-                <button
-                  key={op.value}
-                  type="button"
-                  role="tab"
-                  aria-selected={activa}
-                  onClick={() => setOperacion(op.value)}
-                  className={
-                    "h-10 rounded-md border px-5 text-sm font-semibold transition " +
-                    (activa
-                      ? "border-brand bg-brand text-brand-foreground"
-                      : "border-foreground/15 bg-white text-muted-foreground hover:border-brand/50 hover:text-foreground")
-                  }
-                >
-                  {op.label}
-                </button>
-              );
-            })}
+        <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 pb-16 pt-12 text-center sm:px-6 sm:pt-16 lg:pb-24 lg:pt-24">
+          <div className="hero-in" style={{ "--i": 0 } as React.CSSProperties}>
+            <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80">
+              <ShieldCheck className="size-3.5 text-accent-warm" />
+              <span className="text-white">+{a.anios_experiencia} años</span>
+              <span aria-hidden className="text-accent-warm">·</span>
+              Operamos en todo el país
+            </span>
           </div>
-          {operacion !== "all" && <input type="hidden" name="operacion" value={operacion} />}
 
-          <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
-            <SelectPanel name="tipo" aria="Tipo de propiedad" placeholder="Tipo de propiedad" opciones={tipos} />
-            {/* La ubicación viaja como `q`: el catálogo interpreta la frase y
-                matchea barrio/ciudad — mismo camino que el buscador libre. */}
-            <SelectPanel name="q" aria="Ubicación" placeholder="Ubicación" opciones={ciudades} />
-            <button
-              type="submit"
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-brand px-8 text-sm font-bold uppercase tracking-wide text-brand-foreground transition hover:brightness-110 active:scale-[0.98]"
-            >
-              <Search className="size-4" aria-hidden />
-              Buscar
-            </button>
-          </div>
-        </form>
+          <h1
+            className="hero-in mt-5 text-balance text-4xl font-semibold leading-[1.06] text-white min-[440px]:text-5xl sm:text-6xl"
+           style={{ "--i": 1 } as React.CSSProperties}>
+            Tu próxima propiedad
+            <br />
+            te está esperando
+          </h1>
 
-        {/* CTAs secundarios */}
-        <div
-          className="hero-in mt-7 flex flex-wrap items-center justify-center gap-3"
-         style={{ "--i": 4 } as React.CSSProperties}>
-          <WhatsappButton numero={a.whatsapp} mensaje={mensajeGeneral(a)} label="Asesoría por WhatsApp" size="md" />
-          <Link
-            href="/vende-tu-propiedad"
-            className="inline-flex min-h-13 items-center gap-1.5 rounded-md border border-white/40 px-6 text-sm font-medium text-white transition hover:border-white hover:bg-white/15"
-          >
-            Vendé tu propiedad <ArrowRight className="size-4" />
-          </Link>
-        </div>
+          <p
+            className="hero-in mt-4 max-w-xl text-balance text-base text-white/85 sm:text-lg"
+           style={{ "--i": 2 } as React.CSSProperties}>
+            Casas, departamentos, terrenos y locales en venta y alquiler en toda
+            Argentina. Tasaciones en 48 hs y asesoría real por WhatsApp.
+          </p>
 
-        <dl
-          className="hero-in mt-12 grid w-full max-w-2xl grid-cols-3 gap-4 border-t border-white/20 pt-7"
-         style={{ "--i": 5 } as React.CSSProperties}>
-          {TRUST.map((t) => (
-            <div key={t.value} className="flex flex-col items-center gap-1.5">
-              <t.icon className="size-5 text-accent-warm" aria-hidden />
-              <dt className="text-sm font-semibold text-white">{t.value}</dt>
-              <dd className="text-xs leading-snug text-white/75">{t.label}</dd>
+          {/* BUSCADOR PANEL (la pieza central, como en las referencias):
+              tabs de operación + tipo + ubicación + BUSCAR. */}
+          <form
+            action="/propiedades" method="get"
+            className="hero-in mt-9 w-full max-w-2xl rounded-lg bg-white p-3 text-left shadow-[0_28px_70px_-28px_rgba(0,0,0,0.8)] sm:p-4"
+           style={{ "--i": 3 } as React.CSSProperties}>
+            <div role="tablist" aria-label="Tipo de operación" className="flex flex-wrap gap-1.5">
+              {OPERACIONES.map((op) => {
+                const activa = operacion === op.value;
+                return (
+                  <button
+                    key={op.value}
+                    type="button"
+                    role="tab"
+                    aria-selected={activa}
+                    onClick={() => setOperacion(op.value)}
+                    className={
+                      "h-10 rounded-md border px-5 text-sm font-semibold transition " +
+                      (activa
+                        ? "border-brand bg-brand text-brand-foreground"
+                        : "border-foreground/15 bg-white text-muted-foreground hover:border-brand/50 hover:text-foreground")
+                    }
+                  >
+                    {op.label}
+                  </button>
+                );
+              })}
             </div>
-          ))}
-        </dl>
+            {operacion !== "all" && <input type="hidden" name="operacion" value={operacion} />}
+
+            <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+              <SelectPanel name="tipo" aria="Tipo de propiedad" placeholder="Tipo de propiedad" opciones={tipos} />
+              {/* La ubicación viaja como `q`: el catálogo interpreta la frase y
+                  matchea barrio/ciudad — mismo camino que el buscador libre. */}
+              <SelectPanel name="q" aria="Ubicación" placeholder="Ubicación" opciones={ciudades} />
+              <button
+                type="submit"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-brand px-8 text-sm font-bold uppercase tracking-wide text-brand-foreground transition hover:brightness-110 active:scale-[0.98]"
+              >
+                <Search className="size-4" aria-hidden />
+                Buscar
+              </button>
+            </div>
+          </form>
+
+          {/* CTAs secundarios */}
+          <div
+            className="hero-in mt-7 flex flex-wrap items-center justify-center gap-3"
+           style={{ "--i": 4 } as React.CSSProperties}>
+            <WhatsappButton numero={a.whatsapp} mensaje={mensajeGeneral(a)} label="Asesoría por WhatsApp" size="md" />
+            <Link
+              href="/vende-tu-propiedad"
+              className="inline-flex min-h-13 items-center gap-1.5 rounded-md border border-white/40 px-6 text-sm font-medium text-white transition hover:border-white hover:bg-white/15"
+            >
+              Vendé tu propiedad <ArrowRight className="size-4" />
+            </Link>
+          </div>
+
+          <dl
+            className="hero-in mt-12 grid w-full max-w-2xl grid-cols-3 gap-4 border-t border-white/20 pt-7"
+           style={{ "--i": 5 } as React.CSSProperties}>
+            {TRUST.map((t) => (
+              <div key={t.value} className="flex flex-col items-center gap-1.5">
+                <t.icon className="size-5 text-accent-warm" aria-hidden />
+                <dt className="text-sm font-semibold text-white">{t.value}</dt>
+                <dd className="text-xs leading-snug text-white/75">{t.label}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </div>
+
+      {/* RECORRIDO DEL VIDEO: mientras se scrollea este espacio vacío el hero
+          queda fijo arriba y el video avanza. Una pantalla de alto. */}
+      <div ref={recorridoRef} aria-hidden className="h-[100svh]" />
     </section>
   );
 }
