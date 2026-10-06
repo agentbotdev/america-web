@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -12,7 +12,7 @@ import { mensajeGeneral } from "@/lib/whatsapp";
 
 // VERSIÓN 2 — iteración según las webs de REFERENCIA que eligió la
 // inmobiliaria (matiasszpira.com.ar, marascoquirogaprop.com.ar):
-// hero con foto + un BUSCADOR PANEL protagonista al estilo portal clásico:
+// hero con video de fondo + un BUSCADOR PANEL protagonista al estilo portal clásico:
 // tabs de operación (Venta / Alquiler), select de tipo, select de ubicación
 // y botón grande BUSCAR. Los selects se alimentan del stock real (props).
 
@@ -21,6 +21,14 @@ const TRUST = [
   { icon: MapPin, value: "Todo el país", label: "operamos en toda Argentina" },
   { icon: Handshake, value: "Asesoría real", label: "te acompañamos de punta a punta" },
 ];
+
+// El video llega al final cuando se bajó la MITAD del alto del hero: así la
+// puerta abierta se ve con medio hero todavía en pantalla (con 0,7 se probó y el
+// final quedaba en una franja finita arriba), y no se agrega scroll extra antes de
+// las propiedades (pedido explícito de la iteración anterior).
+const RECORRIDO_DEL_VIDEO = 0.5;
+// Qué fracción de la distancia al cuadro pedido se recorre en cada repintado.
+const SUAVIZADO = 0.2;
 
 const OPERACIONES = [
   { value: "venta", label: "Venta" },
@@ -60,17 +68,115 @@ function SelectPanel({
 export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades?: string[] }) {
   const a = AGENCIA;
   const [operacion, setOperacion] = useState<string>("venta");
+  const seccionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoListo, setVideoListo] = useState(false);
+
+  // VIDEO MANEJADO POR EL SCROLL: no se reproduce solo, avanza a medida que se
+  // baja y retrocede al subir. Arranca quieto en el primer cuadro (la puerta
+  // cerrada) y termina en la puerta abierta.
+  //
+  // - Se carga desde acá y no con atributos en el HTML: React no escribe `muted`
+  //   como atributo en el HTML del servidor, y así tampoco se descarga para quien
+  //   activó el ahorro de datos (se queda con la foto, que es el primer cuadro).
+  // - `prefers-reduced-motion` NO se usa como corte a propósito: en Windows lo
+  //   prende el ajuste de rendimiento "mostrar animaciones" (apagado), no solo una
+  //   elección de accesibilidad. Medido el 06/10 en una PC con Windows: estaba en
+  //   `reduce`, y con ese corte el video no se veía nunca.
+  // - El archivo está codificado con un cuadro clave cada pocos cuadros: saltar a
+  //   cualquier momento es instantáneo. Con la codificación normal (1 cuadro clave
+  //   en 8 s, medido) cada salto decodificaba desde el principio y se trababa.
+  useEffect(() => {
+    const video = videoRef.current;
+    const seccion = seccionRef.current;
+    if (!video || !seccion) return;
+    const ahorroDeDatos = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    if (ahorroDeDatos) return;
+
+    video.muted = true;
+    video.preload = "auto";
+    video.load();
+    // iOS no baja los datos de un video solo con `preload`: hace falta darle play
+    // (permitido sin tocar la pantalla porque está mudo) y pausarlo enseguida.
+    video.play().then(() => video.pause()).catch(() => {});
+
+    let objetivo = 0;
+    let mostrado = 0;
+    let cuadro = 0;
+
+    const leerScroll = () => {
+      const duracion = video.duration;
+      if (!Number.isFinite(duracion) || duracion <= 0) return;
+      const finDelHero = seccion.getBoundingClientRect().bottom + window.scrollY;
+      const recorrido = Math.max(1, finDelHero * RECORRIDO_DEL_VIDEO);
+      const progreso = Math.min(1, Math.max(0, window.scrollY / recorrido));
+      objetivo = progreso * (duracion - 0.05);
+    };
+
+    // Cada cuadro de pantalla se acerca un poco al momento que pide el scroll: así
+    // el video se desliza en vez de saltar cuando la rueda del mouse va de a pasos.
+    const animar = () => {
+      cuadro = 0;
+      if (video.readyState < HTMLMediaElement.HAVE_METADATA) return;
+      mostrado += (objetivo - mostrado) * SUAVIZADO;
+      if (Math.abs(objetivo - mostrado) < 0.005) mostrado = objetivo;
+      // Mientras el navegador está buscando un cuadro no se le pide otro: se
+      // amontonarían los saltos y el video quedaría atrasado respecto del scroll.
+      if (!video.seeking && Math.abs(video.currentTime - mostrado) > 0.001) {
+        if (!video.paused) video.pause();
+        video.currentTime = mostrado;
+      }
+      if (mostrado !== objetivo || Math.abs(video.currentTime - mostrado) > 0.001) {
+        cuadro = requestAnimationFrame(animar);
+      }
+    };
+
+    const alScrollear = () => {
+      leerScroll();
+      if (!cuadro) cuadro = requestAnimationFrame(animar);
+    };
+
+    video.addEventListener("loadedmetadata", alScrollear);
+    window.addEventListener("scroll", alScrollear, { passive: true });
+    window.addEventListener("resize", alScrollear);
+    alScrollear();
+    return () => {
+      video.removeEventListener("loadedmetadata", alScrollear);
+      window.removeEventListener("scroll", alScrollear);
+      window.removeEventListener("resize", alScrollear);
+      cancelAnimationFrame(cuadro);
+    };
+  }, []);
 
   return (
-    <section className="relative overflow-hidden">
+    <section ref={seccionRef} className="relative overflow-hidden">
+      {/* La foto va siempre debajo: es lo primero que se pinta (LCP) y el video
+          aparece encima con un fundido recién cuando ya tiene su primer cuadro.
+          Como la foto ES ese primer cuadro, el cambio no se nota. */}
       <Image
-        src="/hero-fondo.jpg"
+        src="/hero-video-poster.webp"
         alt=""
         fill
         priority
         sizes="100vw"
         className="object-cover object-center"
       />
+      <video
+        ref={videoRef}
+        muted
+        playsInline
+        preload="none"
+        disablePictureInPicture
+        aria-hidden
+        tabIndex={-1}
+        onLoadedData={() => setVideoListo(true)}
+        className={
+          "absolute inset-0 size-full object-cover object-center transition-opacity duration-500 " +
+          (videoListo ? "opacity-100" : "opacity-0")
+        }
+      >
+        <source src="/hero-video.mp4" type="video/mp4" />
+      </video>
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-black/35" />
 
       <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 pb-16 pt-12 text-center sm:px-6 sm:pt-16 lg:pb-24 lg:pt-24">
