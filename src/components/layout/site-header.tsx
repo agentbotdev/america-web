@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, Tag, Landmark, Calculator } from "lucide-react";
+import { Menu, ClipboardCheck, Building2, Landmark } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -40,10 +40,13 @@ const NAV = [
 // Medido a 375px: con los textos largos los tres accesos pedían 481px contra
 // 343px disponibles — sobraban 138px y había que deslizar la fila para ver el
 // tercero (el cliente lo marcó). Con los cortos entran los tres de una.
+// Reunión 06/10: son los SERVICIOS de la inmobiliaria — Tasación, Emprendimientos
+// (va a ser su fuerte) y Crédito. La calculadora de alquiler ya no tiene acceso
+// propio: vive dentro de Crédito, en la solapa hermana (FinanciacionTabs).
 const ACCESOS_MOBILE = [
-  { href: "/vende-tu-propiedad", label: "Vendé tu propiedad", corto: "Vender", icon: Tag },
-  { href: "/credito-hipotecario", label: "Financiamos", corto: "Crédito", icon: Landmark },
-  { href: "/calculadora-alquiler", label: "Calculadora", corto: "Alquiler", icon: Calculator },
+  { href: "/vende-tu-propiedad", label: "Tasación", corto: "Tasación", icon: ClipboardCheck },
+  { href: "/emprendimientos", label: "Emprendimientos", corto: "Emprendimientos", icon: Building2 },
+  { href: "/credito-hipotecario", label: "Crédito", corto: "Crédito", icon: Landmark },
 ];
 
 // Marca un item como activo cuando estamos en su ruta o en una subruta de ella.
@@ -225,8 +228,13 @@ export function SiteHeader() {
           acceso. Con `grid-cols-3` cada uno recibe exactamente un tercio y los
           tres entran siempre, en cualquier celular.
           Se conserva `h-11` (44px) porque es el mínimo táctil cómodo: lo que se
-          achica es el ANCHO y el texto, no el alto. */}
-      <div className="grid grid-cols-3 gap-2 px-4 pb-3 md:hidden">
+          achica es el ANCHO y el texto, no el alto.
+          Reunión 06/10: con "Emprendimientos" los tercios iguales no alcanzan
+          (medido a 375px: pide 104px de texto y el tercio le dejaba 70). Ahora
+          cada acceso mide lo que pide su texto y el sobrante se reparte
+          (`flex-auto`): a 375px entran los tres con 30px de aire, a 360px con 15.
+          Debajo de 360px se esconden los íconos para que siga entrando todo. */}
+      <div className="flex gap-2 px-4 pb-3 md:hidden">
         {ACCESOS_MOBILE.map((l) => (
           <Link
             key={l.href}
@@ -234,9 +242,9 @@ export function SiteHeader() {
             // `min-w-0` + `truncate`: si algún label creciera, se corta con
             // puntos suspensivos en vez de desbordar la columna y reventar la
             // grilla (que es como aparecían los cortes laterales).
-            className="inline-flex h-11 min-w-0 items-center justify-center gap-1.5 rounded-md border border-brand/40 bg-white px-2 text-xs font-semibold text-brand-text transition-colors hover:border-brand hover:bg-brand hover:text-brand-foreground"
+            className="inline-flex h-11 min-w-0 flex-auto items-center justify-center gap-1 rounded-md border border-brand/40 bg-white px-1.5 text-xs font-semibold text-brand-text transition-colors hover:border-brand hover:bg-brand hover:text-brand-foreground"
           >
-            <l.icon className="size-4 shrink-0" aria-hidden />
+            <l.icon className="size-4 shrink-0 max-[359px]:hidden" aria-hidden />
             <span className="truncate">{l.corto}</span>
           </Link>
         ))}
