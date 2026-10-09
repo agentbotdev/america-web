@@ -96,7 +96,11 @@ export function SiteHeader() {
     let cuadro = 0;
     const revisar = () => {
       cuadro = 0;
-      const hero = document.querySelector<HTMLElement>("[data-hero]");
+      // El bloque visible del hero, que sube mientras corre el video: con la sección entera el
+      // header seguía transparente (letras blancas) sobre el fondo blanco de abajo.
+      const hero =
+        document.querySelector<HTMLElement>("[data-hero-fijo]") ??
+        document.querySelector<HTMLElement>("[data-hero]");
       const alto = document.querySelector<HTMLElement>("[data-site-header]")?.offsetHeight ?? 0;
       setSobreHero(!!hero && hero.getBoundingClientRect().bottom > alto);
     };

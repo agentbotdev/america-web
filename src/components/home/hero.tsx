@@ -70,7 +70,15 @@ const FASES = {
   video: [0.03, 0.92],
   /** El piso del living se funde con el fondo de la página. */
   blanco: [0.7, 0.92],
+  /** El hero sube de a poco mientras corre el video (ver SUBIDA). */
+  subida: [0.03, 1],
 } as const;
+// Cuánto del alto del hero sube mientras corre el video: al final se ve el 67,5% de abajo
+// (Nacho, 09/10: con el hero quieto "parece que te congelás ahí"; que se vaya yendo da
+// sensación de scroll). La sección también tiene un margen negativo de lo MISMO, así la
+// siguiente sección arranca justo donde termina el hero ya subido y no queda un hueco.
+const SUBIDA = 0.325;
+const MARGEN_SECCION = `-${SUBIDA * 100}lvh`;
 // Qué fracción de la distancia al punto pedido se recorre en cada repintado.
 const SUAVIZADO = 0.2;
 
@@ -212,6 +220,9 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
       // antes, se sigue viendo la foto (que es ese mismo cuadro) y no un hueco.
       video.style.opacity = primerCuadro ? String(tramo(p, FASES.cruce)) : "0";
       blanco.style.opacity = String(suave(tramo(p, FASES.blanco)));
+      // Lineal y no en curva: acompaña al scroll parejo, como si la página siguiera bajando.
+      const subida = tramo(p, FASES.subida);
+      fijo.style.transform = subida > 0 ? `translate3d(0, ${-SUBIDA * subida * 100}%, 0)` : "";
     };
 
     const ahorroDeDatos = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
@@ -219,6 +230,8 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
     // scrollear: se saca el recorrido y queda el cartel quieto con el buscador.
     const sinVideo = () => {
       recorridoEl.style.height = "0px";
+      // Sin recorrido el hero no sube: tampoco tiene que adelantarse la sección siguiente.
+      seccion.style.marginBottom = "0px";
       objetivo = mostrado = 0;
       aplicar(0);
     };
@@ -229,6 +242,7 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
 
     const cargarVideo = () => {
       recorridoEl.style.height = "";
+      seccion.style.marginBottom = MARGEN_SECCION;
       primerCuadro = false;
       video.style.opacity = "0";
       video.src = encuadre.video;
@@ -325,9 +339,14 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
     // Sin `overflow-hidden` acá: un ancestro con overflow distinto de visible
     // rompe el `sticky` del hero. El recorte va en el bloque fijo.
     // `data-hero`: el header lo mira para saber cuándo dejar de ser transparente.
-    <section ref={seccionRef} data-hero className="relative">
+    // El margen negativo de abajo es el de SUBIDA: la sección siguiente se adelanta lo mismo
+    // que sube el hero al final del video.
+    <section ref={seccionRef} data-hero className="relative" style={{ marginBottom: MARGEN_SECCION }}>
       <div
         ref={fijoRef}
+        // `data-hero-fijo`: el header mira dónde está ESTE bloque (que sube con el video),
+        // no la sección entera, para saber cuándo dejar de ser transparente.
+        data-hero-fijo
         className="hero-fijo sticky overflow-hidden bg-[#a8916b]"
         // El fondo es el color promedio de las fotos del cartel: es lo que se ve hasta que
         // la foto carga, y con un fondo oscuro el cambio a la foto (muy luminosa) se notaba.
