@@ -25,7 +25,11 @@ function precioFav(p: Propiedad) {
   return p.tipo_operacion === "alquiler" ? `${base}/mes` : base;
 }
 
-export function FavoritesSheet() {
+/**
+ * `enMenu`: el disparador es una fila del menú del celular ("Mis favoritos") en vez del
+ * corazón del header, que en el celular dejó su lugar a los accesos (08/10).
+ */
+export function FavoritesSheet({ enMenu = false }: { enMenu?: boolean }) {
   const { ids } = useHydratedFavorites();
   const remove = useFavorites((s) => s.remove);
 
@@ -58,17 +62,29 @@ export function FavoritesSheet() {
   return (
     <Sheet>
       {/* Base UI: el Trigger YA es un <button>, no se anida otro */}
-      <SheetTrigger
-        aria-label="Ver favoritos"
-        className="relative inline-flex size-10 items-center justify-center rounded-full hover:bg-secondary"
-      >
-        <Heart className="size-5" />
-        {count > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-brand text-[11px] font-medium text-brand-foreground">
-            {count}
-          </span>
-        )}
-      </SheetTrigger>
+      {enMenu ? (
+        <SheetTrigger className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-base font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
+          <Heart className="size-5 shrink-0" aria-hidden />
+          Mis favoritos
+          {count > 0 && (
+            <span className="ml-auto flex size-6 items-center justify-center rounded-full bg-brand text-xs font-semibold text-brand-foreground">
+              {count}
+            </span>
+          )}
+        </SheetTrigger>
+      ) : (
+        <SheetTrigger
+          aria-label="Ver favoritos"
+          className="relative inline-flex size-10 items-center justify-center rounded-full hover:bg-secondary"
+        >
+          <Heart className="size-5" />
+          {count > 0 && (
+            <span className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-brand text-[11px] font-medium text-brand-foreground">
+              {count}
+            </span>
+          )}
+        </SheetTrigger>
+      )}
 
       <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
         <SheetHeader className="border-b">

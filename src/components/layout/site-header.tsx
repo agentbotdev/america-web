@@ -54,40 +54,29 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-// Logo REAL de la marca, SOLO el círculo (pedido del cliente: sin el wordmark
-// de texto al lado — el badge ya dice "AMERICA CARDOZO VENDE"). Un poco más
-// grande para que el texto interno se lea.
+// ISOTIPO "AC" (pedido de Nacho 08/10: "usamos ese en casi todos lados"). Reemplaza al
+// logo largo AMERICA CARDOZO VENDE, que en el celular competía con los accesos.
+// Es negro: sobre la foto del hero no se lee, así que ahí va sobre una placa blanca. La
+// caja mide lo mismo con y sin placa (la placa achica el logo por dentro): así el resto
+// del renglón no salta cuando el header deja de ser transparente.
 function Logo({ sobreFoto = false }: { sobreFoto?: boolean }) {
   return (
     <Link
       href="/"
       aria-label={AGENCIA.nombre}
-      className="group flex items-center"
-    >
-      {/* Versión FLAT (sin el círculo crema): el fondo de la página ES el crema
-          del logo, así que el texto se apoya directo — fusión perfecta, sin
-          borde visible sea cual sea el tono de pantalla. */}
-      {/* Sobre la foto del hero la versión flat (letras sueltas) no se lee: va la del
-          círculo crema, que se recorta solo sobre cualquier fondo. */}
-      {sobreFoto ? (
-        <Image
-          src="/marca/america-cardozo-circulo.png"
-          alt=""
-          width={386}
-          height={386}
-          priority
-          className="size-14 shrink-0 transition-transform duration-300 group-hover:scale-105"
-        />
-      ) : (
-        <Image
-          src="/marca/america-cardozo-flat.png"
-          alt=""
-          width={329}
-          height={204}
-          priority
-          className="h-12 w-auto shrink-0 transition-transform duration-300 group-hover:scale-105"
-        />
+      className={cn(
+        "group flex h-7 w-[51px] shrink-0 items-center justify-center rounded-md transition-colors md:h-10 md:w-[73px]",
+        sobreFoto && "bg-white/95 p-[3px] shadow-[0_2px_10px_rgb(0_0_0/0.25)]",
       )}
+    >
+      <Image
+        src="/marca/isotipo-ac.png"
+        alt=""
+        width={720}
+        height={397}
+        priority
+        className="size-full object-contain transition-transform duration-300 group-hover:scale-105"
+      />
     </Link>
   );
 }
@@ -149,8 +138,28 @@ export function SiteHeader() {
           : "border-foreground/[0.07] bg-background",
       )}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-1.5 px-3 sm:px-6 md:h-16 md:gap-4 lg:px-8">
         <Logo sobreFoto={transparente} />
+
+        {/* ACCESOS DEL CELULAR en el MISMO renglón del logo (Nacho, 08/10: antes eran un
+            segundo renglón y se comían el alto de la pantalla). Cards más bajas y con menos
+            padding, pero la letra NO se achica. Medido: los tres textos suman 201px; con el
+            isotipo a 28px de alto y la hamburguesa de 36px entran desde 360px de pantalla.
+            `flex-auto` reparte el sobrante, así en un celular más ancho crecen parejas. Los
+            íconos recién entran desde 440px. En md+ la nav ya tiene estos destinos. */}
+        <nav aria-label="Accesos rápidos" className="flex min-w-0 flex-1 gap-1 md:hidden">
+          {ACCESOS_MOBILE.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              aria-current={isActive(pathname, l.href) ? "page" : undefined}
+              className="inline-flex h-8 min-w-0 flex-auto items-center justify-center gap-1 rounded-md border border-brand/40 bg-white px-1 text-xs font-semibold text-brand-text shadow-sm transition-colors hover:border-brand hover:bg-brand hover:text-brand-foreground min-[390px]:px-1.5"
+            >
+              <l.icon className="hidden size-3.5 shrink-0 min-[440px]:block" aria-hidden />
+              <span className="truncate">{l.corto}</span>
+            </Link>
+          ))}
+        </nav>
 
         {/* MAYÚSCULA + tracking (tipografía como los títulos del footer),
             texto un punto más chico para que entren las 6 solapas. */}
@@ -176,8 +185,12 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <div className="flex items-center gap-1.5">
-          <FavoritesSheet />
+        <div className="flex shrink-0 items-center gap-1.5">
+          {/* El corazón no entra en el renglón del celular (ahí van los accesos): en el
+              celular los favoritos se abren desde el menú. */}
+          <div className="hidden md:block">
+            <FavoritesSheet />
+          </div>
           {/* `lg:` y no `sm:`: a 768–1023px las 6 solapas + el corazón ya llenan
               la fila y este botón era EL elemento que desbordaba el viewport
               (medido: scrollWidth 802 vs 768 — quedaba cortado por el clip).
@@ -200,9 +213,9 @@ export function SiteHeader() {
                 como un botón y el área táctil pasa de 40 a 44px. */}
             <SheetTrigger
               aria-label="Abrir menú"
-              className="inline-flex size-11 items-center justify-center rounded-md border border-foreground/15 bg-white text-foreground shadow-sm transition-colors hover:border-foreground/30 md:hidden"
+              className="inline-flex size-9 items-center justify-center rounded-md border border-foreground/15 bg-white text-foreground shadow-sm transition-colors hover:border-foreground/30 md:hidden"
             >
-              <Menu className="size-[26px]" strokeWidth={2.25} />
+              <Menu className="size-6" strokeWidth={2.25} />
             </SheetTrigger>
             {/* `bg-background`: la sidebar va en el CREMA de marca, no en el
                 blanco del popover (pedido del cliente: "la sidebar que sea
@@ -211,11 +224,11 @@ export function SiteHeader() {
               <SheetHeader className="border-b border-border px-5 py-4">
                 <SheetTitle className="flex items-center gap-2.5">
                   <Image
-                    src="/marca/america-cardozo-flat.png"
+                    src="/marca/isotipo-ac.png"
                     alt=""
-                    width={329}
-                    height={204}
-                    className="h-9 w-auto shrink-0"
+                    width={720}
+                    height={397}
+                    className="h-8 w-auto shrink-0"
                   />
                   <span className="wordmark text-sm uppercase leading-none tracking-[0.14em]">
                     {AGENCIA.logoTexto}
@@ -252,6 +265,7 @@ export function SiteHeader() {
                     />
                   );
                 })}
+                <FavoritesSheet enMenu />
               </nav>
 
               <div className="border-t border-border p-4">
@@ -266,45 +280,6 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {/* Accesos rápidos FIJOS en el top bar — SOLO mobile (en md+ la nav ya
-          los tiene). Scroll horizontal si no entran; sin scrollbar visible. */}
-      {/* ACCESOS MÁS GRANDES (pedido del cliente). Antes: texto de 12px con
-          padding de 6px → 27px de alto, por debajo del mínimo táctil y difíciles
-          de leer de un vistazo. Ahora 14px de texto y 44px de alto, que es el
-          mínimo cómodo para el dedo.
-          `snap-x` + `snap-start`: al arrastrar la fila, las pastillas encajan en
-          el borde en vez de quedar cortadas por la mitad — era una de las cosas
-          que el cliente marcó como "se ve corrido" en mobile.
-          `scroll-px-4`: el snap respeta el padding lateral y la primera pastilla
-          no queda pegada al borde de la pantalla. */}
-      {/* GRID de 3 columnas iguales, sin scroll horizontal.
-          Antes era una fila con `overflow-x-auto`: los tres accesos pedían
-          481px contra 343px de pantalla, así que el tercero quedaba fuera y
-          había que deslizar para descubrirlo — un acceso que no se ve no es un
-          acceso. Con `grid-cols-3` cada uno recibe exactamente un tercio y los
-          tres entran siempre, en cualquier celular.
-          Se conserva `h-11` (44px) porque es el mínimo táctil cómodo: lo que se
-          achica es el ANCHO y el texto, no el alto.
-          Reunión 06/10: con "Emprendimientos" los tercios iguales no alcanzan
-          (medido a 375px: pide 104px de texto y el tercio le dejaba 70). Ahora
-          cada acceso mide lo que pide su texto y el sobrante se reparte
-          (`flex-auto`): a 375px entran los tres con 30px de aire, a 360px con 15.
-          Debajo de 360px se esconden los íconos para que siga entrando todo. */}
-      <div className="flex gap-2 px-4 pb-3 md:hidden">
-        {ACCESOS_MOBILE.map((l) => (
-          <Link
-            key={l.href}
-            href={l.href}
-            // `min-w-0` + `truncate`: si algún label creciera, se corta con
-            // puntos suspensivos en vez de desbordar la columna y reventar la
-            // grilla (que es como aparecían los cortes laterales).
-            className="inline-flex h-11 min-w-0 flex-auto items-center justify-center gap-1 rounded-md border border-brand/40 bg-white px-1.5 text-xs font-semibold text-brand-text transition-colors hover:border-brand hover:bg-brand hover:text-brand-foreground"
-          >
-            <l.icon className="size-4 shrink-0 max-[359px]:hidden" aria-hidden />
-            <span className="truncate">{l.corto}</span>
-          </Link>
-        ))}
-      </div>
     </header>
   );
 }
