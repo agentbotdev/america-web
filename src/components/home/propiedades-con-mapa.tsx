@@ -3,17 +3,26 @@
 import { useDeferredValue, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, MapPin, Search } from "lucide-react";
+import { ArrowRight, Home, MapPin, MessageCircle, Search, SearchX } from "lucide-react";
 import PropertyCard from "@/components/propiedades/property-card";
 import { MapaPropiedades, type PuntoMapa } from "./mapa-propiedades";
-import { coincideBusqueda, datosBuscables, interpretarBusqueda, type DatosBuscables } from "@/lib/buscador";
+import {
+  coincideBusqueda,
+  datosBuscables,
+  interpretarBusqueda,
+  type BusquedaInterpretada,
+  type DatosBuscables,
+} from "@/lib/buscador";
 import { scoreVidriera } from "@/lib/vidriera";
+import { waLink } from "@/lib/whatsapp";
+import { AGENCIA } from "@/data/agencia";
 import type { Propiedad } from "@/types";
 
 // PROPIEDADES, justo debajo del hero (pedido de Nacho, 08/10): el video termina adentro
 // de una casa y acá se "aterriza" en las propiedades. Arriba el título y una BARRA de
 // búsqueda (la de la versión 1: una sola frase, "casa en venta en Moreno"), debajo el MAPA
-// (el de la versión 3) y abajo las propiedades.
+// (el de la versión 3), una banda roja finita con el título de lo que se muestra y abajo
+// las propiedades.
 //
 // Mientras se escribe, el mapa y la grilla se filtran EN VIVO; con Enter (o Buscar) se va
 // al catálogo completo con esa búsqueda ya aplicada, donde están todos los filtros.
@@ -22,6 +31,19 @@ export type PuntoBuscable = PuntoMapa & DatosBuscables;
 
 /** Cuántas propiedades muestra la grilla (las demás, en el catálogo). */
 const EN_GRILLA = 6;
+
+const ordenar = (lista: Propiedad[]) => [...lista].sort((a, b) => scoreVidriera(b) - scoreVidriera(a));
+
+/** "casa · en venta · “moreno”": lo que se entendió de la frase, para mostrarlo en la banda. */
+function describir(b: BusquedaInterpretada): string {
+  return [
+    b.tipo,
+    b.operacion ? `en ${b.operacion}` : null,
+    b.texto ? `“${b.texto}”` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
 
 export function PropiedadesConMapa({
   puntos,
@@ -38,11 +60,6 @@ export function PropiedadesConMapa({
   const fraseDiferida = useDeferredValue(frase);
   const busqueda = useMemo(() => interpretarBusqueda(fraseDiferida), [fraseDiferida]);
   const hayBusqueda = !!(busqueda.operacion || busqueda.tipo || busqueda.texto);
-
-  const visibles = useMemo(
-    () => (hayBusqueda ? new Set(puntos.filter((p) => coincideBusqueda(busqueda, p)).map((p) => p.id)) : null),
-    [hayBusqueda, busqueda, puntos],
-  );
 
   // Para la grilla hacen falta las propiedades COMPLETAS (foto, specs, precio). Se bajan
   // recién cuando alguien empieza a buscar, del mismo endpoint cacheado que usan los
@@ -61,10 +78,41 @@ export function PropiedadesConMapa({
   const resultados = useMemo(() => {
     if (!hayBusqueda) return destacadas;
     if (!catalogo) return null; // todavía bajando
-    return catalogo
-      .filter((p) => coincideBusqueda(busqueda, datosBuscables(p)))
-      .sort((a, b) => scoreVidriera(b) - scoreVidriera(a));
+    return ordenar(catalogo.filter((p) => coincideBusqueda(busqueda, datosBuscables(p))));
   }, [hayBusqueda, busqueda, catalogo, destacadas]);
+
+  const sinResultados = hayBusqueda && resultados !== null && resultados.length === 0;
+
+  // SIN RESULTADOS: en vez de una lista vacía, otras parecidas (Nacho, 09/10: "que te diga
+  // en el cartel rojo che no hay, y abajo mirá otras"). Se afloja la búsqueda de a un
+  // criterio: primero el mismo tipo en cualquier zona ("casa en venta" en otro barrio),
+  // después la misma zona con cualquier tipo, después solo la operación. Si nada de eso
+  // da, las destacadas.
+  const sugeridas = useMemo(() => {
+    if (!sinResultados || !catalogo) return null;
+    const { operacion, tipo, texto } = busqueda;
+    const intentos: BusquedaInterpretada[] = [
+      { operacion, tipo, texto: "" },
+      { operacion, texto },
+      { operacion, texto: "" },
+    ];
+    for (const intento of intentos) {
+      // Un intento sin ningún criterio traería todo: para eso están las destacadas.
+      if (!(intento.operacion || intento.tipo || intento.texto)) continue;
+      const parecidas = catalogo.filter((p) => coincideBusqueda(intento, datosBuscables(p)));
+      if (parecidas.length > 0) return ordenar(parecidas);
+    }
+    return destacadas;
+  }, [sinResultados, catalogo, busqueda, destacadas]);
+
+  const lista = sinResultados ? sugeridas : resultados;
+
+  // El mapa muestra lo mismo que la lista: las que coinciden o, si no hay, las sugeridas.
+  const visibles = useMemo(() => {
+    if (!hayBusqueda) return null;
+    if (sugeridas) return new Set(sugeridas.map((p) => p.id));
+    return new Set(puntos.filter((p) => coincideBusqueda(busqueda, p)).map((p) => p.id));
+  }, [hayBusqueda, sugeridas, puntos, busqueda]);
 
   const destinoCatalogo = frase.trim() ? `/propiedades?q=${encodeURIComponent(frase.trim())}` : "/propiedades";
 
@@ -73,7 +121,39 @@ export function PropiedadesConMapa({
     router.push(destinoCatalogo);
   };
 
-  const hayCards = !!resultados && resultados.length > 0;
+  // Lo que dice la banda roja según el momento: sin búsqueda, buscando, con resultados o
+  // sin resultados (y en ese caso, la opción de que le avisen por WhatsApp: es un lead).
+  const fraseLimpia = fraseDiferida.trim();
+  const banda = !hayBusqueda
+    ? {
+        icono: Home,
+        titulo: "Propiedades destacadas",
+        detalle: "Las más completas de la cartera: con fotos, precio a la vista y ficha completa.",
+        accion: { href: "/propiedades", texto: "Ver catálogo completo", externo: false },
+      }
+    : resultados === null
+      ? { icono: Search, titulo: "Buscando…", detalle: "Un segundo, estamos revisando todas las propiedades.", accion: null }
+      : sinResultados
+        ? {
+            icono: SearchX,
+            titulo: `Por ahora no tenemos “${fraseLimpia}”`,
+            detalle: "Abajo te mostramos otras parecidas. Si querés, te avisamos cuando entre una.",
+            accion: {
+              href: waLink(
+                AGENCIA.whatsapp,
+                `¡Hola! Estoy buscando ${fraseLimpia} y no encontré en la web. ¿Me avisan si entra alguna?`,
+              ),
+              texto: "Avisame cuando entre",
+              externo: true,
+            },
+          }
+        : {
+            icono: Search,
+            titulo: `${resultados.length} ${resultados.length === 1 ? "propiedad" : "propiedades"} para “${fraseLimpia}”`,
+            detalle: `Filtramos por ${describir(busqueda)}. Tocá cualquiera para ver la ficha.`,
+            accion: { href: destinoCatalogo, texto: "Ver en el catálogo", externo: false },
+          };
+  const IconoBanda = banda.icono;
 
   return (
     <section id="propiedades" aria-labelledby="titulo-propiedades">
@@ -102,7 +182,12 @@ export function PropiedadesConMapa({
             name="q"
             type="search"
             value={frase}
-            onChange={(e) => setFrase(e.target.value)}
+            // Se pide al enfocar (así llega antes de la primera letra) y también al escribir:
+            // un autocompletado o un pegado pueden cambiar el texto sin que haya foco.
+            onChange={(e) => {
+              traerCatalogo();
+              setFrase(e.target.value);
+            }}
             onFocus={traerCatalogo}
             placeholder="Ej: casa en venta en Moreno"
             aria-label="Buscar propiedades"
@@ -132,34 +217,49 @@ export function PropiedadesConMapa({
         </div>
       </div>
 
-      {/* BANDA ROJA FINITA, de punta a punta, con el título de los resultados (Nacho, 09/10:
-          el rojo grande detrás del mapa y de la primera propiedad no gustó; lo que queda de
-          rojo es esta línea, como separador entre el mapa y la lista). Rojo PROFUNDO
-          (--brand-text): blanco encima da 5.7:1 → AA. */}
+      {/* BANDA ROJA FINITA, de punta a punta, con el título de lo que se muestra abajo (Nacho,
+          09/10: el rojo grande detrás del mapa no gustó; queda esta franja como separador
+          entre el mapa y la lista, con un renglón de detalle). Rojo PROFUNDO (--brand-text):
+          blanco encima da 5.7:1 → AA. */}
       <div className="mt-10 bg-brand-text sm:mt-12">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8">
-          <h3 className="text-base font-semibold text-white sm:text-lg" aria-live="polite">
-            {!hayBusqueda
-              ? "Propiedades destacadas"
-              : resultados === null
-                ? "Buscando…"
-                : resultados.length === 0
-                  ? "No encontramos propiedades con esa búsqueda"
-                  : `${resultados.length} ${resultados.length === 1 ? "propiedad" : "propiedades"} para “${frase.trim()}”`}
-          </h3>
-          <Link
-            href={hayBusqueda ? destinoCatalogo : "/propiedades"}
-            className="text-sm font-semibold text-white/90 underline-offset-4 hover:text-white hover:underline"
-          >
-            {hayBusqueda ? "Ver en el catálogo →" : "Ver catálogo →"}
-          </Link>
+        <div
+          className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2.5 px-4 py-4 sm:flex-nowrap sm:px-6 sm:py-5 lg:px-8"
+          aria-live="polite"
+        >
+          <span className="hidden size-10 shrink-0 items-center justify-center rounded-full bg-white/15 sm:flex">
+            <IconoBanda className="size-5 text-white" aria-hidden />
+          </span>
+          <div className="w-full min-w-0 sm:w-auto sm:flex-1">
+            <h3 className="text-lg font-semibold leading-snug text-white sm:text-xl">{banda.titulo}</h3>
+            <p className="mt-0.5 text-sm text-white/80">{banda.detalle}</p>
+          </div>
+          {banda.accion &&
+            (banda.accion.externo ? (
+              <a
+                href={banda.accion.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full bg-white px-4 sm:h-10 sm:px-5 text-sm font-semibold text-brand-text transition hover:brightness-95"
+              >
+                <MessageCircle className="size-4" aria-hidden />
+                {banda.accion.texto}
+              </a>
+            ) : (
+              <Link
+                href={banda.accion.href}
+                className="group inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-white/45 px-4 sm:h-10 sm:px-5 text-sm font-semibold text-white transition hover:bg-white hover:text-brand-text"
+              >
+                {banda.accion.texto}
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+              </Link>
+            ))}
         </div>
       </div>
 
       <div className="mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 sm:pb-14 sm:pt-10 lg:px-8">
-        {hayCards && (
+        {lista && lista.length > 0 && (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {resultados.slice(0, EN_GRILLA).map((p) => (
+            {lista.slice(0, EN_GRILLA).map((p) => (
               <PropertyCard key={p.id} propiedad={p} />
             ))}
           </div>
@@ -167,10 +267,10 @@ export function PropiedadesConMapa({
 
         <div className="mt-10 text-center">
           <Link
-            href={hayBusqueda ? destinoCatalogo : "/propiedades"}
+            href={hayBusqueda && !sinResultados ? destinoCatalogo : "/propiedades"}
             className="group inline-flex h-12 items-center gap-2 rounded-md border border-brand/50 px-8 text-sm font-semibold uppercase tracking-wide text-brand-text transition hover:bg-brand hover:text-brand-foreground"
           >
-            {hayBusqueda && resultados && resultados.length > EN_GRILLA
+            {hayBusqueda && !sinResultados && resultados && resultados.length > EN_GRILLA
               ? `Ver las ${resultados.length}`
               : "Ver todas las propiedades"}
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />

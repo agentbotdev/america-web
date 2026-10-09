@@ -447,7 +447,10 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
               para que se lea. Se va junto con el buscador. Deja libre el alto del header. */}
           <div ref={tituloRef} className="hero-titulo pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/35 to-transparent" />
-            <div className="relative flex h-full flex-col items-center justify-end px-4 pb-[2cqh] pt-[var(--hero-header,64px)] text-center">
+            {/* Centrado entre el header y el techo del cartel, no pegado al cartel (Nacho,
+                09/10: "un poco más arriba"). En pantallas bajas, donde no sobra lugar, queda
+                igual que antes: el centrado solo reparte el espacio que sobra. */}
+            <div className="relative flex h-full flex-col items-center justify-center px-4 pb-[2cqh] pt-[var(--hero-header,64px)] text-center">
               <span
                 className="hero-in hero-ojo inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/85 [text-shadow:0_1px_8px_rgb(0_0_0/0.7)]"
                 style={{ "--i": 0 } as React.CSSProperties}
@@ -457,11 +460,11 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
                 <span aria-hidden className="text-accent-warm">·</span>
                 Operamos en todo el país
               </span>
-              {/* En mayúsculas y con mucha sombra (Nacho, 08/10): dos sombras, una corta
-                  que marca el borde de la letra y una larga y difusa que la despega del
-                  cielo, que es claro. */}
+              {/* Con mucha sombra (Nacho, 08/10): dos sombras, una corta que marca el borde
+                  de la letra y una larga y difusa que la despega del cielo, que es claro.
+                  En minúscula normal (09/10: se probó todo en mayúsculas y pidió volver). */}
               <h1
-                className="hero-in mt-3 text-balance text-[min(3.5rem,6cqh,7.4cqw)] font-bold uppercase leading-[1.04] tracking-[0.01em] text-white [text-shadow:0_2px_3px_rgb(0_0_0/0.55),0_6px_28px_rgb(0_0_0/0.65)]"
+                className="hero-in mt-3 text-balance text-[min(3.75rem,6.5cqh,9cqw)] font-bold leading-[1.06] text-white [text-shadow:0_2px_3px_rgb(0_0_0/0.55),0_6px_28px_rgb(0_0_0/0.65)]"
                 style={{ "--i": 1 } as React.CSSProperties}
               >
                 Tu próxima propiedad
