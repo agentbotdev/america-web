@@ -438,6 +438,93 @@
   }
 }
 
+/* HERO "EL BUSCADOR ES EL CARTEL" (components/home/hero.tsx).
+   El buscador tiene que quedar clavado en el cuerpo vacío del cartel de la foto, en
+   cualquier pantalla. Para eso la foto no se escala con object-cover sino que vive en
+   un ESCENARIO con sus mismas proporciones, que se escala como lo haría object-cover;
+   adentro del escenario las medidas del cartel son simples porcentajes. Todo en CSS
+   (unidades de contenedor): no se mide nada con JS, ni al cargar ni al girar el celular.
+   Las medidas de cada encuadre llegan como variables desde el componente. */
+.hero-fijo {
+  /* Con nombre: las consultas de alto tienen que mirar ESTE bloque y no el contenedor
+     (solo de ancho) más cercano, que es el cuerpo del cartel. */
+  container: hero / size;
+}
+.hero-capas {
+  position: absolute;
+  inset: 0;
+  --ar: var(--h-ar);
+  --techo: var(--h-techo);
+  --cuerpo-x: var(--h-cuerpo-x);
+  --cuerpo-y: var(--h-cuerpo-y);
+  --cuerpo-w: var(--h-cuerpo-w);
+  --cuerpo-h: var(--h-cuerpo-h);
+  /* Cuánto del alto que sobra se recorta ARRIBA (0.5 = parejo). Arriba hay cielo; abajo,
+     el cartel con el buscador: se sacrifica cielo. */
+  --recorte-arriba: 0.7;
+  --escena-w: max(100cqw, 100cqh * var(--ar));
+  --escena-h: max(100cqh, 100cqw / var(--ar));
+  --escena-x: calc((100cqw - var(--escena-w)) / 2);
+  --escena-y: calc((100cqh - var(--escena-h)) * var(--recorte-arriba));
+}
+/* La misma consulta que MEDIA_VERTICAL del componente (elige también foto y video). */
+@media (max-aspect-ratio: 4/5) {
+  .hero-capas {
+    --ar: var(--v-ar);
+    --techo: var(--v-techo);
+    --cuerpo-x: var(--v-cuerpo-x);
+    --cuerpo-y: var(--v-cuerpo-y);
+    --cuerpo-w: var(--v-cuerpo-w);
+    --cuerpo-h: var(--v-cuerpo-h);
+  }
+}
+.hero-escena {
+  position: absolute;
+  left: var(--escena-x);
+  top: var(--escena-y);
+  width: var(--escena-w);
+  height: var(--escena-h);
+}
+.hero-cuerpo {
+  position: absolute;
+  left: calc(var(--cuerpo-x) * 100%);
+  top: calc(var(--cuerpo-y) * 100%);
+  width: calc(var(--cuerpo-w) * 100%);
+  height: calc(var(--cuerpo-h) * 100%);
+  container-type: inline-size;
+}
+/* Del borde de arriba del hero hasta el techo del cartel. */
+.hero-titulo {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: calc(var(--escena-y) + var(--escena-h) * var(--techo));
+}
+/* Pantallas bajitas (un celular acostado): el cuerpo del cartel queda más chico que el
+   buscador. Ahí el buscador sale del cartel y va como tarjeta en el medio, y el título
+   (que no entraría) se esconde. */
+@container hero (max-height: 460px) {
+  .hero-capas {
+    --recorte-arriba: 0.5;
+  }
+  .hero-titulo {
+    display: none;
+  }
+  .hero-cuerpo {
+    left: 50%;
+    top: 50%;
+    width: min(640px, 92cqw);
+    height: auto;
+    translate: -50% -50%;
+  }
+  .hero-buscador {
+    border-radius: var(--radius-lg, 0.5rem);
+    background: #fff;
+    padding: 0.75rem;
+    box-shadow: 0 28px 70px -28px rgb(0 0 0 / 0.8);
+  }
+}
+
 /* Vuelo de la carta que deja el frente en el deck del hero. Corre en el
    compositor (CSS), no en JS. Los % son relativos a la propia carta. */
 @keyframes deck-vuela {
