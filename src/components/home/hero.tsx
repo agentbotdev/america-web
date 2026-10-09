@@ -80,9 +80,9 @@ const MEDIA_VERTICAL = "(max-aspect-ratio: 4/5)";
 // Qué parte del recorrido ocupa cada tramo (0 = el hero recién se fija, 1 = se suelta).
 const FASES = {
   textos: [0.01, 0.1],
-  zoom: [0, 0.3],
-  fundido: [0.2, 0.3],
-  video: [0.3, 0.94],
+  zoom: [0, 0.28],
+  fundido: [0.18, 0.28],
+  video: [0.28, 0.95],
 } as const;
 // Qué fracción de la distancia al punto pedido se recorre en cada repintado.
 const SUAVIZADO = 0.2;
@@ -269,7 +269,8 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
         objetivo = 0;
         return;
       }
-      const avance = alturaHeader - seccion.getBoundingClientRect().top;
+      // El hero se fija en el borde de arriba (el header va encima, transparente).
+      const avance = -seccion.getBoundingClientRect().top;
       objetivo = Math.min(1, Math.max(0, avance / recorrido));
     };
 
@@ -334,18 +335,21 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
   return (
     // Sin `overflow-hidden` acá: un ancestro con overflow distinto de visible
     // rompe el `sticky` del hero. El recorte va en el bloque fijo.
-    <section ref={seccionRef} className="relative">
+    // `data-hero`: el header lo mira para saber cuándo dejar de ser transparente.
+    <section ref={seccionRef} data-hero className="relative">
       <div
         ref={fijoRef}
         className="hero-fijo sticky overflow-hidden bg-[#a8916b]"
         // El fondo es el color promedio de las fotos del cartel: es lo que se ve hasta que
         // la foto carga, y con un fondo oscuro el cambio a la foto (muy luminosa) se notaba.
         style={{
-          top: "var(--hero-header, 0px)",
+          top: 0,
+          // Pantalla completa, de borde a borde: el header va ENCIMA, transparente (la
+          // "barra blanca" que había arriba del hero se sacó a pedido de Nacho, 08/10).
           // `lvh` y no `svh`: en el celular, cuando la barra del navegador se esconde al
           // scrollear, con `svh` quedaba una franja vacía abajo del hero. Con `lvh` lo que
           // queda tapado al principio es el pie del cartel (pasto y postes), no el buscador.
-          height: "calc(100lvh - var(--hero-header, 0px))",
+          height: "100lvh",
         }}
       >
         <div className="hero-capas" style={variablesEncuadre()}>
@@ -427,13 +431,17 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
             </div>
           </div>
 
+          {/* Velo fijo arriba: el menú (blanco, transparente) se lee sobre la foto y sobre
+              el video en todo el recorrido. */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[calc(var(--hero-header,64px)+4rem)] bg-gradient-to-b from-black/45 to-transparent" />
+
           {/* TÍTULO: en la franja de arriba del cartel (casa y cielo), con un velo oscuro
-              para que se lea. Se va junto con el buscador. */}
+              para que se lea. Se va junto con el buscador. Deja libre el alto del header. */}
           <div ref={tituloRef} className="hero-titulo pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/35 to-transparent" />
-            <div className="relative flex h-full flex-col items-center justify-end px-4 pb-[3cqh] text-center">
+            <div className="relative flex h-full flex-col items-center justify-end px-4 pb-[2cqh] pt-[var(--hero-header,64px)] text-center">
               <span
-                className="hero-in inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/85"
+                className="hero-in hero-ojo inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/85"
                 style={{ "--i": 0 } as React.CSSProperties}
               >
                 <ShieldCheck className="size-3.5 text-accent-warm" />
@@ -442,7 +450,7 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
                 Operamos en todo el país
               </span>
               <h1
-                className="hero-in mt-3 text-balance text-[min(3.75rem,7cqh,9cqw)] font-semibold leading-[1.06] text-white"
+                className="hero-in mt-3 text-balance text-[min(3.75rem,6.5cqh,9cqw)] font-semibold leading-[1.06] text-white"
                 style={{ "--i": 1 } as React.CSSProperties}
               >
                 Tu próxima propiedad
@@ -455,8 +463,9 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
       </div>
 
       {/* RECORRIDO: mientras se scrollea este espacio vacío el hero queda fijo arriba y
-          pasa todo lo de arriba. Más largo que una pantalla para que el video no corra. */}
-      <div ref={recorridoRef} aria-hidden className="h-[160svh]" />
+          pasa todo lo de arriba. Lo que tarda la animación lo define ESTE alto, no lo que
+          dura el video (el video avanza con el scroll): para hacerla más ágil, se achica acá. */}
+      <div ref={recorridoRef} aria-hidden className="h-[115svh]" />
     </section>
   );
 }

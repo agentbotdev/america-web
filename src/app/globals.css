@@ -460,8 +460,9 @@
   --cuerpo-w: var(--h-cuerpo-w);
   --cuerpo-h: var(--h-cuerpo-h);
   /* Cuánto del alto que sobra se recorta ARRIBA (0.5 = parejo). Arriba hay cielo; abajo,
-     el cartel con el buscador: se sacrifica cielo. */
-  --recorte-arriba: 0.7;
+     el cartel con el buscador: se sacrifica cielo, pero no tanto que el título (que va
+     entre el header y el cartel) se quede sin lugar en las pantallas anchas y bajas. */
+  --recorte-arriba: 0.6;
   --escena-w: max(100cqw, 100cqh * var(--ar));
   --escena-h: max(100cqh, 100cqw / var(--ar));
   --escena-x: calc((100cqw - var(--escena-w)) / 2);
@@ -499,6 +500,13 @@
   inset-inline: 0;
   top: 0;
   height: calc(var(--escena-y) + var(--escena-h) * var(--techo));
+}
+/* Notebooks y ventanas bajas: entre el header y el techo del cartel no entran el
+   renglón de arriba y el título (medido a 1397×607: el renglón se pisaba con el menú). */
+@container hero (max-height: 719px) {
+  .hero-ojo {
+    display: none;
+  }
 }
 /* Pantallas bajitas (un celular acostado): el cuerpo del cartel queda más chico que el
    buscador. Ahí el buscador sale del cartel y va como tarjeta en el medio, y el título

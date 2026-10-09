@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -57,7 +57,7 @@ function isActive(pathname: string, href: string) {
 // Logo REAL de la marca, SOLO el círculo (pedido del cliente: sin el wordmark
 // de texto al lado — el badge ya dice "AMERICA CARDOZO VENDE"). Un poco más
 // grande para que el texto interno se lea.
-function Logo() {
+function Logo({ sobreFoto = false }: { sobreFoto?: boolean }) {
   return (
     <Link
       href="/"
@@ -67,14 +67,27 @@ function Logo() {
       {/* Versión FLAT (sin el círculo crema): el fondo de la página ES el crema
           del logo, así que el texto se apoya directo — fusión perfecta, sin
           borde visible sea cual sea el tono de pantalla. */}
-      <Image
-        src="/marca/america-cardozo-flat.png"
-        alt=""
-        width={329}
-        height={204}
-        priority
-        className="h-12 w-auto shrink-0 transition-transform duration-300 group-hover:scale-105"
-      />
+      {/* Sobre la foto del hero la versión flat (letras sueltas) no se lee: va la del
+          círculo crema, que se recorta solo sobre cualquier fondo. */}
+      {sobreFoto ? (
+        <Image
+          src="/marca/america-cardozo-circulo.png"
+          alt=""
+          width={386}
+          height={386}
+          priority
+          className="size-14 shrink-0 transition-transform duration-300 group-hover:scale-105"
+        />
+      ) : (
+        <Image
+          src="/marca/america-cardozo-flat.png"
+          alt=""
+          width={329}
+          height={204}
+          priority
+          className="h-12 w-auto shrink-0 transition-transform duration-300 group-hover:scale-105"
+        />
+      )}
     </Link>
   );
 }
@@ -82,6 +95,36 @@ function Logo() {
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  // HOME: el header va ENCIMA del hero, transparente, para que la foto y el video lleguen
+  // hasta el borde de arriba (reunión 06/10, pedido de Nacho 08/10: "sacar la barra
+  // blanca"). Cuando el hero termina vuelve a ser el header sólido de siempre.
+  const esHome = pathname === "/";
+  const [sobreHero, setSobreHero] = useState(esHome);
+
+  useEffect(() => {
+    // Fuera de la home no hay hero: `transparente` ya da false por `esHome`.
+    if (!esHome) return;
+    let cuadro = 0;
+    const revisar = () => {
+      cuadro = 0;
+      const hero = document.querySelector<HTMLElement>("[data-hero]");
+      const alto = document.querySelector<HTMLElement>("[data-site-header]")?.offsetHeight ?? 0;
+      setSobreHero(!!hero && hero.getBoundingClientRect().bottom > alto);
+    };
+    const alScrollear = () => {
+      if (!cuadro) cuadro = requestAnimationFrame(revisar);
+    };
+    alScrollear();
+    window.addEventListener("scroll", alScrollear, { passive: true });
+    window.addEventListener("resize", alScrollear);
+    return () => {
+      window.removeEventListener("scroll", alScrollear);
+      window.removeEventListener("resize", alScrollear);
+      cancelAnimationFrame(cuadro);
+    };
+  }, [esHome]);
+
+  const transparente = esHome && sobreHero;
 
   return (
     // Header SÓLIDO, sin `backdrop-filter` — por dos razones que ya se pagaron:
@@ -93,10 +136,21 @@ export function SiteHeader() {
     // Hairline inferior: en el lenguaje sobrio el borde fino ES la estructura.
     // (No es el caso de los "cortes" que marcó el cliente — aquello eran bandas
     // de color distinto entre secciones, no una línea de 1px bajo el header.)
-    // `data-site-header`: el hero de la home mide este alto para quedar fijo justo debajo.
-    <header data-site-header className="sticky top-0 z-50 border-b border-foreground/[0.07] bg-background">
+    // `data-site-header`: el hero de la home mide este alto para dejarle lugar al título.
+    // En la home es `fixed` (fuera del flujo, así el hero arranca en el borde de arriba);
+    // en el resto, `sticky` como siempre.
+    <header
+      data-site-header
+      className={cn(
+        "z-50 border-b transition-colors duration-300",
+        esHome ? "fixed inset-x-0 top-0" : "sticky top-0",
+        transparente
+          ? "border-transparent bg-transparent text-white"
+          : "border-foreground/[0.07] bg-background",
+      )}
+    >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <Logo />
+        <Logo sobreFoto={transparente} />
 
         {/* MAYÚSCULA + tracking (tipografía como los títulos del footer),
             texto un punto más chico para que entren las 6 solapas. */}
@@ -110,8 +164,10 @@ export function SiteHeader() {
                 aria-current={active ? "page" : undefined}
                 data-active={active ? "true" : undefined}
                 className={cn(
-                  "nav-underline text-xs font-semibold uppercase tracking-wider transition-colors hover:text-foreground",
-                  active ? "text-foreground" : "text-muted-foreground",
+                  "nav-underline text-xs font-semibold uppercase tracking-wider transition-colors",
+                  transparente
+                    ? active ? "text-white" : "text-white/85 hover:text-white"
+                    : active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {item.label}
