@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, MapPin, Search } from "lucide-react";
@@ -66,26 +66,6 @@ export function PropiedadesConMapa({
       .sort((a, b) => scoreVidriera(b) - scoreVidriera(a));
   }, [hayBusqueda, busqueda, catalogo, destacadas]);
 
-  // Dónde termina el rojo: el borde de abajo de la primera card (o del título de los
-  // resultados, si no hay ninguna), medido desde el borde de arriba de la zona. Se vuelve a
-  // medir cada vez que la zona cambia de tamaño: resultados nuevos, fotos que cargan,
-  // giro del celular.
-  const zonaRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const zona = zonaRef.current;
-    if (!zona) return;
-    const medir = () => {
-      const fin = zona.querySelector<HTMLElement>("[data-fin-rojo]");
-      if (!fin) return;
-      const hasta = fin.getBoundingClientRect().bottom - zona.getBoundingClientRect().top;
-      zona.style.setProperty("--rojo-fin", `${Math.round(hasta)}px`);
-    };
-    medir();
-    const observador = new ResizeObserver(medir);
-    observador.observe(zona);
-    return () => observador.disconnect();
-  }, []);
-
   const destinoCatalogo = frase.trim() ? `/propiedades?q=${encodeURIComponent(frase.trim())}` : "/propiedades";
 
   const buscar = (e: React.FormEvent<HTMLFormElement>) => {
@@ -138,75 +118,63 @@ export function PropiedadesConMapa({
         </form>
       </div>
 
-      {/* ZONA ROJA: arranca adentro del mapa (a 4-5rem de su borde de arriba) y termina
-          justo debajo de la PRIMERA propiedad — en la compu, la primera fila de tres. De ahí
-          para abajo, blanco (Nacho, 09/10). Dónde termina depende de la grilla (cambia al
-          buscar, al girar el celular, cuando cargan las fotos): se MIDE y llega como
-          `--rojo-fin`. Antes de medir (sin JS todavía) no se pinta. */}
-      <div ref={zonaRef} className="relative pb-12 [--rojo-inicio:4rem] sm:pb-14 sm:[--rojo-inicio:5rem]">
-        <div
-          aria-hidden
-          className="absolute inset-x-0 top-[var(--rojo-inicio)] bg-brand-text"
-          style={{ height: "max(0px, calc(var(--rojo-fin, 0px) - var(--rojo-inicio)))" }}
-        />
-
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* rounded-[20px]: pedido del cliente en la v3 — el mapa con más curva que las cards. */}
-          <div className="overflow-hidden rounded-[20px] border border-foreground/12 bg-white shadow-[0_24px_56px_-32px_rgba(60,45,20,0.45)]">
-            <div className="flex items-center gap-2 border-b border-border bg-white px-4 py-3">
-              <MapPin className="size-4 shrink-0 text-brand" aria-hidden />
-              <p className="text-sm font-semibold text-foreground">Explorá por el mapa</p>
-              <span className="ml-auto text-xs tabular-nums text-muted-foreground" aria-live="polite">
-                {visibles ? visibles.size : puntos.length} en el mapa
-              </span>
-            </div>
-            <MapaPropiedades puntos={puntos} visibles={visibles} />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* rounded-[20px]: pedido del cliente en la v3 — el mapa con más curva que las cards. */}
+        <div className="overflow-hidden rounded-[20px] border border-foreground/12 bg-white shadow-[0_24px_56px_-32px_rgba(60,45,20,0.45)]">
+          <div className="flex items-center gap-2 border-b border-border bg-white px-4 py-3">
+            <MapPin className="size-4 shrink-0 text-brand" aria-hidden />
+            <p className="text-sm font-semibold text-foreground">Explorá por el mapa</p>
+            <span className="ml-auto text-xs tabular-nums text-muted-foreground" aria-live="polite">
+              {visibles ? visibles.size : puntos.length} en el mapa
+            </span>
           </div>
+          <MapaPropiedades puntos={puntos} visibles={visibles} />
+        </div>
+      </div>
 
-          {/* Sobre el rojo: letras blancas. Si no hay cards, el rojo termina acá. */}
-          <div
-            data-fin-rojo={hayCards ? undefined : true}
-            className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 pb-6 pt-10 sm:pt-12"
+      {/* BANDA ROJA FINITA, de punta a punta, con el título de los resultados (Nacho, 09/10:
+          el rojo grande detrás del mapa y de la primera propiedad no gustó; lo que queda de
+          rojo es esta línea, como separador entre el mapa y la lista). Rojo PROFUNDO
+          (--brand-text): blanco encima da 5.7:1 → AA. */}
+      <div className="mt-10 bg-brand-text sm:mt-12">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-8">
+          <h3 className="text-base font-semibold text-white sm:text-lg" aria-live="polite">
+            {!hayBusqueda
+              ? "Propiedades destacadas"
+              : resultados === null
+                ? "Buscando…"
+                : resultados.length === 0
+                  ? "No encontramos propiedades con esa búsqueda"
+                  : `${resultados.length} ${resultados.length === 1 ? "propiedad" : "propiedades"} para “${frase.trim()}”`}
+          </h3>
+          <Link
+            href={hayBusqueda ? destinoCatalogo : "/propiedades"}
+            className="text-sm font-semibold text-white/90 underline-offset-4 hover:text-white hover:underline"
           >
-            <h3 className="text-xl font-semibold text-white sm:text-2xl" aria-live="polite">
-              {!hayBusqueda
-                ? "Destacadas"
-                : resultados === null
-                  ? "Buscando…"
-                  : resultados.length === 0
-                    ? "No encontramos propiedades con esa búsqueda"
-                    : `${resultados.length} ${resultados.length === 1 ? "propiedad" : "propiedades"} para “${frase.trim()}”`}
-            </h3>
-            {hayBusqueda && hayCards && (
-              <Link href={destinoCatalogo} className="text-sm font-semibold text-white/90 underline-offset-4 hover:underline">
-                Ver en el catálogo con más filtros →
-              </Link>
-            )}
-          </div>
+            {hayBusqueda ? "Ver en el catálogo →" : "Ver catálogo →"}
+          </Link>
+        </div>
+      </div>
 
-          {hayCards && (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {resultados.slice(0, EN_GRILLA).map((p, i) => (
-                // La primera card marca dónde termina el rojo (en la compu, toda su fila:
-                // las cards de una fila se estiran al mismo alto).
-                <div key={p.id} data-fin-rojo={i === 0 || undefined} className="h-full">
-                  <PropertyCard propiedad={p} />
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-10 text-center">
-            <Link
-              href={hayBusqueda ? destinoCatalogo : "/propiedades"}
-              className="group inline-flex h-12 items-center gap-2 rounded-md border border-brand/50 px-8 text-sm font-semibold uppercase tracking-wide text-brand-text transition hover:bg-brand hover:text-brand-foreground"
-            >
-              {hayBusqueda && resultados && resultados.length > EN_GRILLA
-                ? `Ver las ${resultados.length}`
-                : "Ver todas las propiedades"}
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
-            </Link>
+      <div className="mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 sm:pb-14 sm:pt-10 lg:px-8">
+        {hayCards && (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {resultados.slice(0, EN_GRILLA).map((p) => (
+              <PropertyCard key={p.id} propiedad={p} />
+            ))}
           </div>
+        )}
+
+        <div className="mt-10 text-center">
+          <Link
+            href={hayBusqueda ? destinoCatalogo : "/propiedades"}
+            className="group inline-flex h-12 items-center gap-2 rounded-md border border-brand/50 px-8 text-sm font-semibold uppercase tracking-wide text-brand-text transition hover:bg-brand hover:text-brand-foreground"
+          >
+            {hayBusqueda && resultados && resultados.length > EN_GRILLA
+              ? `Ver las ${resultados.length}`
+              : "Ver todas las propiedades"}
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
+          </Link>
         </div>
       </div>
     </section>

@@ -418,11 +418,25 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
           </div>
 
           {/* PISO BLANCO: al final del video, la parte de abajo se funde con el fondo de la
-              página, que sigue debajo del hero. */}
+              página, que sigue debajo del hero. Bajo y DENSO (Nacho, 09/10: el de 45% de alto
+              se veía largo y dejaba ver la línea donde termina el video): el tercio de abajo
+              es blanco sólido y el resto cae en curva, no en línea recta, para que no se note
+              dónde empieza. Baja 2px más allá del borde: tapa cualquier medio píxel de
+              redondeo entre el hero y la sección siguiente. */}
           <div
             ref={blancoRef}
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-background from-[12%] via-background/70 to-transparent opacity-0"
+            className="pointer-events-none absolute inset-x-0 -bottom-0.5 h-[30%] opacity-0"
+            style={{
+              background: `linear-gradient(to top,
+                var(--background) 0%,
+                var(--background) 35%,
+                color-mix(in oklch, var(--background) 82%, transparent) 50%,
+                color-mix(in oklch, var(--background) 55%, transparent) 64%,
+                color-mix(in oklch, var(--background) 28%, transparent) 78%,
+                color-mix(in oklch, var(--background) 9%, transparent) 90%,
+                transparent 100%)`,
+            }}
           />
 
           {/* Velo fijo arriba: el menú (blanco, transparente) se lee sobre la foto y sobre
