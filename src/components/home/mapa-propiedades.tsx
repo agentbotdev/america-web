@@ -75,23 +75,23 @@ function iconoDelTipo(tipo: string | undefined): string {
   }
 }
 
-const TAMANO_PIN = 26;
+const TAMANO_PIN = 28;
 
 /**
  * Tamaño del pin según el zoom: con el mapa alejado van chicos (Nacho, 09/10: "hacelos
  * más chicos cuando estén deszoomeados") y crecen al acercarse. Con 135 pins en el GBA
- * oeste, a tamaño completo y zoom lejano se tapaban unos a otros. Zoom 10 → mitad;
+ * oeste, a tamaño completo y zoom lejano se tapaban unos a otros. Zoom 10 → 60%;
  * 14 o más → completo. Se aplica como `--escala-pin` en el contenedor del mapa: el
  * `<svg>` de cada pin la lee, así no hay que regenerar los 135 íconos en cada zoom.
  */
-const escalaPin = (zoom: number) => Math.min(1, Math.max(0.5, 0.5 + (zoom - 10) * 0.125));
+const escalaPin = (zoom: number) => Math.min(1, Math.max(0.6, 0.6 + (zoom - 10) * 0.1));
 
 function svgDelPin(clave: string) {
   const trazos = TRAZOS[clave] ?? TRAZOS.casa;
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" width="${TAMANO_PIN}" height="${TAMANO_PIN}" viewBox="-2 -2 28 28" fill="none" stroke-linecap="round" stroke-linejoin="round" style="display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));transform:scale(var(--escala-pin,1));transition:transform .2s ease-out">` +
-    `<g stroke="#fff" stroke-width="5.5">${trazos}</g>` +
-    `<g stroke="#c41f0d" stroke-width="2.25">${trazos}</g>` +
+    `<g stroke="#fff" fill="#fff" stroke-width="5.5">${trazos}</g>` +
+    `<g stroke="#c41f0d" fill="#c41f0d" fill-opacity=".22" stroke-width="2.25">${trazos}</g>` +
     `</svg>`
   );
 }
