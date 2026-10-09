@@ -217,6 +217,8 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
     // la foto del cartel de abajo (Nacho, 09/10: "el cartel titila y reaparece"; medido:
     // 19 apagones en un scroll de prueba). Solo vuelve a false al cargar otro video.
     let primerCuadro = false;
+    // Alto del bloque fijo: se mide al cambiar el tamaño, no en cada repintado.
+    let altoFijo = fijo.offsetHeight;
 
     const aplicar = (p: number) => {
       // Título y buscador se van apenas se empieza a bajar.
@@ -231,7 +233,18 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
       blanco.style.opacity = String(suave(tramo(p, FASES.blanco)));
       // Lineal y no en curva: acompaña al scroll parejo, como si la página siguiera bajando.
       const subida = tramo(p, FASES.subida);
-      fijo.style.transform = subida > 0 ? `translate3d(0, ${-SUBIDA * subida * 100}%, 0)` : "";
+      // Redondeado a PÍXELES FÍSICOS de la pantalla. El video se dibuja en una capa aparte
+      // del degradé: con un desplazamiento fraccionario cada capa redondeaba su borde de
+      // abajo distinto y el video asomaba un renglón por debajo del degradé — una línea
+      // finita, oscura donde el video es oscuro (Nacho, 09/10: "una paredcita").
+      const dpr = window.devicePixelRatio || 1;
+      const desplazamiento = Math.round(altoFijo * SUBIDA * subida * dpr) / dpr;
+      fijo.style.transform = subida > 0 ? `translate3d(0, ${-desplazamiento}px, 0)` : "";
+      // Al subir, el borde de abajo cae en medio píxel y en ese renglón (antialiasing) se
+      // colaba el fondo beige de carga del bloque: una línea finita entre el video y la
+      // página (Nacho, 09/10: "una paredcita"). Subiendo, la foto ya cargó hace rato: el
+      // fondo pasa a transparente y abajo queda el blanco de la página.
+      fijo.style.backgroundColor = subida > 0 ? "transparent" : "";
     };
 
     const ahorroDeDatos = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
@@ -264,6 +277,7 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
     };
 
     const medir = () => {
+      altoFijo = fijo.offsetHeight;
       const alturaHeader = document.querySelector<HTMLElement>("[data-site-header]")?.offsetHeight ?? 0;
       seccion.style.setProperty("--hero-header", `${alturaHeader}px`);
     };
@@ -445,24 +459,24 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
             </div>
           </div>
 
-          {/* PISO BLANCO: al final del video, la parte de abajo se funde con el fondo de la
-              página, que sigue debajo del hero. Bajo y DENSO (Nacho, 09/10: el de 45% de alto
-              se veía largo y dejaba ver la línea donde termina el video): el tercio de abajo
-              es blanco sólido y el resto cae en curva, no en línea recta, para que no se note
-              dónde empieza. Baja 2px más allá del borde: tapa cualquier medio píxel de
-              redondeo entre el hero y la sección siguiente. */}
+          {/* PISO BLANCO: el borde de abajo del hero se funde con el fondo de la página, que
+              sigue debajo. Bajo y DENSO (Nacho, 09/10: primero 45% de alto, después 30%, y
+              las dos veces pidió más bajo y menos invasivo): la parte de abajo es blanco
+              sólido y el resto cae en curva, no en línea recta, para que no se note dónde
+              empieza. La línea que se veía en el borde no era el degradé: ver el fondo del
+              bloque fijo en `aplicar`. */}
           <div
             ref={blancoRef}
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 -bottom-0.5 h-[30%] opacity-0"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[22%] opacity-0"
             style={{
               background: `linear-gradient(to top,
                 var(--background) 0%,
-                var(--background) 35%,
-                color-mix(in oklch, var(--background) 82%, transparent) 50%,
-                color-mix(in oklch, var(--background) 55%, transparent) 64%,
-                color-mix(in oklch, var(--background) 28%, transparent) 78%,
-                color-mix(in oklch, var(--background) 9%, transparent) 90%,
+                var(--background) 30%,
+                color-mix(in oklch, var(--background) 80%, transparent) 46%,
+                color-mix(in oklch, var(--background) 52%, transparent) 61%,
+                color-mix(in oklch, var(--background) 25%, transparent) 76%,
+                color-mix(in oklch, var(--background) 8%, transparent) 89%,
                 transparent 100%)`,
             }}
           />
