@@ -1,74 +1,57 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getImageProps } from "next/image";
 import { Search, ShieldCheck, ChevronDown } from "lucide-react";
 import { AGENCIA } from "@/data/agencia";
 
-// HERO "EL BUSCADOR ES EL CARTEL" (concepto A + C, decidido con Nacho el 08/10).
+// HERO "EL BUSCADOR ES EL CARTEL" (concepto decidido con Nacho el 08/10).
 //
 // Arriba de todo hay una foto de un cartel de América Cardozo clavado frente a una
 // casa, con el logo arriba y el cuerpo VACÍO: el buscador va impreso ahí, en HTML real.
-// Al scrollear, el hero queda fijo (estilo Apple) y pasa esto:
-//   1. el título y el buscador se desvanecen y la cámara se acerca al logo del cartel;
-//   2. el logo se FUNDE con la placa del llavero, que tiene el mismo logo en el mismo
-//      lugar y del mismo tamaño (un "match cut" de cine);
-//   3. corre el video: la llave entra en la cerradura, la puerta se abre y se entra al
-//      living.
-// (La "C" —el llavero que cae como un pin en el mapa de abajo— espera al mapa, W2 de
-// la reunión del 06/10.)
+// Al scrollear, el hero queda fijo (estilo Apple) y corre UN video que arranca en esa
+// misma foto: el cartel se desclava, se achica hasta ser un llavero, la llave abre la
+// puerta y la cámara entra a un living de piso blanco. Abajo, ese piso se funde con el
+// fondo de la página, que sigue en blanco.
 //
-// Por qué la transformación NO la hace el video: se le pidió a Veo que el cartel se
-// convirtiera en el llavero en la misma toma y en las dos versiones salió mal (en la
-// horizontal le escribió un segundo "VENDE" al cartel; en la vertical la transición
-// quedó rara). Hacerla con un fundido controlado por el scroll sale perfecta siempre.
+// El video se generó en Flow (Omni, 4 s) con la foto del cartel como PRIMER cuadro y el
+// living como ÚLTIMO, así que el paso de la foto al video no se nota: el primer cuadro
+// del video ES la foto (comprobado pegando mitad y mitad, 08/10). Reemplaza al "match
+// cut" anterior (zoom al logo del cartel + fundido con el logo de un llavero).
 
 /**
- * Lo que hace falta saber de cada encuadre para calzar el HTML encima de la imagen.
- * Todas las medidas son fracciones de la imagen (0 a 1), medidas sobre los archivos
- * generados en Flow el 08/10.
+ * Lo que hace falta saber de cada encuadre para calzar el HTML encima de la foto.
+ * Las medidas son fracciones de la foto (0 a 1), medidas sobre los archivos generados
+ * en Flow el 08/10.
  */
 interface Encuadre {
   ancho: number;
   alto: number;
   cartel: string;
-  /** Primer cuadro del video: lo que se ve mientras el video todavía no cargó. */
-  llavero: string;
   video: string;
   /** Borde de arriba del cartel: el título va por encima. */
   techo: number;
   /** El cuerpo vacío del cartel, donde va el buscador. */
   cuerpo: { x: number; y: number; w: number; h: number };
-  /**
-   * Centro y tamaño del logo (de "AMERICA" a "VENDE"). Es la referencia del fundido: en
-   * el cartel y en el primer cuadro del video tienen que coincidir.
-   */
-  logoCartel: { cx: number; cy: number; w: number; h: number };
-  logoVideo: { cx: number; cy: number; w: number; h: number };
 }
 
 const HORIZONTAL: Encuadre = {
   ancho: 2752,
   alto: 1536,
   cartel: "/hero/cartel-horizontal.webp",
-  llavero: "/hero/llavero-horizontal.webp",
-  video: "/hero/llave-horizontal.mp4",
+  video: "/hero/recorrido-horizontal.mp4",
   techo: 0.361,
   cuerpo: { x: 0.301, y: 0.575, w: 0.4, h: 0.251 },
-  logoCartel: { cx: 0.5007, cy: 0.4684, w: 0.1672, h: 0.1751 },
-  logoVideo: { cx: 0.4982, cy: 0.5202, w: 0.2362, h: 0.2695 },
 };
 
 const VERTICAL: Encuadre = {
   ancho: 1536,
   alto: 2752,
   cartel: "/hero/cartel-vertical.webp",
-  llavero: "/hero/llavero-vertical.webp",
-  video: "/hero/llave-vertical.mp4",
+  video: "/hero/recorrido-vertical.mp4",
   techo: 0.334,
   cuerpo: { x: 0.09, y: 0.525, w: 0.83, h: 0.318 },
-  logoCartel: { cx: 0.5033, cy: 0.4386, w: 0.3815, h: 0.1417 },
-  logoVideo: { cx: 0.4974, cy: 0.5117, w: 0.4401, h: 0.1554 },
 };
 
 // Pantallas más angostas que 4:5 usan el encuadre vertical. Con el horizontal el cartel
@@ -79,10 +62,14 @@ const MEDIA_VERTICAL = "(max-aspect-ratio: 4/5)";
 
 // Qué parte del recorrido ocupa cada tramo (0 = el hero recién se fija, 1 = se suelta).
 const FASES = {
+  /** Título y buscador se desvanecen. */
   textos: [0.01, 0.1],
-  zoom: [0, 0.28],
-  fundido: [0.18, 0.28],
-  video: [0.28, 0.95],
+  /** La foto le pasa la posta al video (muestran lo mismo: el cambio no se ve). */
+  cruce: [0.01, 0.05],
+  /** El video corre de punta a punta. */
+  video: [0.03, 0.92],
+  /** El piso del living se funde con el fondo de la página. */
+  blanco: [0.7, 0.92],
 } as const;
 // Qué fracción de la distancia al punto pedido se recorre en cada repintado.
 const SUAVIZADO = 0.2;
@@ -142,15 +129,15 @@ function variablesEncuadre(): React.CSSProperties {
 
 export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades?: string[] }) {
   const a = AGENCIA;
+  const router = useRouter();
   const [operacion, setOperacion] = useState<string>("venta");
   const seccionRef = useRef<HTMLElement>(null);
   const fijoRef = useRef<HTMLDivElement>(null);
   const recorridoRef = useRef<HTMLDivElement>(null);
-  const lienzoRef = useRef<HTMLDivElement>(null);
-  const capaVideoRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const tituloRef = useRef<HTMLDivElement>(null);
   const buscadorRef = useRef<HTMLDivElement>(null);
+  const blancoRef = useRef<HTMLDivElement>(null);
 
   // Foto distinta según la pantalla ("art direction"): el navegador baja UNA sola.
   const comun = { alt: "", sizes: "100vw", quality: 80 };
@@ -166,6 +153,19 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
     fetchPriority: "high",
     loading: "eager",
   });
+
+  // Los selects sin elegir NO viajan: con `tipo=` vacío el catálogo filtraba por "tipo
+  // igual a nada" y el buscador del cartel devolvía cero propiedades (Nacho, 08/10:
+  // "hay que hacer funcional la card"). El form igual tiene action/method: sin JS, anda.
+  const buscar = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    for (const [clave, valor] of new FormData(e.currentTarget)) {
+      if (typeof valor === "string" && valor.trim()) params.set(clave, valor.trim());
+    }
+    const consulta = params.toString();
+    router.push(consulta ? `/propiedades?${consulta}` : "/propiedades");
+  };
 
   // TODO LO QUE PASA AL SCROLLEAR sale de un único número, el progreso del recorrido
   // (0 a 1). Se aplica escribiendo estilos directo en el DOM, sin pasar por React:
@@ -183,54 +183,30 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
     const seccion = seccionRef.current;
     const fijo = fijoRef.current;
     const recorridoEl = recorridoRef.current;
-    const lienzo = lienzoRef.current;
-    const capaVideo = capaVideoRef.current;
     const video = videoRef.current;
     const titulo = tituloRef.current;
     const buscador = buscadorRef.current;
-    if (!seccion || !fijo || !recorridoEl || !lienzo || !capaVideo || !video || !titulo || !buscador) return;
+    const blanco = blancoRef.current;
+    if (!seccion || !fijo || !recorridoEl || !video || !titulo || !buscador || !blanco) return;
 
     const consulta = window.matchMedia(MEDIA_VERTICAL);
     let encuadre = consulta.matches ? VERTICAL : HORIZONTAL;
     let objetivo = 0;
     let mostrado = 0;
     let cuadro = 0;
-    let alturaHeader = 0;
 
     const aplicar = (p: number) => {
-      // 1. Título y buscador se van apenas se empieza a bajar.
+      // Título y buscador se van apenas se empieza a bajar.
       const visibles = 1 - suave(tramo(p, FASES.textos));
       titulo.style.opacity = String(visibles);
       buscador.style.opacity = String(visibles);
       // Invisible y todavía enfocable con Tab sería una trampa: se apaga del todo.
       buscador.inert = visibles < 0.05;
-
-      // 2. La cámara se acerca al logo del cartel hasta dejarlo del tamaño y en el lugar
-      //    del logo del llavero. El video viaja pegado al cartel con la transformación
-      //    inversa: así los dos logos coinciden durante TODO el fundido, no solo al final.
-      const { logoCartel: c, logoVideo: k } = encuadre;
-      // La IA no dibujó el logo con las mismas proporciones en el cartel y en el llavero:
-      // en el horizontal el del llavero es un 9% más alto, en el vertical un 5% más bajo. Con
-      // una escala pareja los dos logos quedaban corridos y se leían dos veces. Por eso el
-      // acercamiento es parejo (por el ancho) y, SOLO durante el fundido, el cartel se
-      // estira de a poco en alto hasta igualar al llavero: cuando termina de estirarse ya
-      // es invisible, y mientras tanto se lee como que el cartel se transforma.
-      const anchoFinal = k.w / c.w;
-      const altoFinal = k.h / c.h;
-      const q = suave(tramo(p, FASES.zoom));
-      const f = suave(tramo(p, FASES.fundido));
-      const ex = 1 + (anchoFinal - 1) * q;
-      const ey = ex * (1 + (altoFinal / anchoFinal - 1) * f);
-      const cx = c.cx + (k.cx - c.cx) * q;
-      const cy = c.cy + (k.cy - c.cy) * q;
-      lienzo.style.transform =
-        `translate(${(cx - ex * c.cx) * 100}%, ${(cy - ey * c.cy) * 100}%) scale(${ex}, ${ey})`;
-      // El video, con la transformación que deja SU logo exactamente sobre el del cartel.
-      const vx = (ex * c.w) / k.w;
-      const vy = (ey * c.h) / k.h;
-      capaVideo.style.transform =
-        `translate(${(cx - vx * k.cx) * 100}%, ${(cy - vy * k.cy) * 100}%) scale(${vx}, ${vy})`;
-      capaVideo.style.opacity = String(f);
+      // El video tapa la foto recién cuando tiene su primer cuadro: si el scroll llega
+      // antes, se sigue viendo la foto (que es ese mismo cuadro) y no un hueco.
+      const listo = video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA;
+      video.style.opacity = listo ? String(tramo(p, FASES.cruce)) : "0";
+      blanco.style.opacity = String(suave(tramo(p, FASES.blanco)));
     };
 
     const ahorroDeDatos = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
@@ -248,7 +224,7 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
 
     const cargarVideo = () => {
       recorridoEl.style.height = "";
-      video.poster = encuadre.llavero;
+      video.style.opacity = "0";
       video.src = encuadre.video;
       video.muted = true;
       video.preload = "auto";
@@ -259,7 +235,7 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
     };
 
     const medir = () => {
-      alturaHeader = document.querySelector<HTMLElement>("[data-site-header]")?.offsetHeight ?? 0;
+      const alturaHeader = document.querySelector<HTMLElement>("[data-site-header]")?.offsetHeight ?? 0;
       seccion.style.setProperty("--hero-header", `${alturaHeader}px`);
     };
 
@@ -314,6 +290,8 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
 
     video.addEventListener("error", sinVideo);
     video.addEventListener("loadedmetadata", alScrollear);
+    // Recién con el primer cuadro el video puede tapar la foto (ver `aplicar`).
+    video.addEventListener("loadeddata", alScrollear);
     consulta.addEventListener("change", alCambiarEncuadre);
     const observador = new ResizeObserver(alCambiarTamano);
     observador.observe(fijo);
@@ -325,6 +303,7 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
       observador.disconnect();
       video.removeEventListener("error", sinVideo);
       video.removeEventListener("loadedmetadata", alScrollear);
+      video.removeEventListener("loadeddata", alScrollear);
       consulta.removeEventListener("change", alCambiarEncuadre);
       window.removeEventListener("scroll", alScrollear);
       window.removeEventListener("resize", alCambiarTamano);
@@ -354,82 +333,87 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
       >
         <div className="hero-capas" style={variablesEncuadre()}>
           <div className="hero-escena">
-            {/* CARTEL + BUSCADOR: se mueven juntos (el buscador está "impreso" en el cartel). */}
-            <div ref={lienzoRef} className="absolute inset-0 origin-top-left will-change-transform">
-              <picture>
-                <source media={MEDIA_VERTICAL} srcSet={srcSetVertical} sizes="100vw" />
-                {/* <img> a mano y no next/image: next/image no maneja <picture> (dos fotos
-                    según la pantalla). getImageProps arma igual el srcset optimizado. */}
-                <img {...imgHorizontal} alt="" className="absolute inset-0 size-full object-cover" />
-              </picture>
+            <picture>
+              <source media={MEDIA_VERTICAL} srcSet={srcSetVertical} sizes="100vw" />
+              {/* <img> a mano y no next/image: next/image no maneja <picture> (dos fotos
+                  según la pantalla). getImageProps arma igual el srcset optimizado. */}
+              <img {...imgHorizontal} alt="" className="absolute inset-0 size-full object-cover" />
+            </picture>
 
-              <div ref={buscadorRef} className="hero-cuerpo">
-                <form
-                  action="/propiedades"
-                  method="get"
-                  className="hero-in hero-buscador flex size-full flex-col justify-center gap-2 p-[4%] text-left"
-                  style={{ "--i": 2 } as React.CSSProperties}
-                >
-                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-800">
-                    Encontrá tu propiedad
-                  </p>
-                  <div role="tablist" aria-label="Tipo de operación" className="flex flex-wrap gap-1.5">
-                    {OPERACIONES.map((op) => {
-                      const activa = operacion === op.value;
-                      return (
-                        <button
-                          key={op.value}
-                          type="button"
-                          role="tab"
-                          aria-selected={activa}
-                          onClick={() => setOperacion(op.value)}
-                          className={
-                            "h-9 rounded-md border px-4 text-sm font-semibold transition " +
-                            (activa
-                              ? "border-brand bg-brand text-brand-foreground"
-                              : "border-foreground/15 bg-white/85 text-muted-foreground hover:border-brand/50 hover:text-foreground")
-                          }
-                        >
-                          {op.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {operacion !== "all" && <input type="hidden" name="operacion" value={operacion} />}
+            {/* VIDEO: arranca invisible y aparece sobre la foto, que es su primer cuadro. */}
+            <video
+              ref={videoRef}
+              muted
+              playsInline
+              preload="none"
+              disablePictureInPicture
+              aria-hidden
+              tabIndex={-1}
+              className="absolute inset-0 size-full object-cover opacity-0 will-change-[opacity]"
+            />
 
-                  <div className="grid grid-cols-2 gap-2 @md:grid-cols-[1fr_1fr_auto]">
-                    {/* "Inmueble" y no "Tipo de propiedad": en el celular el select mide media
-                        tarjeta y el texto largo quedaba cortado ("Tipo de propie"). */}
-                    <SelectPanel name="tipo" aria="Tipo de inmueble" placeholder="Inmueble" opciones={tipos} />
-                    {/* La ubicación viaja como `q`: el catálogo interpreta la frase y
-                        matchea barrio/ciudad — mismo camino que el buscador libre. */}
-                    <SelectPanel name="q" aria="Ubicación" placeholder="Ubicación" opciones={ciudades} />
-                    <button
-                      type="submit"
-                      className="col-span-2 inline-flex h-11 items-center justify-center gap-2 rounded-md bg-brand px-7 text-sm font-bold uppercase tracking-wide text-brand-foreground transition hover:brightness-110 active:scale-[0.98] @md:col-span-1"
-                    >
-                      <Search className="size-4" aria-hidden />
-                      Buscar
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
+            {/* BUSCADOR "impreso" en el cuerpo del cartel, por encima del video. */}
+            <div ref={buscadorRef} className="hero-cuerpo">
+              <form
+                action="/propiedades"
+                method="get"
+                onSubmit={buscar}
+                className="hero-in hero-buscador flex size-full flex-col justify-center gap-2 p-[4%] text-left"
+                style={{ "--i": 2 } as React.CSSProperties}
+              >
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-800">
+                  Encontrá tu propiedad
+                </p>
+                <div role="tablist" aria-label="Tipo de operación" className="flex flex-wrap gap-1.5">
+                  {OPERACIONES.map((op) => {
+                    const activa = operacion === op.value;
+                    return (
+                      <button
+                        key={op.value}
+                        type="button"
+                        role="tab"
+                        aria-selected={activa}
+                        onClick={() => setOperacion(op.value)}
+                        className={
+                          "h-9 rounded-md border px-4 text-sm font-semibold transition " +
+                          (activa
+                            ? "border-brand bg-brand text-brand-foreground"
+                            : "border-foreground/15 bg-white/85 text-muted-foreground hover:border-brand/50 hover:text-foreground")
+                        }
+                      >
+                        {op.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {operacion !== "all" && <input type="hidden" name="operacion" value={operacion} />}
 
-            {/* VIDEO: invisible hasta el fundido. Su primer cuadro es el llavero. */}
-            <div ref={capaVideoRef} className="absolute inset-0 origin-top-left opacity-0 will-change-transform">
-              <video
-                ref={videoRef}
-                muted
-                playsInline
-                preload="none"
-                disablePictureInPicture
-                aria-hidden
-                tabIndex={-1}
-                className="absolute inset-0 size-full object-cover"
-              />
+                <div className="grid grid-cols-2 gap-2 @md:grid-cols-[1fr_1fr_auto]">
+                  {/* "Inmueble" y no "Tipo de propiedad": en el celular el select mide media
+                      tarjeta y el texto largo quedaba cortado ("Tipo de propie"). */}
+                  <SelectPanel name="tipo" aria="Tipo de inmueble" placeholder="Inmueble" opciones={tipos} />
+                  {/* La ubicación viaja como `q`: el catálogo interpreta la frase y
+                      matchea barrio/ciudad — mismo camino que el buscador libre. */}
+                  <SelectPanel name="q" aria="Ubicación" placeholder="Ubicación" opciones={ciudades} />
+                  <button
+                    type="submit"
+                    className="col-span-2 inline-flex h-11 items-center justify-center gap-2 rounded-md bg-brand px-7 text-sm font-bold uppercase tracking-wide text-brand-foreground transition hover:brightness-110 active:scale-[0.98] @md:col-span-1"
+                  >
+                    <Search className="size-4" aria-hidden />
+                    Buscar
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
+
+          {/* PISO BLANCO: al final del video, la parte de abajo se funde con el fondo de la
+              página, que sigue debajo del hero. */}
+          <div
+            ref={blancoRef}
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-background from-[12%] via-background/70 to-transparent opacity-0"
+          />
 
           {/* Velo fijo arriba: el menú (blanco, transparente) se lee sobre la foto y sobre
               el video en todo el recorrido. */}
@@ -441,7 +425,7 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/35 to-transparent" />
             <div className="relative flex h-full flex-col items-center justify-end px-4 pb-[2cqh] pt-[var(--hero-header,64px)] text-center">
               <span
-                className="hero-in hero-ojo inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/85"
+                className="hero-in hero-ojo inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/85 [text-shadow:0_1px_8px_rgb(0_0_0/0.7)]"
                 style={{ "--i": 0 } as React.CSSProperties}
               >
                 <ShieldCheck className="size-3.5 text-accent-warm" />
@@ -449,8 +433,11 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
                 <span aria-hidden className="text-accent-warm">·</span>
                 Operamos en todo el país
               </span>
+              {/* En mayúsculas y con mucha sombra (Nacho, 08/10): dos sombras, una corta
+                  que marca el borde de la letra y una larga y difusa que la despega del
+                  cielo, que es claro. */}
               <h1
-                className="hero-in mt-3 text-balance text-[min(3.75rem,6.5cqh,9cqw)] font-semibold leading-[1.06] text-white"
+                className="hero-in mt-3 text-balance text-[min(3.5rem,6cqh,7.4cqw)] font-bold uppercase leading-[1.04] tracking-[0.01em] text-white [text-shadow:0_2px_3px_rgb(0_0_0/0.55),0_6px_28px_rgb(0_0_0/0.65)]"
                 style={{ "--i": 1 } as React.CSSProperties}
               >
                 Tu próxima propiedad
@@ -463,9 +450,9 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
       </div>
 
       {/* RECORRIDO: mientras se scrollea este espacio vacío el hero queda fijo arriba y
-          pasa todo lo de arriba. Lo que tarda la animación lo define ESTE alto, no lo que
-          dura el video (el video avanza con el scroll): para hacerla más ágil, se achica acá. */}
-      <div ref={recorridoRef} aria-hidden className="h-[115svh]" />
+          corre el video. Lo que tarda la animación lo define ESTE alto, no lo que dura el
+          video (el video avanza con el scroll): para hacerla más ágil, se achica acá. */}
+      <div ref={recorridoRef} aria-hidden className="h-[90svh]" />
     </section>
   );
 }

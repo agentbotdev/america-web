@@ -253,19 +253,22 @@ export function CatalogoBrowser({
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
     if ([...sp.keys()].length === 0) return;
-    const interpretada = interpretarBusqueda(sp.get("q") ?? "");
+    // Un parámetro vacío (`tipo=`) es "sin filtro", no "igual a nada": el form del
+    // hero los mandaba así y el catálogo quedaba en cero resultados (08/10).
+    const param = (clave: string) => sp.get(clave)?.trim() || null;
+    const interpretada = interpretarBusqueda(param("q") ?? "");
     setF((prev) => ({
       ...prev,
       q: interpretada.texto,
-      operacion: sp.get("operacion") ?? interpretada.operacion ?? prev.operacion,
-      tipo: sp.get("tipo") ?? interpretada.tipo ?? prev.tipo,
-      barrio: sp.get("barrio") ?? prev.barrio,
-      dormitorios: sp.get("dormitorios") ?? prev.dormitorios,
-      banos: sp.get("banos") ?? prev.banos,
-      precio_min: sp.get("precio_min") ?? prev.precio_min,
-      precio_max: sp.get("precio_max") ?? prev.precio_max,
-      superficie_min: sp.get("superficie_min") ?? prev.superficie_min,
-      orden: sp.get("orden") ?? prev.orden,
+      operacion: param("operacion") ?? interpretada.operacion ?? prev.operacion,
+      tipo: param("tipo") ?? interpretada.tipo ?? prev.tipo,
+      barrio: param("barrio") ?? prev.barrio,
+      dormitorios: param("dormitorios") ?? prev.dormitorios,
+      banos: param("banos") ?? prev.banos,
+      precio_min: param("precio_min") ?? prev.precio_min,
+      precio_max: param("precio_max") ?? prev.precio_max,
+      superficie_min: param("superficie_min") ?? prev.superficie_min,
+      orden: param("orden") ?? prev.orden,
     }));
   }, []);
 
