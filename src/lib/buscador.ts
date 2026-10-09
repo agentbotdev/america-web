@@ -40,7 +40,7 @@ const VACIAS = new Set([
 ]);
 
 /** Quita tildes y pasa a minúsculas, para comparar sin sorpresas. */
-function normalizar(s: string): string {
+export function normalizar(s: string): string {
   return s
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
@@ -103,4 +103,38 @@ export function interpretarBusqueda(consulta: string): BusquedaInterpretada {
     .trim();
 
   return { operacion, tipo, texto };
+}
+
+/**
+ * Lo mínimo de una propiedad para decidir si coincide con una búsqueda. Lo arma el
+ * servidor para cada pin del mapa (así el filtrado en vivo de la home no necesita bajar
+ * todo el catálogo) y el navegador para las propiedades completas.
+ */
+export interface DatosBuscables {
+  tipo: string;
+  operacion: string;
+  /** Título, barrio, ciudad y amenities, normalizados (sin tildes, en minúscula). */
+  texto: string;
+}
+
+export function datosBuscables(p: {
+  titulo?: string;
+  tipo_propiedad: string;
+  tipo_operacion: string;
+  barrio?: string;
+  ciudad?: string;
+  tags?: string[];
+}): DatosBuscables {
+  return {
+    tipo: p.tipo_propiedad,
+    operacion: p.tipo_operacion,
+    texto: normalizar([p.titulo, p.barrio, p.ciudad, ...(p.tags ?? [])].filter(Boolean).join(" ")),
+  };
+}
+
+/** ¿La propiedad cumple la búsqueda? Cada palabra del texto libre tiene que aparecer. */
+export function coincideBusqueda(b: BusquedaInterpretada, d: DatosBuscables): boolean {
+  if (b.operacion && d.operacion !== b.operacion) return false;
+  if (b.tipo && d.tipo !== b.tipo) return false;
+  return b.texto.split(" ").filter(Boolean).every((palabra) => d.texto.includes(palabra));
 }
