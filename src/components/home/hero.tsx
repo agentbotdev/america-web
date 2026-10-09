@@ -29,6 +29,12 @@ interface Encuadre {
   ancho: number;
   alto: number;
   cartel: string;
+  /**
+   * La misma foto en miniatura (~200 bytes, viaja dentro del HTML): es lo que se ve, ya
+   * borroso, mientras baja la foto de verdad. Sin esto se veían los velos oscuros del título
+   * sobre un fondo liso antes que la foto (Nacho, 09/10: "cargan antes las sombras").
+   */
+  borrador: string;
   video: string;
   /** Borde de arriba del cartel: el título va por encima. */
   techo: number;
@@ -40,7 +46,9 @@ const HORIZONTAL: Encuadre = {
   ancho: 2752,
   alto: 1536,
   cartel: "/hero/cartel-horizontal.webp",
-  video: "/hero/recorrido-horizontal.mp4",
+  borrador:
+    "data:image/webp;base64,UklGRsYAAABXRUJQVlA4ILoAAAAQBQCdASocABAAPt1cpkyopSOiMAgBEBuJagCdL1AagA48wNUdAHHFI7SfynbIw3qAAP4F/3Q4O+V6wGv3NaqrmuUyC4KPqzHkOyV8bV12caV5qZsNhsmtFmL2WbD8x+D++3J4mmjXnkyB2gcadXUJsSawE+wifO+kzX/L55qddN1/ON9hdG783e8u4mLZA5+IMLFhddHPYObY3D75H5joAK4egxOEooQhQXS6f+m9/8OHScPhBpQAAAA=",
+  video: "/hero/recorrido-horizontal-2.mp4",
   techo: 0.361,
   cuerpo: { x: 0.301, y: 0.575, w: 0.4, h: 0.251 },
 };
@@ -49,7 +57,9 @@ const VERTICAL: Encuadre = {
   ancho: 1536,
   alto: 2752,
   cartel: "/hero/cartel-vertical.webp",
-  video: "/hero/recorrido-vertical.mp4",
+  borrador:
+    "data:image/webp;base64,UklGRqwAAABXRUJQVlA4IKAAAACwBACdASoQAB0APt1apkyopSOiMAgBEBuJbACdL1A4QMY2SIuUZEn9nzCeOvIAAP7qj+NTSLNw6A2DOeC6BiH4bepyzEDbDB8hrYFB2LnrmSJk/ZxfDNk4SXc+8Wxx2hl2For+zqvP6xc5Q1CzYfGBmZQCfodwiYVjjR6ytlRfdfTqOvfYTmV3lDCG2AjFzNAw7V15TI42oJEkKMr1swAA",
+  video: "/hero/recorrido-vertical-2.mp4",
   techo: 0.334,
   cuerpo: { x: 0.09, y: 0.525, w: 0.83, h: 0.318 },
 };
@@ -132,8 +142,9 @@ function SelectPanel({
 
 /** Las medidas de los dos encuadres como variables de CSS (globals.css elige cuál usar). */
 function variablesEncuadre(): React.CSSProperties {
-  const vars: Record<string, number> = {};
+  const vars: Record<string, number | string> = {};
   for (const [prefijo, e] of [["h", HORIZONTAL], ["v", VERTICAL]] as const) {
+    vars[`--${prefijo}-borrador`] = `url("${e.borrador}")`;
     vars[`--${prefijo}-ar`] = e.ancho / e.alto;
     vars[`--${prefijo}-techo`] = e.techo;
     vars[`--${prefijo}-cuerpo-x`] = e.cuerpo.x;
@@ -262,18 +273,46 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
       return;
     }
 
+    const ponerFuente = (fuente: string) => {
+      video.src = fuente;
+      video.muted = true;
+      video.preload = "auto";
+      video.load();
+      // iOS no decodifica el primer cuadro solo con `preload`: hace falta darle play
+      // (permitido sin tocar la pantalla porque está mudo) y pausarlo enseguida.
+      video.play().then(() => video.pause()).catch(() => {});
+    };
+
+    // El video se baja ENTERO una sola vez y se reproduce desde la memoria del teléfono.
+    // Dándole la URL directo, cada salto del scroll le pedía un pedacito al servidor: en
+    // producción, en el celular, el video iba a los tirones y se veía "lento" (Nacho, 09/10;
+    // en local no pasaba porque el servidor está en la misma máquina). Mientras baja se ve
+    // la foto del cartel, que es su primer cuadro. Si el pedido falla, va directo como antes.
+    let urlEnMemoria: string | null = null;
+    let pedidoVideo: AbortController | null = null;
     const cargarVideo = () => {
       recorridoEl.style.height = "";
       seccion.style.marginBottom = MARGEN_SECCION;
       primerCuadro = false;
       video.style.opacity = "0";
-      video.src = encuadre.video;
-      video.muted = true;
-      video.preload = "auto";
-      video.load();
-      // iOS no baja los datos de un video solo con `preload`: hace falta darle play
-      // (permitido sin tocar la pantalla porque está mudo) y pausarlo enseguida.
-      video.play().then(() => video.pause()).catch(() => {});
+      pedidoVideo?.abort();
+      const pedido = new AbortController();
+      pedidoVideo = pedido;
+      const url = encuadre.video;
+      fetch(url, { signal: pedido.signal })
+        .then((r) => {
+          if (!r.ok) throw new Error(`video ${r.status}`);
+          return r.blob();
+        })
+        .then((archivo) => {
+          if (pedido.signal.aborted) return;
+          if (urlEnMemoria) URL.revokeObjectURL(urlEnMemoria);
+          urlEnMemoria = URL.createObjectURL(archivo);
+          ponerFuente(urlEnMemoria);
+        })
+        .catch(() => {
+          if (!pedido.signal.aborted) ponerFuente(url);
+        });
     };
 
     const medir = () => {
@@ -355,6 +394,8 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
       window.removeEventListener("scroll", alScrollear);
       window.removeEventListener("resize", alCambiarTamano);
       cancelAnimationFrame(cuadro);
+      pedidoVideo?.abort();
+      if (urlEnMemoria) URL.revokeObjectURL(urlEnMemoria);
     };
   }, []);
 

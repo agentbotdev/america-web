@@ -450,10 +450,41 @@
      (solo de ancho) más cercano, que es el cuerpo del cartel. */
   container: hero / size;
 }
+
+/* HEADER SOBRE EL HERO (components/layout/site-header.tsx). Si la página tiene un hero, el
+   header va fijo arriba (fuera del flujo: el hero arranca en el borde de arriba) y, mientras
+   el hero esté debajo, transparente con letras blancas. Lo decide CSS y no React porque el
+   header vive en el layout raíz, que se pre-renderiza sin saber la ruta: con React, el HTML
+   salía blanco y ocupando lugar hasta que cargaba el JS (Nacho, 09/10). El JS solo agrega
+   `data-solido` cuando el hero ya se fue. Fuera de los layers: le gana a las utilidades. */
+body:has([data-hero]) [data-site-header] {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+}
+body:has([data-hero]) [data-site-header]:not([data-solido]) {
+  border-color: transparent;
+  background-color: transparent;
+  color: #fff;
+}
+body:has([data-hero]) [data-site-header]:not([data-solido]) [data-nav-escritorio] a {
+  color: rgb(255 255 255 / 0.85);
+}
+body:has([data-hero]) [data-site-header]:not([data-solido]) [data-nav-escritorio] a:hover,
+body:has([data-hero]) [data-site-header]:not([data-solido]) [data-nav-escritorio] a[aria-current="page"] {
+  color: #fff;
+}
+/* El isotipo es negro: sobre la foto va en una placa blanca. */
+body:has([data-hero]) [data-site-header]:not([data-solido]) [data-logo-header] {
+  background-color: rgb(255 255 255 / 0.95);
+  padding: 3px;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.25);
+}
 .hero-capas {
   position: absolute;
   inset: 0;
   --ar: var(--h-ar);
+  --borrador: var(--h-borrador);
   --techo: var(--h-techo);
   --cuerpo-x: var(--h-cuerpo-x);
   --cuerpo-y: var(--h-cuerpo-y);
@@ -472,6 +503,7 @@
 @media (max-aspect-ratio: 4/5) {
   .hero-capas {
     --ar: var(--v-ar);
+    --borrador: var(--v-borrador);
     --techo: var(--v-techo);
     --cuerpo-x: var(--v-cuerpo-x);
     --cuerpo-y: var(--v-cuerpo-y);
@@ -480,6 +512,8 @@
   }
 }
 .hero-escena {
+  /* La foto en miniatura, estirada: se ve borrosa mientras baja la de verdad. */
+  background: var(--borrador) center / 100% 100% no-repeat;
   position: absolute;
   left: var(--escena-x);
   top: var(--escena-y);

@@ -56,24 +56,26 @@ function isActive(pathname: string, href: string) {
 
 // ISOTIPO "AC" (pedido de Nacho 08/10: "usamos ese en casi todos lados"). Reemplaza al
 // logo largo AMERICA CARDOZO VENDE, que en el celular competía con los accesos.
-// Es negro: sobre la foto del hero no se lee, así que ahí va sobre una placa blanca. La
-// caja mide lo mismo con y sin placa (la placa achica el logo por dentro): así el resto
-// del renglón no salta cuando el header deja de ser transparente.
-function Logo({ sobreFoto = false }: { sobreFoto?: boolean }) {
+// Es negro: sobre la foto del hero no se lee, así que ahí va sobre una placa blanca (la
+// pone globals.css, ver "HEADER SOBRE EL HERO"). La caja mide lo mismo con y sin placa
+// (la placa achica el logo por dentro): así el resto del renglón no salta cuando el
+// header deja de ser transparente.
+function Logo() {
   return (
     <Link
       href="/"
       aria-label={AGENCIA.nombre}
-      className={cn(
-        "group flex h-7 w-[51px] shrink-0 items-center justify-center rounded-md transition-colors md:h-10 md:w-[73px]",
-        sobreFoto && "bg-white/95 p-[3px] shadow-[0_2px_10px_rgb(0_0_0/0.25)]",
-      )}
+      data-logo-header
+      className="group flex h-7 w-[51px] shrink-0 items-center justify-center rounded-md transition-colors md:h-10 md:w-[73px]"
     >
+      {/* width/height = el tamaño MÁS GRANDE al que se muestra (73x40 en la compu), no el
+          del archivo: con 720 de ancho Next precargaba con prioridad una versión de 1920px
+          para mostrarla a 51px, y en el celular le competía a la foto del hero. */}
       <Image
         src="/marca/isotipo-ac.png"
         alt=""
-        width={720}
-        height={397}
+        width={73}
+        height={40}
         priority
         className="size-full object-contain transition-transform duration-300 group-hover:scale-105"
       />
@@ -87,11 +89,18 @@ export function SiteHeader() {
   // HOME: el header va ENCIMA del hero, transparente, para que la foto y el video lleguen
   // hasta el borde de arriba (reunión 06/10, pedido de Nacho 08/10: "sacar la barra
   // blanca"). Cuando el hero termina vuelve a ser el header sólido de siempre.
+  //
+  // El modo "sobre el hero" lo pone CSS (globals.css, "HEADER SOBRE EL HERO": si la página
+  // tiene un [data-hero]), no React. Este componente vive en el layout raíz, que se
+  // pre-renderiza sin saber la ruta: con la ruta decidiéndolo acá, el HTML salía con el
+  // header blanco y ocupando lugar, y recién al cargar el JS pasaba a transparente — en
+  // la compu se veía la barra blanca unos segundos y en el celular todo arrancaba corrido
+  // (Nacho, 09/10). El JS solo marca `data-solido` cuando el hero ya se fue.
   const esHome = pathname === "/";
-  const [sobreHero, setSobreHero] = useState(esHome);
+  const [sobreHero, setSobreHero] = useState(true);
 
   useEffect(() => {
-    // Fuera de la home no hay hero: `transparente` ya da false por `esHome`.
+    // Fuera de la home no hay hero: el CSS de "sobre el hero" no aplica.
     if (!esHome) return;
     let cuadro = 0;
     const revisar = () => {
@@ -117,8 +126,6 @@ export function SiteHeader() {
     };
   }, [esHome]);
 
-  const transparente = esHome && sobreHero;
-
   return (
     // Header SÓLIDO, sin `backdrop-filter` — por dos razones que ya se pagaron:
     // 1) Un fondo translúcido dejaba ver el contenido sangrando por debajo al
@@ -130,20 +137,15 @@ export function SiteHeader() {
     // (No es el caso de los "cortes" que marcó el cliente — aquello eran bandas
     // de color distinto entre secciones, no una línea de 1px bajo el header.)
     // `data-site-header`: el hero de la home mide este alto para dejarle lugar al título.
-    // En la home es `fixed` (fuera del flujo, así el hero arranca en el borde de arriba);
-    // en el resto, `sticky` como siempre.
+    // En la home el CSS lo pasa a `fixed` (fuera del flujo, así el hero arranca en el borde
+    // de arriba) y transparente mientras no tenga `data-solido`; en el resto, `sticky`.
     <header
       data-site-header
-      className={cn(
-        "z-50 border-b transition-colors duration-300",
-        esHome ? "fixed inset-x-0 top-0" : "sticky top-0",
-        transparente
-          ? "border-transparent bg-transparent text-white"
-          : "border-foreground/[0.07] bg-background",
-      )}
+      data-solido={(esHome && !sobreHero) || undefined}
+      className="sticky top-0 z-50 border-b border-foreground/[0.07] bg-background transition-colors duration-300"
     >
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-1.5 px-3 sm:px-6 md:h-16 md:gap-4 lg:px-8">
-        <Logo sobreFoto={transparente} />
+        <Logo />
 
         {/* ACCESOS DEL CELULAR en el MISMO renglón del logo (Nacho, 08/10: antes eran un
             segundo renglón y se comían el alto de la pantalla). Cards más bajas y con menos
@@ -167,7 +169,8 @@ export function SiteHeader() {
 
         {/* MAYÚSCULA + tracking (tipografía como los títulos del footer),
             texto un punto más chico para que entren las 6 solapas. */}
-        <nav className="hidden items-center gap-6 md:flex lg:gap-7">
+        {/* `data-nav-escritorio`: sobre el hero, globals.css pasa estos links a blanco. */}
+        <nav data-nav-escritorio className="hidden items-center gap-6 md:flex lg:gap-7">
           {NAV.map((item) => {
             const active = isActive(pathname, item.href);
             return (
@@ -178,9 +181,7 @@ export function SiteHeader() {
                 data-active={active ? "true" : undefined}
                 className={cn(
                   "nav-underline text-xs font-semibold uppercase tracking-wider transition-colors",
-                  transparente
-                    ? active ? "text-white" : "text-white/85 hover:text-white"
-                    : active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {item.label}
@@ -230,8 +231,8 @@ export function SiteHeader() {
                   <Image
                     src="/marca/isotipo-ac.png"
                     alt=""
-                    width={720}
-                    height={397}
+                    width={58}
+                    height={32}
                     className="h-8 w-auto shrink-0"
                   />
                   <span className="wordmark text-sm uppercase leading-none tracking-[0.14em]">

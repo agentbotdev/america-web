@@ -5,6 +5,19 @@ const nextConfig: NextConfig = {
   // contador de issues abajo a la izquierda). Es SOLO de desarrollo — en
   // producción no existe — pero molesta al revisar el diseño.
   devIndicators: false,
+  async headers() {
+    return [
+      {
+        // Videos y fotos del hero: caché de un año. Vercel servía /public con
+        // `max-age=0, must-revalidate`: cada visita, y cada salto del video
+        // mientras se scrollea, volvía a preguntarle al servidor (Nacho, 09/10:
+        // "en el celu el video carga lento"). OJO: si se reemplaza un archivo de
+        // /public/hero, RENOMBRARLO (el navegador no lo vuelve a pedir).
+        source: "/hero/:archivo*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+    ];
+  },
   async redirects() {
     return [
       {
