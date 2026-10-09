@@ -194,6 +194,12 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
     let objetivo = 0;
     let mostrado = 0;
     let cuadro = 0;
+    // ¿El video ya tiene su primer cuadro? Una vez que sí, queda en true aunque después
+    // `readyState` baje: baja a 1 CADA VEZ que se salta a otro momento (o sea, en cada
+    // scroll), y mirarlo en cada repintado apagaba el video unos milisegundos y dejaba ver
+    // la foto del cartel de abajo (Nacho, 09/10: "el cartel titila y reaparece"; medido:
+    // 19 apagones en un scroll de prueba). Solo vuelve a false al cargar otro video.
+    let primerCuadro = false;
 
     const aplicar = (p: number) => {
       // Título y buscador se van apenas se empieza a bajar.
@@ -204,8 +210,7 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
       buscador.inert = visibles < 0.05;
       // El video tapa la foto recién cuando tiene su primer cuadro: si el scroll llega
       // antes, se sigue viendo la foto (que es ese mismo cuadro) y no un hueco.
-      const listo = video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA;
-      video.style.opacity = listo ? String(tramo(p, FASES.cruce)) : "0";
+      video.style.opacity = primerCuadro ? String(tramo(p, FASES.cruce)) : "0";
       blanco.style.opacity = String(suave(tramo(p, FASES.blanco)));
     };
 
@@ -224,6 +229,7 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
 
     const cargarVideo = () => {
       recorridoEl.style.height = "";
+      primerCuadro = false;
       video.style.opacity = "0";
       video.src = encuadre.video;
       video.muted = true;
@@ -291,7 +297,11 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
     video.addEventListener("error", sinVideo);
     video.addEventListener("loadedmetadata", alScrollear);
     // Recién con el primer cuadro el video puede tapar la foto (ver `aplicar`).
-    video.addEventListener("loadeddata", alScrollear);
+    const alTenerPrimerCuadro = () => {
+      primerCuadro = true;
+      alScrollear();
+    };
+    video.addEventListener("loadeddata", alTenerPrimerCuadro);
     consulta.addEventListener("change", alCambiarEncuadre);
     const observador = new ResizeObserver(alCambiarTamano);
     observador.observe(fijo);
@@ -303,7 +313,7 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
       observador.disconnect();
       video.removeEventListener("error", sinVideo);
       video.removeEventListener("loadedmetadata", alScrollear);
-      video.removeEventListener("loadeddata", alScrollear);
+      video.removeEventListener("loadeddata", alTenerPrimerCuadro);
       consulta.removeEventListener("change", alCambiarEncuadre);
       window.removeEventListener("scroll", alScrollear);
       window.removeEventListener("resize", alCambiarTamano);

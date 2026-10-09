@@ -77,8 +77,24 @@ export function PropiedadesConMapa({
     <section id="propiedades" aria-labelledby="titulo-propiedades">
       {/* BANDA de color de marca a lo ancho, con el título y la barra. Rojo PROFUNDO
           (--brand-text): blanco encima da 5.7:1 → AA. Abajo deja lugar para que el mapa
-          se monte sobre el borde. */}
-      <div className="bg-brand-text px-4 pb-24 pt-12 text-center sm:pb-28 sm:pt-14">
+          se monte sobre el borde.
+          Arriba ARRANCA EN BLANCO y se va al rojo: el video del hero termina con el piso
+          fundido al blanco de la página, y la banda roja de golpe abajo de eso quedaba
+          como un corte (Nacho, 09/10). El degradé tiene paradas intermedias en curva (no
+          lineal) para que no se vea el borde donde termina, y mezcla en oklch para que el
+          paso por el rosado no quede apagado. El título arranca recién en el rojo pleno. */}
+      <div
+        className="px-4 pb-24 pt-40 text-center sm:pb-28 sm:pt-44"
+        style={{
+          background: `linear-gradient(to bottom in oklch,
+            var(--background) 0,
+            color-mix(in oklch, var(--brand-text) 6%, var(--background)) 1.5rem,
+            color-mix(in oklch, var(--brand-text) 28%, var(--background)) 3.5rem,
+            color-mix(in oklch, var(--brand-text) 65%, var(--background)) 5.5rem,
+            color-mix(in oklch, var(--brand-text) 90%, var(--background)) 7rem,
+            var(--brand-text) 8rem)`,
+        }}
+      >
         <h2 id="titulo-propiedades" className="text-3xl font-semibold text-white sm:text-4xl">
           Nuestras propiedades
         </h2>
