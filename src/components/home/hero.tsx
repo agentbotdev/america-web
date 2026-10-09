@@ -68,10 +68,19 @@ const FASES = {
   cruce: [0.01, 0.05],
   /** El video corre de punta a punta. */
   video: [0.03, 0.92],
-  /** El piso del living se funde con el fondo de la página. */
-  blanco: [0.7, 0.92],
-  /** El hero sube de a poco mientras corre el video (ver SUBIDA). */
-  subida: [0.03, 1],
+  /**
+   * El borde de abajo del hero se funde con el fondo de la página. Tiene que estar puesto
+   * ANTES de que el hero empiece a subir: apenas sube, su borde de abajo queda a la vista, y
+   * sin el degradé se veía el video "cortado" contra el blanco (Nacho, 09/10). Antes
+   * aparecía recién al final del video, cuando el hero todavía no se movía.
+   */
+  blanco: [0.08, 0.11],
+  /**
+   * El hero sube de a poco mientras corre el video (ver SUBIDA). Arranca recién cuando el
+   * título y el buscador ya se fueron: así el degradé de abajo no lava el buscador mientras
+   * se desvanece.
+   */
+  subida: [0.1, 1],
 } as const;
 // Cuánto del alto del hero sube mientras corre el video: al final se ve el 67,5% de abajo
 // (Nacho, 09/10: con el hero quieto "parece que te congelás ahí"; que se vaya yendo da
