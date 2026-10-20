@@ -18,7 +18,8 @@ import { formatPrecio, formatM2, tituloPropiedad, labelOperacion } from "@/lib/f
 import { useMounted } from "@/lib/use-client-hooks";
 import { cn } from "@/lib/utils";
 import type { Propiedad } from "@/types";
-
+
+import { SITE_URL as SITE } from "@/lib/site";
 /* Paleta del brochure — CLARA e imprimible, con la marca REAL de América (rojo).
    No usa los tokens dark del sitio: un PDF se imprime en blanco. */
 const BRAND = "#f02e19"; // rojo REAL de América Cardozo (verificado en su sitio)
@@ -27,8 +28,7 @@ const INK = "#0f172a";
 const MUTE = "#64748b";
 const LINE = "#e3e8f0";
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://america-cardozo.vercel.app";
+const SITE_URL = SITE;
 
 function urlPropiedad(p: Propiedad) {
   return `${SITE_URL}/propiedad/${p.slug}`;

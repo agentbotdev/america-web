@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
 import { getPropiedades } from "@/lib/supabase/queries";
-
-const BASE =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://america-cardozo.vercel.app";
+
+import { SITE_URL as SITE } from "@/lib/site";
+const BASE = SITE;
 
 // Sitemap con las propiedades REALES (Supabase) + rutas estáticas de la web.
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

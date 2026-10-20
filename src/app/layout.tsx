@@ -16,9 +16,9 @@ import { WhatsappFloat } from "@/components/whatsapp/whatsapp-float";
 import { AsesorChatLazy } from "@/components/chatbot/asesor-chat-lazy";
 import { brandStyle } from "@/lib/brand";
 import { AGENCIA } from "@/data/agencia";
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://america-cardozo.vercel.app";
+
+import { SITE_URL as SITE } from "@/lib/site";
+const SITE_URL = SITE;
 
 const geistSans = Geist({ variable: "--font-sans", subsets: ["latin"], display: "swap" });
 const geistMono = Geist_Mono({ variable: "--font-mono", subsets: ["latin"], display: "swap" });

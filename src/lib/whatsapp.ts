@@ -5,14 +5,14 @@
 import type { Agencia, Propiedad } from "@/types";
 import { tituloPropiedad, formatPrecio, formatM2 } from "@/lib/format";
 
+import { SITE_URL as SITE } from "@/lib/site";
 /** Construye el link oficial de WhatsApp con el texto urlencodeado. */
 export function waLink(numero: string, mensaje: string) {
   const num = numero.replace(/[^\d]/g, "");
   return `https://wa.me/${num}?text=${encodeURIComponent(mensaje)}`;
 }
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://america-cardozo.vercel.app";
+const SITE_URL = SITE;
 
 function urlPropiedad(p: Propiedad) {
   return `${SITE_URL}/propiedad/${p.slug}`;
