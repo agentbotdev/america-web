@@ -171,6 +171,16 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
+  /* Todos los títulos en MAYÚSCULA (pedido de Nacho, 20/10): secciones, tarjetas y fichas
+     de propiedades. Excepción: el título grande del hero, que ya se probó en mayúsculas
+     y se volvió a minúscula (09/10). */
+  h1, h2, h3, h4 {
+    text-transform: uppercase;
+  }
+  [data-hero] h1 {
+    text-transform: none;
+  }
+
   /* (La textura de puntos + glows del body::before se fue con el glass: existía
      únicamente para darle "algo que difuminar" al backdrop-filter. Sin blur,
      el marfil liso es el fondo — más limpio y más barato de componer.) */
