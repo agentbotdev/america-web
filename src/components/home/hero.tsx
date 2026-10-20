@@ -405,7 +405,7 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
     // `data-hero`: el header lo mira para saber cuándo dejar de ser transparente.
     // El margen negativo de abajo es el de SUBIDA: la sección siguiente se adelanta lo mismo
     // que sube el hero al final del video.
-    <section ref={seccionRef} data-hero className="relative" style={{ marginBottom: MARGEN_SECCION }}>
+    <section ref={seccionRef} data-hero className="pointer-events-none relative" style={{ marginBottom: MARGEN_SECCION }}>
       <div
         ref={fijoRef}
         // `data-hero-fijo`: el header mira dónde está ESTE bloque (que sube con el video),
