@@ -59,7 +59,15 @@ function mapFotos(rows: Array<Record<string, unknown>>): FotoPropiedad[] {
 function mapRow(r: Record<string, unknown>, fotos: FotoPropiedad[]): Propiedad {
   const id = String(r.tokko_id);
   const operacion: TipoOperacion = r.tipo_operacion === "alquiler" ? "alquiler" : "venta";
-  const moneda: Moneda = r.moneda === "ARS" ? "ARS" : "USD";
+  // El CRM edita precio_venta / precio_alquiler (y sus monedas). La columna `precio` es la
+  // vieja de Tokko: ya no se actualiza y en las propiedades cargadas a mano viene vacía, así
+  // que la web mostraba el precio anterior o "Consultar" (la inmo, 19/10: Uruguay 1629 bajó
+  // a 170.000 y la web seguía en 180.000). Manda el precio de la operación; `precio` queda
+  // solo de respaldo.
+  const esAlquiler = operacion === "alquiler";
+  const precioReal = esAlquiler ? num(r.precio_alquiler) : num(r.precio_venta);
+  const monedaReal = esAlquiler ? r.moneda_alquiler : r.moneda_venta;
+  const moneda: Moneda = (monedaReal ?? r.moneda) === "ARS" ? "ARS" : "USD";
   return {
     id,
     slug: propiedadSlug(String(r.titulo ?? ""), id),
@@ -84,7 +92,7 @@ function mapRow(r: Record<string, unknown>, fotos: FotoPropiedad[]): Propiedad {
     metros_cubiertos: num(r.metros_cubiertos),
     frente: num(r.frente),
     fondo: num(r.fondo),
-    precio: num(r.precio),
+    precio: precioReal ?? num(r.precio),
     moneda,
     precio_venta: num(r.precio_venta),
     precio_alquiler: num(r.precio_alquiler),
