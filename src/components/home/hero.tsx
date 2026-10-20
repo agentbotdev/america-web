@@ -562,7 +562,10 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
       {/* RECORRIDO: mientras se scrollea este espacio vacío el hero queda fijo arriba y
           corre el video. Lo que tarda la animación lo define ESTE alto, no lo que dura el
           video (el video avanza con el scroll): para hacerla más ágil, se achica acá. */}
-      <div ref={recorridoRef} aria-hidden className="h-[90svh]" />
+      {/* `pointer-events-none`: la sección siguiente se adelanta con un margen negativo y este
+          espacio quedaba ENCIMA del buscador de "Nuestras propiedades": se comía los clicks y
+          el buscador "no andaba" (Nacho, 20/10). Es solo alto para scrollear, no recibe nada. */}
+      <div ref={recorridoRef} aria-hidden className="pointer-events-none h-[90svh]" />
     </section>
   );
 }
