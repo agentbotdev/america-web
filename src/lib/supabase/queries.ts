@@ -56,6 +56,15 @@ function mapFotos(rows: Array<Record<string, unknown>>): FotoPropiedad[] {
     }));
 }
 
+// "casa" y "Casa" llegaban como dos tipos distintos y el filtro los mostraba duplicados
+// (Nacho, 20/10): algunas fichas se cargaron en minúscula. Se unifica con la inicial en
+// mayúscula; "PH" y los tipos ya bien escritos quedan igual.
+function tipoNormalizado(v: unknown): string {
+  const t = String(v ?? "").trim();
+  if (!t) return "Propiedad";
+  return t === t.toLowerCase() ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+}
+
 function mapRow(r: Record<string, unknown>, fotos: FotoPropiedad[]): Propiedad {
   const id = String(r.tokko_id);
   const operacion: TipoOperacion = r.tipo_operacion === "alquiler" ? "alquiler" : "venta";
@@ -74,7 +83,7 @@ function mapRow(r: Record<string, unknown>, fotos: FotoPropiedad[]): Propiedad {
     titulo: String(r.titulo ?? "Propiedad"),
     descripcion: String(r.descripcion ?? ""),
     reference_code: str(r.reference_code),
-    tipo_propiedad: String(r.tipo_propiedad ?? "Propiedad"),
+    tipo_propiedad: tipoNormalizado(r.tipo_propiedad),
     tipo_propiedad_code: str(r.tipo_propiedad_code),
     tipo_operacion: operacion,
     estado_propiedad: str(r.estado_propiedad),
