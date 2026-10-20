@@ -79,7 +79,8 @@
      las webs que las clientas marcaron de referencia (matiasszpira.com.ar,
      marascoquirogaprop.com.ar) — ambas trabajan sobre blanco y dejan el color
      para el acento y las fotos. Contrastes: foreground ≈ 15:1 → AA sobrado. */
-  --background: oklch(0.985 0.004 95);
+  /* Crema amarillito, el mismo de la web 4 (Nacho, 20/10). */
+  --background: lab(95.041% -1.1985 17.4515);
   --foreground: oklch(0.218 0 0); /* negro suave: el puro vibra sobre cálido */
 
   /* Superficies sólidas. El translúcido quedó solo para chips SOBRE FOTO. */
