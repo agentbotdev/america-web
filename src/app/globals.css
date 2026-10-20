@@ -172,13 +172,9 @@
   }
 
   /* Todos los títulos en MAYÚSCULA (pedido de Nacho, 20/10): secciones, tarjetas y fichas
-     de propiedades. Excepción: el título grande del hero, que ya se probó en mayúsculas
-     y se volvió a minúscula (09/10). */
+     de propiedades. Incluye el título del hero (20/10: "falta en mayúscula el título del hero"). */
   h1, h2, h3, h4 {
     text-transform: uppercase;
-  }
-  [data-hero] h1 {
-    text-transform: none;
   }
 
   /* (La textura de puntos + glows del body::before se fue con el glass: existía

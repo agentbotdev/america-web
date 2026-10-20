@@ -83,7 +83,8 @@ function mensajeAlquiler(costo: CostoAlquiler): string {
     `🏠 *Alquiler mensual*: ${formatPrecio(costo.alquilerMensual, "ARS")}\n\n` +
     `🧾 *Desglose estimado*\n${lineas}\n\n` +
     `💰 *Total para ingresar*: ${formatPrecio(costo.totalIngreso, "ARS")}\n\n` +
-    `(Valores referenciales) ¿Me asesoran con el contrato y la garantía?`
+    `(Valores referenciales) (Sujeto a las condiciones de financiación de cada propiedad)
+¿Me asesoran con el contrato y la garantía?`
   );
 }
 
@@ -282,6 +283,9 @@ export function CalculadoraAlquilerClient() {
             </p>
             <p className="mt-1 text-sm font-bold uppercase leading-tight tracking-wide text-brand-text sm:text-base">
               Sujeto a aprobación y análisis
+            </p>
+            <p className="mt-1 text-xs font-medium text-foreground">
+              (Sujeto a las condiciones de financiación de cada propiedad)
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
               Los porcentajes de honorarios y sellado varían según la jurisdicción

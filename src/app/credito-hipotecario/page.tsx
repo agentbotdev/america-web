@@ -7,9 +7,9 @@ import { CreditoHipotecarioClient } from "./credito-client";
 // La lógica y la interactividad viven en ./credito-client.tsx.
 
 export const metadata: Metadata = {
-  title: "Simulá tu crédito hipotecario",
+  title: "Simulá tu crédito personal",
   description:
-    "Simulá la cuota de tu crédito hipotecario: monto, plazo y anticipo. Tasa anual fija del 10% acumulativo. Te acompañamos en todo el proceso de compra.",
+    "Simulá la cuota de tu crédito personal: monto, plazo y anticipo. Tasa anual fija del 10% acumulativo. Te acompañamos en todo el proceso de compra.",
   keywords: [
     "crédito hipotecario",
     "simulador crédito hipotecario",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/credito-hipotecario" },
   openGraph: {
-    title: "Simulá tu crédito hipotecario | América Cardozo",
+    title: "Simulá tu crédito personal | América Cardozo",
     description:
       "Calculá tu cuota antes de decidir: monto, plazo y anticipo, con tasa anual fija.",
     url: "/credito-hipotecario",

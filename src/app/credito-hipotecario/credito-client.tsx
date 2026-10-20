@@ -44,7 +44,7 @@ function mensajeHipoteca(
   totalIntereses: number,
 ): string {
   return (
-    `¡Hola ${AGENCIA.nombre}! 👋 Simulé un crédito hipotecario en la web y quiero asesoramiento:\n\n` +
+    `¡Hola ${AGENCIA.nombre}! 👋 Simulé un crédito personal en la web y quiero asesoramiento:\n\n` +
     `🏠 *Valor propiedad*: ${formatPrecio(montoPropiedad, moneda)}\n` +
     `💵 *Anticipo*: ${anticipoPct}% (${formatPrecio(montoPropiedad * (anticipoPct / 100), moneda)})\n` +
     `🏦 *A financiar*: ${formatPrecio(montoFinanciar, moneda)}\n` +
@@ -53,7 +53,8 @@ function mensajeHipoteca(
     `📌 *Cuota mensual estimada*: ${formatPrecio(cuotaMensual, moneda)}\n` +
     `🧮 Total a pagar: ${formatPrecio(totalPagado, moneda)}\n` +
     `🔺 Intereses: ${formatPrecio(totalIntereses, moneda)}\n\n` +
-    `(Valores referenciales) ¿Me ayudan a ver opciones reales?`
+    `(Valores referenciales) (Sujeto a las condiciones de financiación de cada propiedad)
+¿Me ayudan a ver opciones reales?`
   );
 }
 
@@ -306,6 +307,9 @@ export function CreditoHipotecarioClient() {
             </p>
             <p className="mt-1 text-sm font-bold uppercase leading-tight tracking-wide text-brand-text sm:text-base">
               Sujeto a aprobación y análisis
+            </p>
+            <p className="mt-1 text-xs font-medium text-foreground">
+              (Sujeto a las condiciones de financiación de cada propiedad)
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
               No constituyen una oferta de crédito. Las condiciones reales (tasa,
