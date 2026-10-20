@@ -411,7 +411,7 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
         // `data-hero-fijo`: el header mira dónde está ESTE bloque (que sube con el video),
         // no la sección entera, para saber cuándo dejar de ser transparente.
         data-hero-fijo
-        className="hero-fijo sticky overflow-hidden bg-[#a8916b]"
+        className="hero-fijo pointer-events-none sticky overflow-hidden bg-[#a8916b]"
         // El fondo es el color promedio de las fotos del cartel: es lo que se ve hasta que
         // la foto carga, y con un fondo oscuro el cambio a la foto (muy luminosa) se notaba.
         style={{
@@ -446,7 +446,7 @@ export function Hero({ tipos = [], ciudades = [] }: { tipos?: string[]; ciudades
             />
 
             {/* BUSCADOR "impreso" en el cuerpo del cartel, por encima del video. */}
-            <div ref={buscadorRef} className="hero-cuerpo">
+            <div ref={buscadorRef} className="hero-cuerpo pointer-events-auto">
               <form
                 action="/propiedades"
                 method="get"
