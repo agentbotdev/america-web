@@ -178,18 +178,6 @@
     text-transform: uppercase;
   }
 
-  /* Puntitos de fondo, iguales a los de la web 4 (Nacho, 20/10): una grilla de 20px, fija
-     detrás de todo, que no recibe clicks. Solo los puntos, sin los resplandores. */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-image: radial-gradient(circle at 1px 1px, rgba(60, 50, 25, 0.2) 1px, transparent 0);
-    background-size: 20px 20px;
-  }
-
   /* (La textura de puntos + glows del body::before se fue con el glass: existía
      únicamente para darle "algo que difuminar" al backdrop-filter. Sin blur,
      el marfil liso es el fondo — más limpio y más barato de componer.) */
