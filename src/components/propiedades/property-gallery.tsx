@@ -47,7 +47,7 @@ export function PropertyGallery({ fotos, titulo, tipo, tieneVideo, hayVideos }: 
   }, [active]);
 
   return (
-    <div>
+    <div className="min-w-0 max-w-full">
       <div
         // Deslizar con el dedo pasa de foto (touch-pan-y deja scrollear la página hacia abajo).
         onTouchStart={(e) => { toqueX.current = e.touches[0].clientX; }}

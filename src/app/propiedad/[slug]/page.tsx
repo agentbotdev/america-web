@@ -129,7 +129,7 @@ export default async function PropiedadPage({
 
       <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
         {/* Columna izquierda */}
-        <div>
+        <div className="min-w-0">
           <PropertyGallery
             fotos={p.fotos}
             titulo={p.titulo}
