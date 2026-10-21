@@ -30,6 +30,7 @@ const NAV = [
   { href: "/emprendimientos", label: "Emprendimientos" },
   { href: "/credito-hipotecario", label: "Financiamos" },
   { href: "/vende-tu-propiedad", label: "Vendé tu propiedad" },
+  { href: "/nosotros", label: "Nosotros" },
   { href: "/administracion", label: "Administración" },
 ];
 

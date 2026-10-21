@@ -21,11 +21,12 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        // Reunión 18/09 (Moria): la sección "Nosotros" pasa a llamarse
-        // "Administración" — el quiénes somos ahora convive con el servicio
-        // de administración de alquileres. La URL vieja redirige permanente.
-        source: "/nosotros",
-        destination: "/administracion",
+        // El dominio oficial es www.americacardozo.com.ar (20/10). El de Vercel queda vivo pero
+        // redirige, para que nadie comparta ni guarde la dirección vieja. Solo ese host: los
+        // previews (america-web2.vercel.app, etc.) siguen andando.
+        source: "/:path*",
+        has: [{ type: "host", value: "america-web.vercel.app" }],
+        destination: "https://www.americacardozo.com.ar/:path*",
         permanent: true,
       },
     ];
