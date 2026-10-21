@@ -1,4 +1,7 @@
+"use client";
+
 import { waLink, mensajeGeneral } from "@/lib/whatsapp";
+import { useWaContexto } from "@/lib/wa-contexto";
 import { AGENCIA } from "@/data/agencia";
 
 // Botón flotante de WhatsApp, presente en toda la web.
@@ -6,10 +9,12 @@ import { AGENCIA } from "@/data/agencia";
 // que ocupa la esquina inferior DERECHA. Así ambos FABs conviven en mobile.
 // data-no-print: no se imprime al exportar el brochure de favoritos.
 export function WhatsappFloat() {
+  // En la ficha de una propiedad, el mensaje es el de ESA propiedad (ver WhatsappPropiedad).
+  const mensajeContexto = useWaContexto((s) => s.mensaje);
   return (
     <a
       data-no-print
-      href={waLink(AGENCIA.whatsapp, mensajeGeneral(AGENCIA))}
+      href={waLink(AGENCIA.whatsapp, mensajeContexto ?? mensajeGeneral(AGENCIA))}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Hablar por WhatsApp"

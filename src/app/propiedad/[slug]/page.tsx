@@ -11,6 +11,12 @@ import { FavoriteButton } from "@/components/favoritos/favorite-button";
 import { PropertyBrochure } from "@/components/propiedades/property-brochure";
 import { MapsButton } from "@/components/propiedades/maps-button";
 import { DescripcionCard } from "@/components/propiedades/descripcion-card";
+import { FichaVideos } from "@/components/propiedades/ficha-videos";
+import { CompartirBoton } from "@/components/propiedades/compartir-boton";
+import { WhatsappButton } from "@/components/whatsapp/whatsapp-button";
+import { WhatsappPropiedad } from "@/components/whatsapp/whatsapp-propiedad";
+import { mensajePropiedad } from "@/lib/whatsapp";
+import { SITE_URL } from "@/lib/site";
 import { Badge } from "@/components/ui/badge";
 import { formatPrecio, labelOperacion, tituloPropiedad } from "@/lib/format";
 
@@ -111,6 +117,7 @@ export default async function PropiedadPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <WhatsappPropiedad mensaje={mensajePropiedad(AGENCIA, p)} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <Link
@@ -128,7 +135,10 @@ export default async function PropiedadPage({
             titulo={p.titulo}
             tipo={p.tipo_propiedad}
             tieneVideo={p.tiene_video}
+            hayVideos={(p.videos?.length ?? 0) > 0}
           />
+
+          <FichaVideos videos={p.videos ?? []} titulo={titulo} />
 
           {/* Título + precio + CTA (mobile): justo bajo la galería, así el usuario
               puede consultar sin scrollear toda la ficha. El aside sticky cubre desktop. */}
@@ -163,6 +173,15 @@ export default async function PropiedadPage({
                 ya cargada. En una inmobiliaria es la segunda pregunta después
                 del precio: "¿dónde queda?". */}
             <MapsButton propiedad={p} variant="outline" fullWidth className="mt-2" />
+            {/* Consultar por ESTA propiedad (el mensaje ya lleva la ficha) y compartir el link. */}
+            <WhatsappButton
+              numero={AGENCIA.whatsapp}
+              mensaje={mensajePropiedad(AGENCIA, p)}
+              label="Consultar por esta propiedad"
+              fullWidth
+              className="mt-3"
+            />
+            <CompartirBoton url={`${SITE_URL}/propiedad/${p.slug}`} titulo={titulo} texto={`${titulo} · ${precio}`} className="mt-2 w-full" />
           </div>
 
           {/* Descripción en CARD y colapsable (pedido del cliente): los textos
@@ -211,6 +230,15 @@ export default async function PropiedadPage({
               </div>
               <FavoriteButton id={p.id} variant="inline" className="h-12 w-12" />
             </div>
+            {/* Consultar por ESTA propiedad (el mensaje ya lleva la ficha) y compartir el link. */}
+            <WhatsappButton
+              numero={AGENCIA.whatsapp}
+              mensaje={mensajePropiedad(AGENCIA, p)}
+              label="Consultar por esta propiedad"
+              fullWidth
+              className="mt-3"
+            />
+            <CompartirBoton url={`${SITE_URL}/propiedad/${p.slug}`} titulo={titulo} texto={`${titulo} · ${precio}`} className="mt-2 w-full" />
           </div>
         </aside>
       </div>

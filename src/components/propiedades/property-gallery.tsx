@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Video, Map, ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 import { PropertyImage } from "./property-image";
 import { cn } from "@/lib/utils";
@@ -16,10 +16,14 @@ interface PropertyGalleryProps {
   titulo: string;
   tipo?: string;
   tieneVideo?: boolean;
+  /** Hay videos para mostrar más abajo (#videos): la etiqueta lleva hasta ahí. */
+  hayVideos?: boolean;
 }
 
-export function PropertyGallery({ fotos, titulo, tipo, tieneVideo }: PropertyGalleryProps) {
+export function PropertyGallery({ fotos, titulo, tipo, tieneVideo, hayVideos }: PropertyGalleryProps) {
   const [active, setActive] = useState(0);
+  const tira = useRef<HTMLDivElement>(null);
+  const toqueX = useRef<number | null>(null);
 
   const hasFotos = fotos.length > 0;
   // Siempre hay al menos un slot (aunque sea el fallback con ícono).
@@ -34,9 +38,27 @@ export function PropertyGallery({ fotos, titulo, tipo, tieneVideo }: PropertyGal
     [total],
   );
 
+  // La miniatura activa se mantiene centrada en la tira (que se desliza de costado).
+  useEffect(() => {
+    const t = tira.current;
+    const el = t?.children[active] as HTMLElement | undefined;
+    if (!t || !el) return;
+    t.scrollTo({ left: el.offsetLeft - t.clientWidth / 2 + el.clientWidth / 2, behavior: "smooth" });
+  }, [active]);
+
   return (
     <div>
-      <div className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-border bg-muted">
+      <div
+        // Deslizar con el dedo pasa de foto (touch-pan-y deja scrollear la página hacia abajo).
+        onTouchStart={(e) => { toqueX.current = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          if (toqueX.current == null) return;
+          const dx = e.changedTouches[0].clientX - toqueX.current;
+          toqueX.current = null;
+          if (Math.abs(dx) > 45) go(dx < 0 ? 1 : -1);
+        }}
+        className="group relative aspect-[4/3] touch-pan-y overflow-hidden rounded-xl border border-border bg-muted"
+      >
         <PropertyImage
           foto={current}
           titulo={titulo}
@@ -84,14 +106,17 @@ export function PropertyGallery({ fotos, titulo, tipo, tieneVideo }: PropertyGal
           </span>
         )}
         {tieneVideo && (
-          <span className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-sm bg-black/70 px-3 py-1.5 text-xs font-medium text-white">
-            <Video className="size-4" aria-hidden="true" /> Video disponible
-          </span>
+          <a
+            href={hayVideos ? "#videos" : undefined}
+            className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-sm bg-black/70 px-3 py-1.5 text-xs font-medium text-white"
+          >
+            <Video className="size-4" aria-hidden="true" /> {hayVideos ? "Ver video" : "Video disponible"}
+          </a>
         )}
       </div>
 
       {total > 1 && (
-        <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-5">
+        <div ref={tira} className="mt-3 flex gap-2 overflow-x-auto pb-1.5 [scrollbar-width:thin]">
           {items.map((f, i) => (
             <button
               key={i}
@@ -100,7 +125,7 @@ export function PropertyGallery({ fotos, titulo, tipo, tieneVideo }: PropertyGal
               aria-current={i === idx}
               onClick={() => setActive(i)}
               className={cn(
-                "relative aspect-square overflow-hidden rounded-lg border bg-muted transition",
+                "relative size-[72px] shrink-0 overflow-hidden rounded-lg border bg-muted transition sm:size-24",
                 i === idx
                   ? "border-brand ring-2 ring-brand/40"
                   : "border-border hover:border-brand/50",
@@ -111,7 +136,7 @@ export function PropertyGallery({ fotos, titulo, tipo, tieneVideo }: PropertyGal
                 src={f.thumbnail ?? f.url}
                 titulo={titulo}
                 tipo={tipo}
-                sizes="120px"
+                sizes="96px"
               />
             </button>
           ))}

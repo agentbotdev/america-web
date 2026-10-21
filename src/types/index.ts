@@ -86,10 +86,17 @@ export interface Propiedad {
   alquiler_temporal?: boolean;
   tags: string[]; // amenities + servicios, ya en español ("Parrilla", "Gas Natural"...)
   tiene_video?: boolean;
+  /** Videos de YouTube de la ficha (propiedades.videos). */
+  videos?: VideoPropiedad[];
   orientacion?: string;
 
   // Media
   fotos: FotoPropiedad[];
+}
+
+export interface VideoPropiedad {
+  url: string;
+  titulo?: string;
 }
 
 export interface BrandColors {

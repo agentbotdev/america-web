@@ -19,7 +19,7 @@ const COLS =
   "superficie_descubierta,metros_cubiertos,frente,fondo,precio,moneda,precio_venta," +
   "precio_alquiler,moneda_venta,moneda_alquiler,precio_visible,expensas,apto_credito," +
   "barrio,ciudad,zona,provincia,direccion_publica,location_short,location_full," +
-  "coordenadas_lat,coordenadas_lng,destacada_web,alquiler_temporal,tags,tiene_video,orientacion";
+  "coordenadas_lat,coordenadas_lng,destacada_web,alquiler_temporal,tags,tiene_video,orientacion,videos";
 
 const FOTO_COLS = "propiedad_id,url,thumbnail,descripcion,es_portada,es_plano,orden";
 
@@ -63,6 +63,17 @@ function tipoNormalizado(v: unknown): string {
   const t = String(v ?? "").trim();
   if (!t) return "Propiedad";
   return t === t.toLowerCase() ? t.charAt(0).toUpperCase() + t.slice(1) : t;
+}
+
+// `propiedades.videos` es jsonb: [{url, titulo}]. Se descarta lo que no sea un link http(s).
+function videosDe(v: unknown): { url: string; titulo?: string }[] {
+  if (!Array.isArray(v)) return [];
+  return v.flatMap((x) => {
+    const url = typeof (x as { url?: unknown })?.url === "string" ? (x as { url: string }).url.trim() : "";
+    if (!/^https?:\/\//i.test(url)) return [];
+    const titulo = (x as { titulo?: unknown }).titulo;
+    return [{ url, ...(typeof titulo === "string" && titulo.trim() ? { titulo: titulo.trim() } : {}) }];
+  });
 }
 
 function mapRow(r: Record<string, unknown>, fotos: FotoPropiedad[]): Propiedad {
@@ -124,6 +135,7 @@ function mapRow(r: Record<string, unknown>, fotos: FotoPropiedad[]): Propiedad {
     // favoritos). Un Set en la fuente lo corta de raíz.
     tags: Array.isArray(r.tags) ? [...new Set((r.tags as unknown[]).map(String))] : [],
     tiene_video: Boolean(r.tiene_video),
+    videos: videosDe(r.videos),
     orientacion: str(r.orientacion),
     fotos,
   };
