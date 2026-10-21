@@ -171,7 +171,7 @@ export function SiteHeader() {
         {/* MAYÚSCULA + tracking (tipografía como los títulos del footer),
             texto un punto más chico para que entren las 6 solapas. */}
         {/* `data-nav-escritorio`: sobre el hero, globals.css pasa estos links a blanco. */}
-        <nav data-nav-escritorio className="hidden items-center gap-3 lg:flex lg:gap-5 xl:gap-7">
+        <nav data-nav-escritorio className="hidden items-center gap-3 lg:flex lg:gap-3.5 xl:gap-7">
           {NAV.map((item) => {
             const active = isActive(pathname, item.href);
             return (
