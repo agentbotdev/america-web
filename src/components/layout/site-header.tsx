@@ -154,7 +154,7 @@ export function SiteHeader() {
             isotipo a 28px de alto y la hamburguesa de 36px entran desde 360px de pantalla.
             `flex-auto` reparte el sobrante, así en un celular más ancho crecen parejas. Los
             íconos recién entran desde 440px. En md+ la nav ya tiene estos destinos. */}
-        <nav aria-label="Accesos rápidos" className="flex min-w-0 flex-1 gap-1 md:hidden">
+        <nav aria-label="Accesos rápidos" className="flex min-w-0 flex-1 gap-1 lg:hidden">
           {ACCESOS_MOBILE.map((l) => (
             <Link
               key={l.href}
@@ -171,7 +171,7 @@ export function SiteHeader() {
         {/* MAYÚSCULA + tracking (tipografía como los títulos del footer),
             texto un punto más chico para que entren las 6 solapas. */}
         {/* `data-nav-escritorio`: sobre el hero, globals.css pasa estos links a blanco. */}
-        <nav data-nav-escritorio className="hidden items-center gap-3 md:flex lg:gap-5 xl:gap-7">
+        <nav data-nav-escritorio className="hidden items-center gap-3 lg:flex lg:gap-5 xl:gap-7">
           {NAV.map((item) => {
             const active = isActive(pathname, item.href);
             return (
@@ -194,7 +194,7 @@ export function SiteHeader() {
         <div className="flex shrink-0 items-center gap-1.5">
           {/* El corazón no entra en el renglón del celular (ahí van los accesos): en el
               celular los favoritos se abren desde el menú. */}
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <FavoritesSheet />
           </div>
           {/* `lg:` y no `sm:`: a 768–1023px las 6 solapas + el corazón ya llenan
@@ -219,7 +219,7 @@ export function SiteHeader() {
                 como un botón y el área táctil pasa de 40 a 44px. */}
             <SheetTrigger
               aria-label="Abrir menú"
-              className="inline-flex size-9 items-center justify-center rounded-md border border-foreground/15 bg-white text-foreground shadow-sm transition-colors hover:border-foreground/30 md:hidden"
+              className="inline-flex size-9 items-center justify-center rounded-md border border-foreground/15 bg-white text-foreground shadow-sm transition-colors hover:border-foreground/30 lg:hidden"
             >
               <Menu className="size-6" strokeWidth={2.25} />
             </SheetTrigger>
