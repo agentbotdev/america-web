@@ -43,7 +43,7 @@ function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
     ? [direccion, barrioCard !== zonaCard ? barrioCard : null].filter(Boolean).join(" · ")
     : [p.barrio, p.ciudad].filter(Boolean).join(", ");
   const m2 = formatM2(p.superficie_total ?? p.superficie_cubierta ?? p.metros_cubiertos);
-  // Título LINDO (no el crudo de Tokko en mayúsculas con barras).
+  // El título que cargó la inmobiliaria (reclamo 24/10: el compuesto ocultaba el suyo).
   const titulo = tituloPropiedad(p);
   const precio = precioCard(p);
   const aptoCredito = p.apto_credito === "Apto crédito";

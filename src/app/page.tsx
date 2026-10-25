@@ -6,7 +6,7 @@ import { PropiedadesConMapa, type PuntoBuscable } from "@/components/home/propie
 import { ProcessSection } from "@/components/home/process-section";
 import { CtaSection } from "@/components/home/cta-section";
 import { getPropiedades } from "@/lib/supabase/queries";
-import { datosBuscables } from "@/lib/buscador";
+import { datosBuscables, opcionesUnicas, tiposDelStock } from "@/lib/buscador";
 import { formatPrecio, tituloPropiedad } from "@/lib/format";
 import { scoreVidriera } from "@/lib/vidriera";
 
@@ -21,12 +21,9 @@ export default async function HomePage() {
     .filter((p) => p.destacada_web)
     .sort((a, b) => scoreVidriera(b) - scoreVidriera(a));
 
-  const tipos = [...new Set(todas.map((p) => p.tipo_propiedad).filter(Boolean))].sort(
-    (a, b) => a.localeCompare(b, "es"),
-  );
-  const ciudades = [...new Set(todas.map((p) => p.ciudad).filter((c): c is string => !!c))].sort(
-    (a, b) => a.localeCompare(b, "es"),
-  );
+  // Sin duplicados por mayúsculas ("Departamento"/"departamento") y con Dúplex (24/10).
+  const tipos = tiposDelStock(todas);
+  const ciudades = opcionesUnicas(todas.map((p) => p.ciudad));
 
   // Pins del mapa: toda propiedad geolocalizada, con lo justo para la mini-card del
   // popup (título lindo, precio y thumbnail liviano) y para filtrarla en vivo.

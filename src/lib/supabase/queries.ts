@@ -23,6 +23,19 @@ const COLS =
 
 const FOTO_COLS = "propiedad_id,url,thumbnail,descripcion,es_portada,es_plano,orden";
 
+/**
+ * Supabase falló (error, timeout, red). ANTES se devolvía el MOCK de data/propiedades.ts:
+ * avisos inventados con precio ("Casa 3 dormitorios… USD 145.000") que la caché ISR podía
+ * dejar publicados más de 10 minutos (auditoría 24/10). Ahora se TIRA el error: en una
+ * revalidación ISR, Next conserva la última versión buena de la página y reintenta en la
+ * próxima, así que el visitante sigue viendo el catálogo real. El mock queda solo para
+ * desarrollo local sin variables de entorno (`hasSupabase()` falso).
+ */
+function falloSupabase(donde: string, error: unknown): never {
+  console.error(`[supabase] ${donde}:`, error);
+  throw new Error(`No se pudo leer ${donde} de Supabase`);
+}
+
 function hasSupabase() {
   return (
     !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -190,10 +203,10 @@ export async function getPropiedades(): Promise<Propiedad[]> {
       .select(COLS)
       .order("destacada_web", { ascending: false, nullsFirst: false })
       .order("updated_at", { ascending: false });
-    if (error || !props?.length) return mockPropiedades();
-    return attachFotos(sb, props as unknown as Record<string, unknown>[]);
-  } catch {
-    return mockPropiedades();
+    if (error) falloSupabase("propiedades_publicas", error);
+    return attachFotos(sb, (props ?? []) as unknown as Record<string, unknown>[]);
+  } catch (e) {
+    falloSupabase("el catálogo", e);
   }
 }
 
@@ -205,10 +218,10 @@ export async function getDestacadas(): Promise<Propiedad[]> {
       .from("propiedades_publicas")
       .select(COLS)
       .eq("destacada_web", true);
-    if (error || !props?.length) return mockDestacadas();
-    return attachFotos(sb, props as unknown as Record<string, unknown>[]);
-  } catch {
-    return mockDestacadas();
+    if (error) falloSupabase("las destacadas", error);
+    return attachFotos(sb, (props ?? []) as unknown as Record<string, unknown>[]);
+  } catch (e) {
+    falloSupabase("las destacadas", e);
   }
 }
 
@@ -217,12 +230,15 @@ export async function getPropiedadBySlug(slug: string): Promise<Propiedad | unde
   if (!hasSupabase()) return mockBySlug(slug);
   try {
     const sb = createPublicClient();
-    const { data } = await sb
+    const { data, error } = await sb
       .from("propiedades_publicas")
       .select(COLS)
       .eq("tokko_id", id)
       .maybeSingle();
-    if (!data) return mockBySlug(slug);
+    if (error) falloSupabase("la ficha", error);
+    // Sin fila = la propiedad no está publicada (vendida, en borrador): 404 de verdad, no
+    // una ficha de ejemplo con otro precio.
+    if (!data) return undefined;
     const { data: fotosRows } = await sb
       .from("fotos_publicas")
       .select(FOTO_COLS)
@@ -231,7 +247,7 @@ export async function getPropiedadBySlug(slug: string): Promise<Propiedad | unde
       data as unknown as Record<string, unknown>,
       mapFotos((fotosRows as unknown as Array<Record<string, unknown>>) ?? []),
     );
-  } catch {
-    return mockBySlug(slug);
+  } catch (e) {
+    falloSupabase("la ficha", e);
   }
 }

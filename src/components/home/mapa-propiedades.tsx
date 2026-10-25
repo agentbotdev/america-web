@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Hand } from "lucide-react";
 import type { Map as LeafletMap, LayerGroup, Marker } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { normalizar } from "@/lib/buscador";
 
 // MAPA de todas las propiedades geolocalizadas (traído de la versión 3, rama
 // `version-3-mapa`, a pedido de Nacho el 08/10). Se navega, se hace zoom y cada pin abre
@@ -49,26 +50,30 @@ const TRAZOS: Record<string, string> = {
     '<path d="m21 8-2 2-1.5-3.7A2 2 0 0 0 15.646 5H8.4a2 2 0 0 0-1.903 1.257L5 10 3 8"/><path d="M7 14h.01"/><path d="M17 14h.01"/><rect width="18" height="8" x="3" y="10" rx="2"/><path d="M5 18v2"/><path d="M19 18v2"/>',
 };
 
-/** Qué ícono lleva cada `tipo_propiedad` (valores reales de la base, ver lib/buscador.ts). */
+/**
+ * Qué ícono lleva cada `tipo_propiedad`. Llega normalizado (sin tildes, minúsculas: ver
+ * `datosBuscables` en lib/buscador.ts) — antes se comparaba exacto y los 3 cargados como
+ * "departamento" en minúscula salían con el ícono de casa.
+ */
 function iconoDelTipo(tipo: string | undefined): string {
-  switch (tipo) {
-    case "Departamento":
-    case "PH":
-    case "Monoambiente":
-    case "Edificio Comercial":
+  switch (normalizar(tipo)) {
+    case "departamento":
+    case "ph":
+    case "monoambiente":
+    case "edificio comercial":
       return "edificio";
-    case "Terreno":
+    case "terreno":
       return "lote";
-    case "Local":
+    case "local":
       return "local";
-    case "Galpón":
+    case "galpon":
       return "galpon";
-    case "Oficina":
+    case "oficina":
       return "oficina";
-    case "Quinta":
-    case "Campo":
+    case "quinta":
+    case "campo":
       return "campo";
-    case "Cochera":
+    case "cochera":
       return "cochera";
     default:
       return "casa";

@@ -39,6 +39,8 @@ function describir(b: BusquedaInterpretada): string {
   return [
     b.tipo,
     b.operacion ? `en ${b.operacion}` : null,
+    b.ambientes ? `${b.ambientes}+ ambientes` : null,
+    b.dormitorios ? `${b.dormitorios}+ dorm.` : null,
     b.texto ? `“${b.texto}”` : null,
   ]
     .filter(Boolean)
@@ -59,7 +61,7 @@ export function PropiedadesConMapa({
   // El filtrado (y re-encuadrar el mapa) va un paso atrás del teclado: escribir nunca se traba.
   const fraseDiferida = useDeferredValue(frase);
   const busqueda = useMemo(() => interpretarBusqueda(fraseDiferida), [fraseDiferida]);
-  const hayBusqueda = !!(busqueda.operacion || busqueda.tipo || busqueda.texto);
+  const hayBusqueda = !!(busqueda.operacion || busqueda.tipo || busqueda.texto || busqueda.ambientes || busqueda.dormitorios);
 
   // Para la grilla hacen falta las propiedades COMPLETAS (foto, specs, precio). Se bajan
   // recién cuando alguien empieza a buscar, del mismo endpoint cacheado que usan los
@@ -100,17 +102,20 @@ export function PropiedadesConMapa({
       // Un intento sin ningún criterio traería todo: para eso están las destacadas.
       if (!(intento.operacion || intento.tipo || intento.texto)) continue;
       const parecidas = catalogo.filter((p) => coincideBusqueda(intento, datosBuscables(p)));
-      if (parecidas.length > 0) return ordenar(parecidas);
+      if (parecidas.length > 0) return { lista: ordenar(parecidas), parecidas: true };
     }
-    return destacadas;
+    return { lista: destacadas, parecidas: false };
   }, [sinResultados, catalogo, busqueda, destacadas]);
 
-  const lista = sinResultados ? sugeridas : resultados;
+  const lista = sinResultados ? sugeridas?.lista ?? null : resultados;
 
-  // El mapa muestra lo mismo que la lista: las que coinciden o, si no hay, las sugeridas.
+  // El mapa muestra lo que coincide. Sin resultados, las parecidas (misma zona o mismo
+  // tipo); pero si lo único que queda son las destacadas, el mapa NO las pinta: reclamo
+  // del 24/10, "si filtrás te muestra todo" — buscabas algo y el mapa se llenaba de pines
+  // que no tenían nada que ver, como si el filtro no anduviera.
   const visibles = useMemo(() => {
     if (!hayBusqueda) return null;
-    if (sugeridas) return new Set(sugeridas.map((p) => p.id));
+    if (sugeridas) return new Set(sugeridas.parecidas ? sugeridas.lista.map((p) => p.id) : []);
     return new Set(puntos.filter((p) => coincideBusqueda(busqueda, p)).map((p) => p.id));
   }, [hayBusqueda, sugeridas, puntos, busqueda]);
 

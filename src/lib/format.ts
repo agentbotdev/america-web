@@ -32,8 +32,30 @@ export function formatNumero(n: number) {
   return numFmt.format(Math.round(n));
 }
 
-/** Título lindo compuesto: "Casa 3 dorm. en General Rodríguez". */
+/**
+ * Título de la propiedad: EL QUE CARGA LA INMOBILIARIA en el CRM.
+ *
+ * Reclamo del 24/10: "los títulos que ponemos no se ven en la web, sale uno inventado".
+ * Hasta acá la web armaba SIEMPRE un título propio ("Casa 3 dorm. en Moreno") y el que
+ * escribían en el CRM no aparecía en ningún lado, así que cambiarlo no tenía efecto. Ahora
+ * se usa el suyo tal cual (solo se limpian espacios repetidos) y el compuesto queda de
+ * respaldo para las fichas sin título ("Propiedad" es el valor por defecto de mapRow).
+ */
 export function tituloPropiedad(p: {
+  titulo?: string;
+  tipo_propiedad: string;
+  barrio?: string;
+  ciudad?: string;
+  dormitorios?: number;
+  ambientes?: number;
+}) {
+  const propio = (p.titulo ?? "").replace(/\s+/g, " ").trim();
+  if (propio && propio.toLowerCase() !== "propiedad") return propio;
+  return tituloCompuesto(p);
+}
+
+/** Título armado con los datos: "Casa 3 dorm. en General Rodríguez". Respaldo sin título. */
+export function tituloCompuesto(p: {
   tipo_propiedad: string;
   barrio?: string;
   ciudad?: string;

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getPropiedades } from "@/lib/supabase/queries";
 import { CatalogoBrowser } from "@/components/propiedades/catalogo-browser";
+import { opcionesUnicas, tiposDelStock } from "@/lib/buscador";
 
 // ISR REAL: el catálogo se regenera cada 120s y se sirve del CDN.
 // OJO — acá NO se lee `searchParams`: leerlo volvía la ruta DINÁMICA (un
@@ -30,12 +31,10 @@ export default async function PropiedadesPage() {
   const todas = await getPropiedades();
 
   // Listas de filtros derivadas del stock real (orden alfabético).
-  const tipos = [...new Set(todas.map((p) => p.tipo_propiedad).filter(Boolean))].sort(
-    (a, b) => a.localeCompare(b, "es"),
-  );
-  const barrios = [...new Set(todas.map((p) => p.barrio).filter((b): b is string => !!b))].sort(
-    (a, b) => a.localeCompare(b, "es"),
-  );
+  // Sin duplicados por mayúsculas/tildes ("Departamento"/"departamento", "PASO DEL REY"/
+  // "Paso del Rey") y con Dúplex aunque esté cargado como Departamento (reclamo 24/10).
+  const tipos = tiposDelStock(todas);
+  const barrios = opcionesUnicas(todas.map((p) => p.barrio));
 
   // PAYLOAD LIVIANO: CatalogoBrowser es client component, así que TODO lo que
   // recibe viaja serializado en el HTML. Las descripciones completas eran ~70KB

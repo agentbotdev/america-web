@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import PropertyCard from "@/components/propiedades/property-card";
 import { labelOperacion } from "@/lib/format";
-import { interpretarBusqueda } from "@/lib/buscador";
+import { coincideBusqueda, datosBuscables, esDelTipo, interpretarBusqueda, normalizar } from "@/lib/buscador";
 import type { Propiedad } from "@/types";
 
 // Catálogo de propiedades: filtrado + orden 100% en memoria (instantáneo, sin
@@ -67,6 +67,8 @@ type Filters = {
   banos: string;
   precio_min: string;
   precio_max: string;
+  /** Moneda del rango de precio: "USD" o "ARS" (no se mezclan dólares con pesos). */
+  moneda: string;
   superficie_min: string;
   orden: string;
 };
@@ -80,6 +82,7 @@ export const FILTROS_VACIOS: Filters = {
   banos: "all",
   precio_min: "",
   precio_max: "",
+  moneda: "USD",
   superficie_min: "all",
   orden: "destacadas",
 };
@@ -117,20 +120,20 @@ function filtrar(items: Propiedad[], f: Filters): Propiedad[] {
   const indexed = items.map((p, index) => ({ p, index }));
   let r = indexed;
 
-  const q = f.q.toLowerCase().trim();
-  if (q) {
-    // Los TAGS entran en la búsqueda libre (reemplazan a la descripción, que
-    // ya no viaja al cliente): son datos estructurados de amenities/servicios
-    // ("Pileta", "Quincho", "Parrilla") — matchean mejor que la prosa.
-    r = r.filter(({ p }) =>
-      `${p.titulo} ${p.barrio ?? ""} ${p.ciudad ?? ""} ${p.tags.join(" ")} ${p.descripcion}`
-        .toLowerCase()
-        .includes(q),
-    );
+  // Búsqueda libre: el MISMO intérprete que la home (reclamo 24/10, "los buscadores de la
+  // web andan peor que los del CRM"). Antes era un `includes` de la frase entera, con
+  // tildes y sin la dirección: "dominguez" o "ituzaingo" daban cero. Ahora cada palabra
+  // se busca por separado en título, dirección, barrio, zona, ciudad, código y amenities,
+  // y "duplex 3 ambientes" se entiende como tipo + ambientes.
+  const busqueda = interpretarBusqueda(f.q);
+  if (busqueda.operacion || busqueda.tipo || busqueda.texto || busqueda.ambientes || busqueda.dormitorios) {
+    r = r.filter(({ p }) => coincideBusqueda(busqueda, datosBuscables(p)));
   }
   if (f.operacion !== "all") r = r.filter(({ p }) => p.tipo_operacion === f.operacion);
-  if (f.tipo !== "all") r = r.filter(({ p }) => p.tipo_propiedad === f.tipo);
-  if (f.barrio !== "all") r = r.filter(({ p }) => p.barrio === f.barrio);
+  // Tipo y zona sin distinguir mayúsculas ni tildes: en la base conviven "Departamento" y
+  // "departamento", "Paso del Rey" y "PASO DEL REY". Dúplex mira también el título.
+  if (f.tipo !== "all") r = r.filter(({ p }) => esDelTipo(f.tipo, datosBuscables(p)));
+  if (f.barrio !== "all") r = r.filter(({ p }) => normalizar(p.barrio) === normalizar(f.barrio));
 
   if (f.dormitorios !== "all") {
     const min = Number(f.dormitorios);
@@ -141,15 +144,18 @@ function filtrar(items: Propiedad[], f: Filters): Propiedad[] {
     if (Number.isFinite(min)) r = r.filter(({ p }) => (p.banos ?? 0) >= min);
   }
 
-  // Rango de precio: solo aplica a propiedades con precio visible y cargado;
-  // las "Consultar" (precio oculto) nunca se descartan por precio.
+  // Rango de precio EN UNA MONEDA (reclamo 24/10): antes se comparaba el número pelado y
+  // "hasta 150.000" dejaba pasar alquileres de $120.000 junto a casas de USD 150.000. Con
+  // un rango cargado solo quedan las de esa moneda; las "Consultar" (precio oculto o sin
+  // cargar) no se descartan nunca por precio.
   const pMin = numOrNull(f.precio_min);
   const pMax = numOrNull(f.precio_max);
-  if (pMin != null) {
-    r = r.filter(({ p }) => p.precio == null || !p.precio_visible || p.precio >= pMin);
-  }
-  if (pMax != null) {
-    r = r.filter(({ p }) => p.precio == null || !p.precio_visible || p.precio <= pMax);
+  if (pMin != null || pMax != null) {
+    r = r.filter(({ p }) => {
+      if (p.precio == null || !p.precio_visible) return true;
+      if ((p.moneda ?? "USD") !== f.moneda) return false;
+      return (pMin == null || p.precio >= pMin) && (pMax == null || p.precio <= pMax);
+    });
   }
 
   if (f.superficie_min !== "all") {
@@ -206,6 +212,7 @@ export function CatalogoBrowser({
     if (next.banos !== "all") p.set("banos", next.banos);
     if (next.precio_min) p.set("precio_min", next.precio_min);
     if (next.precio_max) p.set("precio_max", next.precio_max);
+    if ((next.precio_min || next.precio_max) && next.moneda !== "USD") p.set("moneda", next.moneda);
     if (next.superficie_min !== "all") p.set("superficie_min", next.superficie_min);
     if (next.orden !== "destacadas") p.set("orden", next.orden);
     const qs = p.toString();
@@ -259,7 +266,13 @@ export function CatalogoBrowser({
     const interpretada = interpretarBusqueda(param("q") ?? "");
     setF((prev) => ({
       ...prev,
-      q: interpretada.texto,
+      // Tipo y operación pasan a sus selects; ambientes/dormitorios quedan en la frase
+      // (no tienen select propio) para que el filtro en memoria los siga aplicando.
+      q: [
+        interpretada.texto,
+        interpretada.ambientes ? `${interpretada.ambientes} ambientes` : "",
+        interpretada.dormitorios ? `${interpretada.dormitorios} dormitorios` : "",
+      ].filter(Boolean).join(" "),
       operacion: param("operacion") ?? interpretada.operacion ?? prev.operacion,
       tipo: param("tipo") ?? interpretada.tipo ?? prev.tipo,
       barrio: param("barrio") ?? prev.barrio,
@@ -267,6 +280,7 @@ export function CatalogoBrowser({
       banos: param("banos") ?? prev.banos,
       precio_min: param("precio_min") ?? prev.precio_min,
       precio_max: param("precio_max") ?? prev.precio_max,
+      moneda: param("moneda") === "ARS" ? "ARS" : prev.moneda,
       superficie_min: param("superficie_min") ?? prev.superficie_min,
       orden: param("orden") ?? prev.orden,
     }));
@@ -341,9 +355,10 @@ export function CatalogoBrowser({
           : min != null
             ? `Desde ${milesFmt.format(min)}`
             : `Hasta ${milesFmt.format(max ?? 0)}`;
+      const signo = f.moneda === "ARS" ? "$" : "USD";
       out.push({
         key: "precio",
-        label,
+        label: `${signo} ${label}`,
         clear: () => setF((prev) => { const next = { ...prev, precio_min: "", precio_max: "" }; sync(next); return next; }),
       });
     }
@@ -406,7 +421,7 @@ export function CatalogoBrowser({
             type="search"
             value={f.q}
             onChange={(e) => set("q", e.target.value)}
-            placeholder="Barrio, ciudad o palabra clave"
+            placeholder="Calle, barrio, ciudad o palabra clave"
             className="h-11 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground lg:h-9"
           />
         </div>
@@ -453,7 +468,16 @@ export function CatalogoBrowser({
 
         {/* Rango de precio (min – max). Inputs numéricos: filtran solo a las
             propiedades con precio visible (las "Consultar" no se descartan). */}
-        <div className="flex items-center gap-1.5">
+        <div className="col-span-2 flex items-center gap-1.5 lg:col-span-1">
+          <select
+            value={f.moneda}
+            onChange={(e) => set("moneda", e.target.value)}
+            aria-label="Moneda del precio"
+            className="h-11 shrink-0 rounded-lg border border-input bg-transparent px-2 text-sm font-medium outline-none focus-visible:border-ring lg:h-9"
+          >
+            <option value="USD">USD</option>
+            <option value="ARS">$ (pesos)</option>
+          </select>
           <input
             type="number"
             inputMode="numeric"
@@ -462,7 +486,7 @@ export function CatalogoBrowser({
             onChange={(e) => set("precio_min", e.target.value)}
             placeholder="Precio mín."
             aria-label="Precio mínimo"
-            className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring lg:w-28"
+            className="h-11 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring lg:h-9 lg:w-28"
           />
           <span className="text-muted-foreground" aria-hidden="true">–</span>
           <input
@@ -473,7 +497,7 @@ export function CatalogoBrowser({
             onChange={(e) => set("precio_max", e.target.value)}
             placeholder="Precio máx."
             aria-label="Precio máximo"
-            className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring lg:w-28"
+            className="h-11 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring lg:h-9 lg:w-28"
           />
         </div>
 
