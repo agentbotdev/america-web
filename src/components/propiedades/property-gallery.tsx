@@ -214,8 +214,17 @@ function PantallaCompleta({
 
   // Atrás del navegador = cerrar. Una entrada propia al abrir; si se cierra con la X o
   // Escape, se consume esa entrada para no dejar un "atrás" que no hace nada.
+  //
+  // El `history.back()` del cierre se difiere un tick y solo corre si el visor sigue cerrado:
+  // en desarrollo React monta → desmonta → monta cada efecto (StrictMode), y un `back()`
+  // inmediato en ese desmontaje de prueba disparaba el `popstate` que cerraba el visor recién
+  // abierto. Por lo mismo, no se agrega una segunda entrada si ya está la del visor.
+  const montado = useRef(false);
   useEffect(() => {
-    window.history.pushState({ __visorFotos: true }, "", window.location.href);
+    montado.current = true;
+    if (!window.history.state?.__visorFotos) {
+      window.history.pushState({ __visorFotos: true }, "", window.location.href);
+    }
     let cerradoPorAtras = false;
     const alVolver = () => {
       cerradoPorAtras = true;
@@ -225,9 +234,13 @@ function PantallaCompleta({
     const overflowPrevio = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
+      montado.current = false;
       window.removeEventListener("popstate", alVolver);
       document.body.style.overflow = overflowPrevio;
-      if (!cerradoPorAtras && window.history.state?.__visorFotos) window.history.back();
+      if (cerradoPorAtras) return;
+      setTimeout(() => {
+        if (!montado.current && window.history.state?.__visorFotos) window.history.back();
+      }, 0);
     };
   }, []);
 
@@ -248,7 +261,7 @@ function PantallaCompleta({
       role="dialog"
       aria-modal="true"
       aria-label={`Fotos de ${titulo}`}
-      className="fixed inset-0 z-[200] flex flex-col bg-black/95"
+      className="fixed inset-0 z-[200] flex flex-col bg-black"
       onTouchStart={(e) => { toqueX.current = e.touches[0].clientX; }}
       onTouchEnd={(e) => {
         if (toqueX.current == null) return;
