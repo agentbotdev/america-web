@@ -7,8 +7,12 @@ import { ArrowRight, Home, MapPin, MessageCircle, Search, SearchX } from "lucide
 import PropertyCard from "@/components/propiedades/property-card";
 import { MapaPropiedades, type PuntoMapa } from "./mapa-propiedades";
 import {
+  buscarEn,
+  busquedaVacia,
   coincideBusqueda,
+  crearVocabulario,
   datosBuscables,
+  describirBusqueda,
   interpretarBusqueda,
   type BusquedaInterpretada,
   type DatosBuscables,
@@ -34,17 +38,11 @@ const EN_GRILLA = 6;
 
 const ordenar = (lista: Propiedad[]) => [...lista].sort((a, b) => scoreVidriera(b) - scoreVidriera(a));
 
-/** "casa · en venta · “moreno”": lo que se entendió de la frase, para mostrarlo en la banda. */
+/** "Casa · Venta · “moreno”": lo que se entendió de la frase (mismo motor que el CRM). */
 function describir(b: BusquedaInterpretada): string {
-  return [
-    b.tipo,
-    b.operacion ? `en ${b.operacion}` : null,
-    b.ambientes ? `${b.ambientes}+ ambientes` : null,
-    b.dormitorios ? `${b.dormitorios}+ dorm.` : null,
-    b.texto ? `“${b.texto}”` : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const partes = describirBusqueda(b).join(" · ");
+  const corr = b.correcciones.map((c) => `“${c.a}” (escribiste “${c.de}”)`).join(", ");
+  return corr ? `${partes}. Corregimos ${corr}` : partes;
 }
 
 export function PropiedadesConMapa({
@@ -60,8 +58,10 @@ export function PropiedadesConMapa({
   const [frase, setFrase] = useState("");
   // El filtrado (y re-encuadrar el mapa) va un paso atrás del teclado: escribir nunca se traba.
   const fraseDiferida = useDeferredValue(frase);
-  const busqueda = useMemo(() => interpretarBusqueda(fraseDiferida), [fraseDiferida]);
-  const hayBusqueda = !!(busqueda.operacion || busqueda.tipo || busqueda.texto || busqueda.ambientes || busqueda.dormitorios);
+  // Vocabulario para corregir errores de tipeo: barrios, calles y títulos REALES del stock.
+  const vocabulario = useMemo(() => crearVocabulario(puntos), [puntos]);
+  const busqueda = useMemo(() => interpretarBusqueda(fraseDiferida, vocabulario), [fraseDiferida, vocabulario]);
+  const hayBusqueda = !busquedaVacia(busqueda);
 
   // Para la grilla hacen falta las propiedades COMPLETAS (foto, specs, precio). Se bajan
   // recién cuando alguien empieza a buscar, del mismo endpoint cacheado que usan los
@@ -77,11 +77,21 @@ export function PropiedadesConMapa({
       .catch(() => setCatalogo([]));
   };
 
-  const resultados = useMemo(() => {
-    if (!hayBusqueda) return destacadas;
-    if (!catalogo) return null; // todavía bajando
-    return ordenar(catalogo.filter((p) => coincideBusqueda(busqueda, datosBuscables(p))));
-  }, [hayBusqueda, busqueda, catalogo, destacadas]);
+  // El motor ordena por relevancia cuando hay texto ("moreno", "mitre 689"); si la frase es
+  // solo tipo/operación, todas pesan igual y manda el orden de vidriera.
+  const encontrado = useMemo(() => {
+    if (!hayBusqueda || !catalogo) return null;
+    const r = buscarEn(ordenar(catalogo), busqueda, (p) => datosBuscables(p));
+    return r;
+  }, [hayBusqueda, busqueda, catalogo]);
+
+  const resultados = !hayBusqueda
+    ? destacadas
+    : !encontrado
+      ? null // todavía bajando
+      : encontrado.nivel === "aproximado" || encontrado.nivel === "nada"
+        ? []
+        : encontrado.items;
 
   const sinResultados = hayBusqueda && resultados !== null && resultados.length === 0;
 
@@ -92,11 +102,14 @@ export function PropiedadesConMapa({
   // da, las destacadas.
   const sugeridas = useMemo(() => {
     if (!sinResultados || !catalogo) return null;
+    // Primero, las que cumplen la MAYORÍA de lo pedido (el motor ya las trajo como "aproximado").
+    if (encontrado?.nivel === "aproximado" && encontrado.items.length) return { lista: encontrado.items, parecidas: true };
     const { operacion, tipo, texto } = busqueda;
+    const base = { resto: "", correcciones: [] };
     const intentos: BusquedaInterpretada[] = [
-      { operacion, tipo, texto: "" },
-      { operacion, texto },
-      { operacion, texto: "" },
+      { ...base, operacion, tipo, texto: "" },
+      { ...base, operacion, texto },
+      { ...base, operacion, texto: "" },
     ];
     for (const intento of intentos) {
       // Un intento sin ningún criterio traería todo: para eso están las destacadas.
@@ -105,7 +118,7 @@ export function PropiedadesConMapa({
       if (parecidas.length > 0) return { lista: ordenar(parecidas), parecidas: true };
     }
     return { lista: destacadas, parecidas: false };
-  }, [sinResultados, catalogo, busqueda, destacadas]);
+  }, [sinResultados, catalogo, busqueda, destacadas, encontrado]);
 
   const lista = sinResultados ? sugeridas?.lista ?? null : resultados;
 
@@ -116,8 +129,11 @@ export function PropiedadesConMapa({
   const visibles = useMemo(() => {
     if (!hayBusqueda) return null;
     if (sugeridas) return new Set(sugeridas.parecidas ? sugeridas.lista.map((p) => p.id) : []);
+    // Con el catálogo ya bajado, el mapa muestra EXACTAMENTE lo de la lista (incluye lo que se
+    // encontró en la descripción, que los pines no traen); antes, lo que dan los pines.
+    if (resultados) return new Set(resultados.map((p) => p.id));
     return new Set(puntos.filter((p) => coincideBusqueda(busqueda, p)).map((p) => p.id));
-  }, [hayBusqueda, sugeridas, puntos, busqueda]);
+  }, [hayBusqueda, sugeridas, puntos, busqueda, resultados]);
 
   const destinoCatalogo = frase.trim() ? `/propiedades?q=${encodeURIComponent(frase.trim())}` : "/propiedades";
 

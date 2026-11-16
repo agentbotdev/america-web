@@ -8,7 +8,19 @@ import {
 } from "@/components/ui/select";
 import PropertyCard from "@/components/propiedades/property-card";
 import { labelOperacion } from "@/lib/format";
-import { coincideBusqueda, datosBuscables, esDelTipo, interpretarBusqueda, normalizar } from "@/lib/buscador";
+import {
+  buscarEn,
+  crearVocabulario,
+  datosBuscables,
+  describirBusqueda,
+  esDelTipo,
+  interpretarBusqueda,
+  normalizar,
+  type BusquedaInterpretada,
+  type DatosBuscables,
+  type NivelBusqueda,
+  type Vocabulario,
+} from "@/lib/buscador";
 import type { Propiedad } from "@/types";
 
 // Catálogo de propiedades: filtrado + orden 100% en memoria (instantáneo, sin
@@ -126,23 +138,39 @@ const milesFmt = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 });
 
 // Filtra + ordena EN MEMORIA (instantáneo, sin tocar el servidor).
 // `index` preserva el orden original del server (updated_at desc) para "Más nuevas".
-function filtrar(items: Propiedad[], f: Filters): Propiedad[] {
+interface Filtrado {
+  items: Propiedad[];
+  /** Qué tan exacta fue la búsqueda libre (ver NivelBusqueda en lib/buscador). */
+  nivel: NivelBusqueda;
+  busqueda: BusquedaInterpretada | null;
+}
+
+function filtrar(
+  items: Propiedad[],
+  f: Filters,
+  datosDe: (p: Propiedad) => DatosBuscables,
+  vocabulario: Vocabulario,
+): Filtrado {
   const indexed = items.map((p, index) => ({ p, index }));
   let r = indexed;
 
-  // Búsqueda libre: el MISMO intérprete que la home (reclamo 24/10, "los buscadores de la
-  // web andan peor que los del CRM"). Antes era un `includes` de la frase entera, con
-  // tildes y sin la dirección: "dominguez" o "ituzaingo" daban cero. Ahora cada palabra
-  // se busca por separado en título, dirección, barrio, zona, ciudad, código y amenities,
-  // y "duplex 3 ambientes" se entiende como tipo + ambientes.
-  const busqueda = interpretarBusqueda(f.q);
-  if (busqueda.operacion || busqueda.tipo || busqueda.texto || busqueda.ambientes || busqueda.dormitorios) {
-    r = r.filter(({ p }) => coincideBusqueda(busqueda, datosBuscables(p)));
+  // Búsqueda libre: el MISMO motor que el CRM y la home (16/11, lib/buscador.ts): corrige
+  // errores de tipeo con el vocabulario del stock, entiende tipo, operación, ambientes,
+  // precio y comodidades ("casa con pileta hasta 120 mil"), y ordena por relevancia.
+  let nivel: NivelBusqueda = "todo";
+  let busqueda: BusquedaInterpretada | null = null;
+  const relevancia = new Map<Propiedad, number>();
+  if (f.q.trim()) {
+    const res = buscarEn(r, f.q, ({ p }) => datosDe(p), vocabulario);
+    nivel = res.nivel;
+    busqueda = res.interpretacion;
+    r = res.items;
+    r.forEach(({ p }, i) => relevancia.set(p, i));
   }
   if (f.operacion !== "all") r = r.filter(({ p }) => p.tipo_operacion === f.operacion);
   // Tipo y zona sin distinguir mayúsculas ni tildes: en la base conviven "Departamento" y
   // "departamento", "Paso del Rey" y "PASO DEL REY". Dúplex mira también el título.
-  if (f.tipo !== "all") r = r.filter(({ p }) => esDelTipo(f.tipo, datosBuscables(p)));
+  if (f.tipo !== "all") r = r.filter(({ p }) => esDelTipo(f.tipo, datosDe(p)));
   if (f.barrio !== "all") r = r.filter(({ p }) => normalizar(p.barrio) === normalizar(f.barrio));
 
   if (f.ambientes !== "all") {
@@ -187,12 +215,13 @@ function filtrar(items: Propiedad[], f: Filters): Propiedad[] {
         return superficieDe(b.p) - superficieDe(a.p);
       case "nuevas":
         return a.index - b.index; // orden original del server (updated_at desc)
-      default: // destacadas
+      default: // destacadas — o, si hay búsqueda con texto, lo más relevante primero
+        if (busqueda?.texto) return (relevancia.get(a.p) ?? 0) - (relevancia.get(b.p) ?? 0);
         return Number(b.p.destacada_web) - Number(a.p.destacada_web) || a.index - b.index;
     }
   });
 
-  return sorted.map(({ p }) => p);
+  return { items: sorted.map(({ p }) => p), nivel, busqueda };
 }
 
 export function CatalogoBrowser({
@@ -278,12 +307,16 @@ export function CatalogoBrowser({
     // Un parámetro vacío (`tipo=`) es "sin filtro", no "igual a nada": el form del
     // hero los mandaba así y el catálogo quedaba en cero resultados (08/10).
     const param = (clave: string) => sp.get(clave)?.trim() || null;
+    // Sin vocabulario del stock acá (todavía no hace falta): los tipos y operaciones del rubro
+    // se corrigen igual; el resto lo corrige el filtrado, que sí lo tiene.
     const interpretada = interpretarBusqueda(param("q") ?? "");
     setF((prev) => ({
       ...prev,
       // Tipo, operación, ambientes y dormitorios pasan a sus selects (16/11: ambientes ya
       // tiene select propio); en la frase queda solo el texto libre.
-      q: interpretada.texto,
+      // `resto` y no `texto`: conserva precio y comodidades ("con pileta hasta 100 mil"), que no
+      // tienen select propio y se perdían al repartir la frase.
+      q: interpretada.resto,
       operacion: param("operacion") ?? interpretada.operacion ?? prev.operacion,
       tipo: param("tipo") ?? interpretada.tipo ?? prev.tipo,
       barrio: param("barrio") ?? prev.barrio,
@@ -298,7 +331,15 @@ export function CatalogoBrowser({
     }));
   }, []);
 
-  const items = useMemo(() => filtrar(propiedades, f), [propiedades, f]);
+  // Lo buscable de cada propiedad se calcula UNA vez por catálogo, y el vocabulario para
+  // corregir errores de tipeo sale de esos mismos datos (barrios, calles, títulos reales).
+  const datos = useMemo(() => new Map(propiedades.map((p) => [p, datosBuscables(p)])), [propiedades]);
+  const vocabulario = useMemo(() => crearVocabulario(Array.from(datos.values())), [datos]);
+  const filtrado = useMemo(
+    () => filtrar(propiedades, f, (p) => datos.get(p) ?? datosBuscables(p), vocabulario),
+    [propiedades, f, datos, vocabulario],
+  );
+  const items = filtrado.items;
 
   // Al cambiar el resultado del filtrado, reseteamos la tanda visible: el usuario
   // siempre ve la "primera página" de su nueva búsqueda desde arriba.
@@ -391,6 +432,19 @@ export function CatalogoBrowser({
           {items.length === 1 ? "propiedad" : "propiedades"}
           {/* "según tu búsqueda" solo si hay filtros que REDUCEN el set. */}
           {activosCount > 0 ? " según tu búsqueda" : " disponibles"}
+          {/* Lo que entendió el motor y lo que corrigió: si escribiste "moreon", que se vea que
+              se buscó "moreno" y no parezca magia (ni error). */}
+          {filtrado.busqueda && filtrado.busqueda.correcciones.length > 0 && (
+            <span className="block text-sm">
+              Buscamos {filtrado.busqueda.correcciones.map((c) => `“${c.a}”`).join(", ")} (escribiste{" "}
+              {filtrado.busqueda.correcciones.map((c) => `“${c.de}”`).join(", ")}).
+            </span>
+          )}
+          {filtrado.nivel === "aproximado" && filtrado.busqueda && (
+            <span className="block text-sm">
+              No hay ninguna que cumpla todo ({describirBusqueda(filtrado.busqueda).join(" · ")}): estas cumplen la mayoría.
+            </span>
+          )}
         </p>
 
         {/* Toggle de filtros: solo en mobile/tablet (en lg+ los filtros viven siempre abiertos). */}

@@ -42,7 +42,8 @@ export default async function HomePage() {
         lat: p.coordenadas_lat as number,
         lng: p.coordenadas_lng as number,
         fotoUrl: portada?.thumbnail ?? portada?.url,
-        ...datosBuscables(p),
+        // Sin descripción: viaja en el HTML de la home por cada pin.
+        ...datosBuscables(p, { sinDescripcion: true }),
       };
     });
 
