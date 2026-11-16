@@ -41,17 +41,22 @@ export function normalizar(s: string | null | undefined): string {
  */
 const TIPOS: { valor: string; alias: string[]; enTitulo?: RegExp }[] = [
   { valor: "Departamento", alias: ["departamento", "departamentos", "depto", "deptos", "dpto", "dptos", "depa"] },
-  { valor: "Casa", alias: ["casa", "casas", "chalet", "vivienda"] },
+  // "chalet" ya NO es alias de Casa (16/11): buscar "chalet" devolvía TODAS las casas (56).
+  // Chalet es un tipo propio en el CRM (config/taxonomy.ts) y se reconoce también por título.
+  { valor: "Casa", alias: ["casa", "casas", "vivienda"] },
+  { valor: "Chalet", alias: ["chalet", "chalets"], enTitulo: /\bchalet\b/ },
   { valor: "Dúplex", alias: ["duplex", "duplexs", "duplexes", "triplex"], enTitulo: /\b(duplex|triplex)\b/ },
   { valor: "PH", alias: ["ph"], enTitulo: /\bph\b/ },
   { valor: "Terreno", alias: ["terreno", "terrenos", "lote", "lotes", "loteo"] },
   { valor: "Local", alias: ["local", "locales", "comercio", "negocio"] },
   { valor: "Oficina", alias: ["oficina", "oficinas"] },
   { valor: "Galpón", alias: ["galpon", "galpones", "deposito"] },
-  { valor: "Quinta", alias: ["quinta", "quintas"] },
+  // Quinta y Monoambiente también por título (16/11): hay "CASA QUINTA" cargadas como Casa y
+  // monoambientes cargados como Departamento; "quinta" encontraba 9 de 15.
+  { valor: "Quinta", alias: ["quinta", "quintas"], enTitulo: /\bquintas?\b/ },
   { valor: "Campo", alias: ["campo", "campos", "chacra"] },
   { valor: "Cochera", alias: ["cochera", "cocheras", "garage", "garaje"] },
-  { valor: "Monoambiente", alias: ["monoambiente", "mono"] },
+  { valor: "Monoambiente", alias: ["monoambiente", "mono"], enTitulo: /\bmonoambientes?\b/ },
 ];
 
 const OPERACIONES: { valor: string; alias: string[] }[] = [
@@ -64,6 +69,41 @@ const VACIAS = new Set([
   "en", "de", "del", "la", "el", "los", "las", "un", "una", "por",
   "para", "con", "y", "o", "a", "al", "busco", "quiero", "zona", "calle",
 ]);
+
+/**
+ * Abreviaturas de calles y nombres: LA MISMA LISTA que el buscador del CRM (función SQL
+ * public.buscar_propiedades_catalogo). "gral rodriguez" encontraba 5 propiedades en la web
+ * y 12 en el CRM: la web buscaba "gral" literal y la mayoría dice "General Rodríguez".
+ * Si cambia una, cambiar la otra.
+ */
+const ABREVIATURAS: [corta: string, larga: string][] = [
+  ["av", "avenida"], ["avda", "avenida"], ["avd", "avenida"],
+  ["pje", "pasaje"], ["psje", "pasaje"],
+  ["gral", "general"], ["grl", "general"],
+  ["cnel", "coronel"], ["crnel", "coronel"],
+  ["cap", "capitan"], ["tte", "teniente"],
+  ["dr", "doctor"], ["dra", "doctora"],
+  ["pres", "presidente"], ["pdte", "presidente"], ["pte", "presidente"],
+  ["bv", "bulevar"], ["blvd", "bulevar"], ["bvar", "bulevar"],
+  ["sta", "santa"], ["sto", "santo"],
+  ["gdor", "gobernador"], ["ing", "ingeniero"], ["alte", "almirante"],
+  ["diag", "diagonal"], ["cno", "camino"], ["esq", "esquina"], ["prof", "profesor"],
+];
+
+/** Las otras formas de escribir una palabra ("gral" → general, grl; "general" → gral, grl). */
+function equivalentes(palabra: string): string[] {
+  const largas = new Set(ABREVIATURAS.filter(([c, l]) => c === palabra || l === palabra).map(([, l]) => l));
+  const out = new Set<string>();
+  for (const [c, l] of ABREVIATURAS) if (largas.has(l)) { out.add(c); out.add(l); }
+  out.delete(palabra);
+  return [...out];
+}
+
+/** La palabra aparece en el texto, o alguna equivalente como comienzo de palabra. */
+function aparece(palabra: string, texto: string): boolean {
+  if (texto.includes(palabra)) return true;
+  return equivalentes(palabra).some((alt) => new RegExp(`(^|\\s)${alt}`).test(texto));
+}
 
 const PALABRAS_AMB = new Set(["amb", "ambiente", "ambientes"]);
 const PALABRAS_DORM = new Set(["dorm", "dorms", "dormitorio", "dormitorios", "habitacion", "habitaciones", "hab"]);
@@ -154,6 +194,13 @@ export interface DatosBuscables {
   dormitorios: number;
   /** Título, dirección, barrio, zona, ciudad, ubicación, código y amenities, normalizados. */
   texto: string;
+  /**
+   * Solo el título, normalizado: para reconocer el tipo por título (Dúplex, Quinta…).
+   * Antes se miraba `texto` entero y las comodidades colaban falsos ("monoambiente" traía
+   * un galpón). NO se llama `titulo` a propósito: los pines del mapa hacen
+   * `{ titulo, ...datosBuscables(p) }` y pisaría el título que se muestra.
+   */
+  tituloBuscable: string;
 }
 
 export function datosBuscables(p: {
@@ -175,6 +222,7 @@ export function datosBuscables(p: {
     operacion: p.tipo_operacion,
     ambientes: p.ambientes ?? 0,
     dormitorios: p.dormitorios ?? 0,
+    tituloBuscable: normalizar(p.titulo),
     texto: normalizar(
       [
         p.titulo,
@@ -197,11 +245,11 @@ export function datosBuscables(p: {
  * ¿La propiedad es del tipo pedido? Compara sin mayúsculas ni tildes, y para Dúplex y PH
  * mira también el título (los cargan como Departamento/Casa con "DUPLEX" en el título).
  */
-export function esDelTipo(tipoPedido: string, d: Pick<DatosBuscables, "tipo" | "texto">): boolean {
+export function esDelTipo(tipoPedido: string, d: Pick<DatosBuscables, "tipo" | "tituloBuscable">): boolean {
   const pedido = normalizar(tipoPedido);
   if (d.tipo === pedido) return true;
   const def = TIPOS.find((t) => normalizar(t.valor) === pedido);
-  return !!def?.enTitulo && def.enTitulo.test(d.texto);
+  return !!def?.enTitulo && def.enTitulo.test(d.tituloBuscable);
 }
 
 /** ¿La propiedad cumple la búsqueda? Cada palabra del texto libre tiene que aparecer. */
@@ -213,7 +261,7 @@ export function coincideBusqueda(b: BusquedaInterpretada, d: DatosBuscables): bo
   return normalizar(b.texto)
     .split(/\s+/)
     .filter(Boolean)
-    .every((palabra) => d.texto.includes(palabra));
+    .every((palabra) => aparece(palabra, d.texto));
 }
 
 /**
@@ -243,14 +291,17 @@ export function opcionesUnicas(valores: (string | null | undefined)[]): string[]
 }
 
 /**
- * Tipos para los filtros: los del stock (sin duplicados) más Dúplex si hay alguno con
- * "duplex" en el título, aunque esté cargado como Departamento.
+ * Tipos para los filtros: los del stock (sin duplicados) más los que se reconocen por
+ * título (Dúplex, Chalet…) si hay alguno así, aunque esté cargado con otro tipo.
  */
 export function tiposDelStock(
   props: { titulo?: string; tipo_propiedad: string }[],
 ): string[] {
   const tipos = opcionesUnicas(props.map((p) => p.tipo_propiedad));
-  const hayDuplex = props.some((p) => /\b(duplex|triplex)\b/.test(normalizar(p.titulo)));
-  if (hayDuplex && !tipos.some((t) => normalizar(t) === "duplex")) tipos.push("Dúplex");
+  for (const t of TIPOS) {
+    if (!t.enTitulo || tipos.some((x) => normalizar(x) === normalizar(t.valor))) continue;
+    const re = t.enTitulo;
+    if (props.some((p) => re.test(normalizar(p.titulo)))) tipos.push(t.valor);
+  }
   return tipos.sort((a, b) => a.localeCompare(b, "es"));
 }

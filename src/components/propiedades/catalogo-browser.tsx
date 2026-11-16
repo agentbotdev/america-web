@@ -33,6 +33,14 @@ const OPERACIONES = [
   { value: "venta", label: "En venta" },
   { value: "alquiler", label: "En alquiler" },
 ];
+// Ambientes (16/11): el CRM lo tiene como filtro (mínimo) y la web solo lo entendía si se
+// escribía "3 ambientes" en el buscador. Mismo criterio que el CRM: "2+" = 2 o más.
+const AMBIENTES = [
+  { value: "1", label: "1+ amb." },
+  { value: "2", label: "2+ amb." },
+  { value: "3", label: "3+ amb." },
+  { value: "4", label: "4+ amb." },
+];
 const DORMITORIOS = [
   { value: "1", label: "1+ dorm." },
   { value: "2", label: "2+ dorm." },
@@ -63,6 +71,7 @@ type Filters = {
   operacion: string;
   tipo: string;
   barrio: string;
+  ambientes: string;
   dormitorios: string;
   banos: string;
   precio_min: string;
@@ -78,6 +87,7 @@ export const FILTROS_VACIOS: Filters = {
   operacion: "all",
   tipo: "all",
   barrio: "all",
+  ambientes: "all",
   dormitorios: "all",
   banos: "all",
   precio_min: "",
@@ -135,6 +145,10 @@ function filtrar(items: Propiedad[], f: Filters): Propiedad[] {
   if (f.tipo !== "all") r = r.filter(({ p }) => esDelTipo(f.tipo, datosBuscables(p)));
   if (f.barrio !== "all") r = r.filter(({ p }) => normalizar(p.barrio) === normalizar(f.barrio));
 
+  if (f.ambientes !== "all") {
+    const min = Number(f.ambientes);
+    if (Number.isFinite(min)) r = r.filter(({ p }) => (p.ambientes ?? 0) >= min);
+  }
   if (f.dormitorios !== "all") {
     const min = Number(f.dormitorios);
     if (Number.isFinite(min)) r = r.filter(({ p }) => (p.dormitorios ?? 0) >= min);
@@ -208,6 +222,7 @@ export function CatalogoBrowser({
     if (next.operacion !== "all") p.set("operacion", next.operacion);
     if (next.tipo !== "all") p.set("tipo", next.tipo);
     if (next.barrio !== "all") p.set("barrio", next.barrio);
+    if (next.ambientes !== "all") p.set("ambientes", next.ambientes);
     if (next.dormitorios !== "all") p.set("dormitorios", next.dormitorios);
     if (next.banos !== "all") p.set("banos", next.banos);
     if (next.precio_min) p.set("precio_min", next.precio_min);
@@ -266,17 +281,14 @@ export function CatalogoBrowser({
     const interpretada = interpretarBusqueda(param("q") ?? "");
     setF((prev) => ({
       ...prev,
-      // Tipo y operación pasan a sus selects; ambientes/dormitorios quedan en la frase
-      // (no tienen select propio) para que el filtro en memoria los siga aplicando.
-      q: [
-        interpretada.texto,
-        interpretada.ambientes ? `${interpretada.ambientes} ambientes` : "",
-        interpretada.dormitorios ? `${interpretada.dormitorios} dormitorios` : "",
-      ].filter(Boolean).join(" "),
+      // Tipo, operación, ambientes y dormitorios pasan a sus selects (16/11: ambientes ya
+      // tiene select propio); en la frase queda solo el texto libre.
+      q: interpretada.texto,
       operacion: param("operacion") ?? interpretada.operacion ?? prev.operacion,
       tipo: param("tipo") ?? interpretada.tipo ?? prev.tipo,
       barrio: param("barrio") ?? prev.barrio,
-      dormitorios: param("dormitorios") ?? prev.dormitorios,
+      ambientes: param("ambientes") ?? (interpretada.ambientes ? String(interpretada.ambientes) : prev.ambientes),
+      dormitorios: param("dormitorios") ?? (interpretada.dormitorios ? String(interpretada.dormitorios) : prev.dormitorios),
       banos: param("banos") ?? prev.banos,
       precio_min: param("precio_min") ?? prev.precio_min,
       precio_max: param("precio_max") ?? prev.precio_max,
@@ -315,6 +327,7 @@ export function CatalogoBrowser({
     f.operacion !== "all" ||
     f.tipo !== "all" ||
     f.barrio !== "all" ||
+    f.ambientes !== "all" ||
     f.dormitorios !== "all" ||
     f.banos !== "all" ||
     f.precio_min !== "" ||
@@ -328,6 +341,7 @@ export function CatalogoBrowser({
     (f.operacion !== "all" ? 1 : 0) +
     (f.tipo !== "all" ? 1 : 0) +
     (f.barrio !== "all" ? 1 : 0) +
+    (f.ambientes !== "all" ? 1 : 0) +
     (f.dormitorios !== "all" ? 1 : 0) +
     (f.banos !== "all" ? 1 : 0) +
     (f.precio_min || f.precio_max ? 1 : 0) +
@@ -342,6 +356,8 @@ export function CatalogoBrowser({
       out.push({ key: "operacion", label: labelOperacion(f.operacion as "venta" | "alquiler"), clear: () => set("operacion", "all") });
     if (f.tipo !== "all") out.push({ key: "tipo", label: f.tipo, clear: () => set("tipo", "all") });
     if (f.barrio !== "all") out.push({ key: "barrio", label: f.barrio, clear: () => set("barrio", "all") });
+    if (f.ambientes !== "all")
+      out.push({ key: "ambientes", label: AMBIENTES.find((a) => a.value === f.ambientes)?.label ?? `${f.ambientes}+ amb.`, clear: () => set("ambientes", "all") });
     if (f.dormitorios !== "all")
       out.push({ key: "dormitorios", label: DORMITORIOS.find((d) => d.value === f.dormitorios)?.label ?? f.dormitorios, clear: () => set("dormitorios", "all") });
     if (f.banos !== "all")
@@ -447,6 +463,14 @@ export function CatalogoBrowser({
           <SelectContent>
             <SelectItem value="all">Todas las zonas</SelectItem>
             {barrios.map((b) => (<SelectItem key={b} value={b}>{b}</SelectItem>))}
+          </SelectContent>
+        </Select>
+
+        <Select value={f.ambientes} onValueChange={(v) => set("ambientes", String(v))}>
+          <SelectTrigger className="h-11 lg:h-9 w-full lg:w-32"><SelectValue>{(v) => (!v || v === "all" ? "Amb." : AMBIENTES.find((a) => a.value === v)?.label ?? `${v}+ amb.`)}</SelectValue></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Ambientes</SelectItem>
+            {AMBIENTES.map((a) => (<SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>))}
           </SelectContent>
         </Select>
 
