@@ -3,7 +3,7 @@
 // que la card del deck muestra — no la Propiedad completa (descripción larga,
 // 40 tags, todas las fotos…). Menos bytes en el RSC payload, misma card.
 
-import { formatPrecio, formatM2, labelOperacion, tituloPropiedad } from "@/lib/format";
+import { formatPrecio, formatSuperficie, labelOperacion, tituloPropiedad } from "@/lib/format";
 import type { Propiedad } from "@/types";
 
 export interface DeckItem {
@@ -44,7 +44,7 @@ export function toDeckItems(props: Propiedad[]): DeckItem[] {
       fotoAlt: portada?.alt,
       dormitorios: p.dormitorios,
       banos: p.banos,
-      m2: formatM2(p.superficie_total ?? p.superficie_cubierta ?? p.metros_cubiertos),
+      m2: formatSuperficie(p.superficie_total ?? p.superficie_cubierta ?? p.metros_cubiertos, p.tipo_propiedad),
     };
   });
 }

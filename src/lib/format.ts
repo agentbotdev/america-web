@@ -28,6 +28,46 @@ export function formatM2(m2: number | null | undefined) {
   return `${numFmt.format(m2)} m²`;
 }
 
+const haFmt = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2 });
+// Rango de tildes armado con fromCharCode, como en buscador.ts (target ES2017: sin \p{...}).
+const TILDES = new RegExp("[" + String.fromCharCode(0x300) + "-" + String.fromCharCode(0x36f) + "]", "g");
+const sinAcentos = (s: string) => s.normalize("NFD").replace(TILDES, "").trim().toLowerCase();
+/** Tipos de tierra: desde 1 ha la superficie va en hectáreas (mismo criterio que el CRM). */
+const TIPOS_EN_HECTAREAS = ["campo", "terreno", "lote", "quinta"];
+
+/**
+ * Superficie TOTAL para mostrar (19/11): un campo de 600 ha salía como "6.000.000 m²" mientras el
+ * CRM y Mercado Libre ya decían "600 ha". En tipos de tierra, desde 10.000 m² va en hectáreas;
+ * el resto, igual que formatM2.
+ */
+export function formatSuperficie(m2: number | null | undefined, tipo?: string | null) {
+  if (m2 == null || Number.isNaN(m2) || m2 <= 0) return null;
+  if (m2 >= 10_000 && TIPOS_EN_HECTAREAS.includes(sinAcentos(tipo ?? ""))) {
+    return `${haFmt.format(m2 / 10_000)} ha`;
+  }
+  return formatM2(m2);
+}
+
+/**
+ * Antigüedad para mostrar (19/11). `antiguedad = 0` es el valor POR DEFECTO de la base (95 de 163
+ * fichas), no "a estrenar": la web le decía "A estrenar" a 30 casas y a 29 terrenos. Mismo criterio
+ * que el aviso de Mercado Libre: a estrenar solo si la ficha lo dice (etiqueta o título). En
+ * terrenos y lotes no se muestra: no hay construcción.
+ */
+export function textoAntiguedad(p: {
+  antiguedad?: number | null;
+  tipo_propiedad?: string | null;
+  titulo?: string | null;
+  tags?: string[] | null;
+}): string | null {
+  const tipo = sinAcentos(p.tipo_propiedad ?? "");
+  if (tipo === "terreno" || tipo === "lote") return null;
+  const a = p.antiguedad;
+  if (a != null && a > 0) return `${numFmt.format(a)} ${a === 1 ? "año" : "años"}`;
+  const dice = (p.tags ?? []).some((t) => sinAcentos(t) === "a estrenar") || /a\s+estrenar/i.test(p.titulo ?? "");
+  return dice ? "A estrenar" : null;
+}
+
 export function formatNumero(n: number) {
   return numFmt.format(Math.round(n));
 }

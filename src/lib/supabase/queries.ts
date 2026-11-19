@@ -19,7 +19,8 @@ const COLS =
   "superficie_descubierta,metros_cubiertos,frente,fondo,precio,moneda,precio_venta," +
   "precio_alquiler,moneda_venta,moneda_alquiler,precio_visible,expensas,apto_credito," +
   "barrio,ciudad,zona,provincia,direccion_publica,location_short,location_full," +
-  "coordenadas_lat,coordenadas_lng,destacada_web,alquiler_temporal,tags,tiene_video,orientacion,videos";
+  "coordenadas_lat,coordenadas_lng,destacada_web,alquiler_temporal,tags,tiene_video,orientacion,videos," +
+  "caracteristicas";
 
 const FOTO_COLS = "propiedad_id,url,thumbnail,descripcion,es_portada,es_plano,orden";
 
@@ -89,6 +90,17 @@ function videosDe(v: unknown): { url: string; titulo?: string }[] {
   });
 }
 
+// `propiedades.caracteristicas` es jsonb {clave: valor}. Solo pasan strings no vacíos y números.
+function caracteristicasDe(v: unknown): Record<string, string | number> {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+  const out: Record<string, string | number> = {};
+  for (const [k, x] of Object.entries(v as Record<string, unknown>)) {
+    if (typeof x === "number" && Number.isFinite(x)) out[k] = x;
+    else if (typeof x === "string" && x.trim()) out[k] = x.trim();
+  }
+  return out;
+}
+
 function mapRow(r: Record<string, unknown>, fotos: FotoPropiedad[]): Propiedad {
   const id = String(r.tokko_id);
   const operacion: TipoOperacion = r.tipo_operacion === "alquiler" ? "alquiler" : "venta";
@@ -150,6 +162,7 @@ function mapRow(r: Record<string, unknown>, fotos: FotoPropiedad[]): Propiedad {
     tiene_video: Boolean(r.tiene_video),
     videos: videosDe(r.videos),
     orientacion: str(r.orientacion),
+    caracteristicas: caracteristicasDe(r.caracteristicas),
     fotos,
   };
 }

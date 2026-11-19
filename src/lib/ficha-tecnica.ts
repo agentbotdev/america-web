@@ -1,5 +1,6 @@
 import type { Propiedad } from "@/types";
-import { formatM2, formatNumero, formatPrecio, labelOperacion } from "@/lib/format";
+import { formatM2, formatNumero, formatPrecio, formatSuperficie, labelOperacion, textoAntiguedad } from "@/lib/format";
+import { caracteristicasParaMostrar } from "@/lib/caracteristicas";
 
 // Ficha técnica de una PROPIEDAD, organizada por categorías. Cada item se omite
 // si no tiene valor (no inventamos datos: lo que no está en la DB no se muestra).
@@ -49,7 +50,7 @@ export function fichaTecnica(p: Propiedad): FichaCategoria[] {
 
   // 2. Superficies
   const superficies: FichaItem[] = [];
-  push(superficies, "Superficie total", m2(p.superficie_total));
+  push(superficies, "Superficie total", formatSuperficie(p.superficie_total, p.tipo_propiedad));
   push(superficies, "Superficie cubierta", m2(p.superficie_cubierta));
   push(superficies, "Superficie semicubierta", m2(p.superficie_semicubierta));
   push(superficies, "Superficie descubierta", m2(p.superficie_descubierta));
@@ -61,15 +62,9 @@ export function fichaTecnica(p: Propiedad): FichaCategoria[] {
   const caracteristicas: FichaItem[] = [];
   push(caracteristicas, "Tipo", p.tipo_propiedad);
   push(caracteristicas, "Operación", labelOperacion(p.tipo_operacion));
-  push(
-    caracteristicas,
-    "Antigüedad",
-    p.antiguedad != null && p.antiguedad > 0
-      ? `${formatNumero(p.antiguedad)} ${p.antiguedad === 1 ? "año" : "años"}`
-      : p.antiguedad === 0
-        ? "A estrenar"
-        : null,
-  );
+  push(caracteristicas, "Antigüedad", textoAntiguedad(p));
+  // Los campos propios del tipo (forma del terreno, tipo de campo, altura del galpón...).
+  for (const c of caracteristicasParaMostrar(p.caracteristicas)) push(caracteristicas, c.label, c.value);
   push(caracteristicas, "Orientación", p.orientacion);
   // "No especificado" es ruido: solo mostramos el dato cuando es accionable.
   push(

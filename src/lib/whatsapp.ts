@@ -3,7 +3,7 @@
 // propiedad ya cargada. Cero fricción, cero "contame de nuevo".
 
 import type { Agencia, Propiedad } from "@/types";
-import { tituloPropiedad, formatPrecio, formatM2 } from "@/lib/format";
+import { tituloPropiedad, formatPrecio, formatSuperficie } from "@/lib/format";
 
 import { SITE_URL as SITE } from "@/lib/site";
 /** Construye el link oficial de WhatsApp con el texto urlencodeado. */
@@ -30,7 +30,7 @@ function specs(p: Propiedad): string {
     p.dormitorios ? `🛏️ ${p.dormitorios} dorm.` : null,
     p.banos ? `🚿 ${p.banos} baño${p.banos > 1 ? "s" : ""}` : null,
     p.cocheras ? `🚗 ${p.cocheras} coch.` : null,
-    formatM2(p.superficie_total) ? `📐 ${formatM2(p.superficie_total)}` : null,
+    formatSuperficie(p.superficie_total, p.tipo_propiedad) ? `📐 ${formatSuperficie(p.superficie_total, p.tipo_propiedad)}` : null,
     p.expensas ? `🏢 Expensas ${formatPrecio(p.expensas, "ARS")}` : null,
   ].filter(Boolean);
   return partes.join("\n");

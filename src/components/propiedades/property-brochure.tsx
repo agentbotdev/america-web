@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { AGENCIA } from "@/data/agencia";
 import { mensajePropiedad, waLink } from "@/lib/whatsapp";
-import { formatPrecio, formatM2, tituloPropiedad, labelOperacion } from "@/lib/format";
+import { formatPrecio, formatM2, formatSuperficie, textoAntiguedad, tituloPropiedad, labelOperacion } from "@/lib/format";
 import { useMounted } from "@/lib/use-client-hooks";
 import { cn } from "@/lib/utils";
 import type { Propiedad } from "@/types";
@@ -60,7 +60,7 @@ function BrochureDoc({ p, onClose }: { p: Propiedad; onClose: () => void }) {
     .slice(0, 4);
   const ubicacion =
     p.location_full ?? [p.barrio, p.zona, p.ciudad, p.provincia].filter(Boolean).join(", ");
-  const m2 = formatM2(p.superficie_total ?? p.superficie_cubierta ?? p.metros_cubiertos);
+  const m2 = formatSuperficie(p.superficie_total ?? p.superficie_cubierta ?? p.metros_cubiertos, p.tipo_propiedad);
   const url = urlPropiedad(p);
 
   // Specs físicas (solo las que existen).
@@ -76,9 +76,7 @@ function BrochureDoc({ p, onClose }: { p: Propiedad; onClose: () => void }) {
     ...(formatM2(p.superficie_cubierta)
       ? [{ label: "Sup. cubierta", value: formatM2(p.superficie_cubierta)! }]
       : []),
-    ...(p.antiguedad != null
-      ? [{ label: "Antigüedad", value: p.antiguedad === 0 ? "A estrenar" : `${p.antiguedad} años` }]
-      : []),
+    ...(textoAntiguedad(p) ? [{ label: "Antigüedad", value: textoAntiguedad(p)! }] : []),
     ...(p.plantas ? [{ label: "Plantas", value: String(p.plantas) }] : []),
     ...(p.orientacion ? [{ label: "Orientación", value: p.orientacion }] : []),
     ...(p.expensas

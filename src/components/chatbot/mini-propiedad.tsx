@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { ArrowUpRight, BedDouble, Ruler } from "lucide-react";
 import { PropertyImage } from "../propiedades/property-image";
-import { formatPrecio, formatM2 } from "@/lib/format";
+import { formatPrecio, formatSuperficie } from "@/lib/format";
 import type { Propiedad } from "@/types";
 
 /* ------------------------------------------------------------------ */
@@ -28,7 +28,7 @@ export function MiniPropiedad({
 }) {
   const portada = p.fotos.find((f) => f.es_portada) ?? p.fotos[0];
   const ubicacion = [p.barrio, p.ciudad].filter(Boolean).join(", ");
-  const m2 = formatM2(p.superficie_total ?? p.superficie_cubierta ?? p.metros_cubiertos);
+  const m2 = formatSuperficie(p.superficie_total ?? p.superficie_cubierta ?? p.metros_cubiertos, p.tipo_propiedad);
 
   return (
     <motion.button

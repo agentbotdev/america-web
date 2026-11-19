@@ -5,7 +5,7 @@ import { FavoriteButton } from "../favoritos/favorite-button";
 import { WhatsappButton } from "../whatsapp/whatsapp-button";
 import { AGENCIA } from "@/data/agencia";
 import { mensajePropiedad } from "@/lib/whatsapp";
-import { formatPrecio, formatM2, labelOperacion, tituloPropiedad, suavizarMayusculas } from "@/lib/format";
+import { formatPrecio, formatSuperficie, labelOperacion, tituloPropiedad, suavizarMayusculas } from "@/lib/format";
 import type { Propiedad } from "@/types";
 
 // Card del catálogo: 100% clickeable. El link-overlay absoluto (z-10) cubre toda
@@ -42,7 +42,7 @@ function PropertyCard({ propiedad: p }: { propiedad: Propiedad }) {
   const ubicacion = direccion
     ? [direccion, barrioCard !== zonaCard ? barrioCard : null].filter(Boolean).join(" · ")
     : [p.barrio, p.ciudad].filter(Boolean).join(", ");
-  const m2 = formatM2(p.superficie_total ?? p.superficie_cubierta ?? p.metros_cubiertos);
+  const m2 = formatSuperficie(p.superficie_total ?? p.superficie_cubierta ?? p.metros_cubiertos, p.tipo_propiedad);
   // El título que cargó la inmobiliaria (reclamo 24/10: el compuesto ocultaba el suyo).
   const titulo = tituloPropiedad(p);
   const precio = precioCard(p);

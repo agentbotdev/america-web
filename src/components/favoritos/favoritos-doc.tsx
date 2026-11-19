@@ -8,7 +8,7 @@ import { Printer, ArrowLeft, Heart, Check, Loader2 } from "lucide-react";
 import { useFavorites, useHydratedFavorites } from "./favorites-store";
 import { AGENCIA } from "@/data/agencia";
 import { mensajeFavoritos, mensajePropiedad, waLink } from "@/lib/whatsapp";
-import { formatPrecio, formatM2, tituloPropiedad, labelOperacion } from "@/lib/format";
+import { formatPrecio, formatM2, formatSuperficie, textoAntiguedad, tituloPropiedad, labelOperacion } from "@/lib/format";
 import type { Propiedad } from "@/types";
 
 /* Paleta del documento imprimible. Va con HEX literales (no tokens CSS) porque
@@ -35,7 +35,7 @@ function PropiedadHoja({ p }: { p: Propiedad }) {
   const foto = p.fotos.find((f) => f.es_portada) ?? p.fotos[0];
   const ubicacion =
     p.location_full ?? [p.barrio, p.ciudad, p.provincia].filter(Boolean).join(", ");
-  const m2 = formatM2(p.superficie_total ?? p.superficie_cubierta ?? p.metros_cubiertos);
+  const m2 = formatSuperficie(p.superficie_total ?? p.superficie_cubierta ?? p.metros_cubiertos, p.tipo_propiedad);
 
   // Specs físicas del inmueble (solo las que existen).
   const specs: { label: string; value: string }[] = [
@@ -50,9 +50,7 @@ function PropiedadHoja({ p }: { p: Propiedad }) {
     ...(formatM2(p.superficie_cubierta)
       ? [{ label: "Sup. cubierta", value: formatM2(p.superficie_cubierta)! }]
       : []),
-    ...(p.antiguedad != null
-      ? [{ label: "Antigüedad", value: p.antiguedad === 0 ? "A estrenar" : `${p.antiguedad} años` }]
-      : []),
+    ...(textoAntiguedad(p) ? [{ label: "Antigüedad", value: textoAntiguedad(p)! }] : []),
     ...(p.plantas ? [{ label: "Plantas", value: String(p.plantas) }] : []),
     ...(p.orientacion ? [{ label: "Orientación", value: p.orientacion }] : []),
     ...(p.expensas

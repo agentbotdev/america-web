@@ -89,6 +89,9 @@ export interface Propiedad {
   /** Videos de YouTube de la ficha (propiedades.videos). */
   videos?: VideoPropiedad[];
   orientacion?: string;
+  /** Campos propios del tipo que se cargan en el CRM (forma del terreno, tipo de campo,
+   *  altura del galpón...). Claves de `config/camposPorTipo.ts` del CRM; vacío = sin datos. */
+  caracteristicas?: Record<string, string | number>;
 
   // Media
   fotos: FotoPropiedad[];
