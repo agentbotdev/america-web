@@ -60,7 +60,11 @@ export function textoBuscable(s: string | null | undefined): string {
  * "Departamento" o "Casa" con "DUPLEX" en el título).
  */
 const TIPOS: { valor: string; alias: string[]; incluye?: string[]; enTitulo?: RegExp }[] = [
-  { valor: "Departamento", alias: ["departamento", "departamentos", "depto", "deptos", "dpto", "dptos", "depa", "dto"], incluye: ["monoambiente"] },
+  { valor: "Departamento", alias: ["departamento", "departamentos", "depto", "deptos", "dpto", "dptos", "depa", "dto"], incluye: ["monoambiente", "piso entero", "semipiso"] },
+  // 24/11: tipos nuevos del CRM (pedido de América). Son departamentos: buscar "departamento"
+  // los incluye. "piso" solo no es alias: "3er piso" no es un piso entero.
+  { valor: "Piso entero", alias: [] },
+  { valor: "Semipiso", alias: ["semipiso", "semipisos"] },
   // "chalet" NO es alias de Casa (16/11): buscar "chalet" devolvía TODAS las casas. Al revés sí:
   // un chalet es una casa, así que buscar "casa" los incluye.
   { valor: "Casa", alias: ["casa", "casas", "vivienda", "viviendas"], incluye: ["chalet"] },
