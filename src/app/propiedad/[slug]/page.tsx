@@ -18,7 +18,7 @@ import { WhatsappPropiedad } from "@/components/whatsapp/whatsapp-propiedad";
 import { mensajePropiedad } from "@/lib/whatsapp";
 import { SITE_URL } from "@/lib/site";
 import { Badge } from "@/components/ui/badge";
-import { formatPrecio, labelOperacion, tituloPropiedad } from "@/lib/format";
+import { formatPrecio, labelOperacion, suavizarMayusculas, tituloPropiedad } from "@/lib/format";
 
 // ISR: cookieless + prerender por slug → click a una propiedad = instantáneo.
 export const revalidate = 120;
@@ -83,7 +83,18 @@ export default async function PropiedadPage({
   if (!p) notFound();
 
   const titulo = tituloPropiedad(p);
-  const ubicacion = [p.barrio, p.zona, p.ciudad].filter(Boolean).join(", ");
+  // 24/11 (América: "en la web no sale la dirección exacta"). La ficha armaba la ubicación solo
+  // con barrio/zona/ciudad, mientras la card del catálogo ya mostraba la dirección. Se antepone
+  // `direccion_publica` (la que la inmobiliaria eligió publicar), y no se repite un lugar que la
+  // dirección ya nombra ("Maipú y Pagano, Moreno" + "Moreno").
+  const direccion = suavizarMayusculas(p.direccion_publica);
+  const sinAcentos = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const lugar = [p.barrio, p.zona, p.ciudad]
+    .filter((x): x is string => Boolean(x))
+    .filter((x, i, arr) => arr.indexOf(x) === i)
+    .filter((x) => !direccion || !sinAcentos(direccion).includes(sinAcentos(x)))
+    .join(", ");
+  const ubicacion = [direccion, lugar].filter(Boolean).join(" · ");
   const precio = precioFicha(p);
 
   const jsonLd = {
@@ -105,6 +116,7 @@ export default async function PropiedadPage({
       : {}),
     address: {
       "@type": "PostalAddress",
+      ...(direccion ? { streetAddress: direccion } : {}),
       addressLocality: p.barrio ?? p.ciudad,
       addressRegion: p.provincia,
       addressCountry: "AR",
