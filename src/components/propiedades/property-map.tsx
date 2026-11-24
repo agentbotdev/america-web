@@ -1,5 +1,10 @@
 import { MapPin } from "lucide-react";
 import type { Propiedad } from "@/types";
+import { MapaUbicacion } from "./mapa-ubicacion";
+
+// 24/11: con NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY el mapa es de Google (mapa, satélite y Street
+// View, ver mapa-ubicacion.tsx). Sin la clave, el de OpenStreetMap de siempre.
+const CLAVE_GOOGLE = (process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY ?? "").trim();
 
 // Mapa de ubicación con iframe de OpenStreetMap embed (sin librerías, sin API key).
 // Si la propiedad no tiene coordenadas, no renderiza nada. La ubicación textual
@@ -38,13 +43,17 @@ export function PropertyMap({ propiedad: p }: { propiedad: Propiedad }) {
           <MapPin className="size-4 shrink-0 text-brand" />
           <p className="text-sm font-medium text-foreground">{ubicacion}</p>
         </div>
-        <iframe
-          src={src}
-          title={`Mapa de ${ubicacion}`}
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          className="block aspect-[16/10] w-full border-0 grayscale-[0.15]"
-        />
+        {CLAVE_GOOGLE ? (
+          <MapaUbicacion lat={lat} lng={lng} titulo={ubicacion} clave={CLAVE_GOOGLE} />
+        ) : (
+          <iframe
+            src={src}
+            title={`Mapa de ${ubicacion}`}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="block aspect-[16/10] w-full border-0 grayscale-[0.15]"
+          />
+        )}
       </div>
     </section>
   );
