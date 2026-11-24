@@ -32,11 +32,11 @@ function srcGoogle(clave: string, lat: number, lng: number, vista: Vista): strin
 export function MapaUbicacion({ lat, lng, titulo, clave }: { lat: number; lng: number; titulo: string; clave: string }) {
   const [vista, setVista] = useState<Vista>("mapa");
   return (
-    <div className="relative">
+    <div>
       <div
         role="tablist"
         aria-label="Vista del mapa"
-        className="absolute left-3 top-3 z-10 flex gap-1 rounded-full bg-background/90 p-1 shadow-sm backdrop-blur"
+        className="flex gap-1 border-b border-border px-3 py-2"
       >
         {VISTAS.map((v) => (
           <button

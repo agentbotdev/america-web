@@ -1,5 +1,6 @@
 import { MapPin } from "lucide-react";
 import type { Propiedad } from "@/types";
+import { suavizarMayusculas } from "@/lib/format";
 import { MapaUbicacion } from "./mapa-ubicacion";
 
 // 24/11: con NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY el mapa es de Google (mapa, satélite y Street
@@ -28,8 +29,9 @@ export function PropertyMap({ propiedad: p }: { propiedad: Propiedad }) {
     `https://www.openstreetmap.org/export/embed.html` +
     `?bbox=${bbox(lat, lng)}&layer=mapnik&marker=${lat}%2C${lng}`;
 
+  const lugar = [p.barrio, p.zona, p.ciudad].filter(Boolean).join(", ");
   const ubicacion =
-    [p.barrio, p.zona, p.ciudad].filter(Boolean).join(", ") || "Ubicación de la propiedad";
+    [suavizarMayusculas(p.direccion_publica), lugar].filter(Boolean).join(" · ") || "Ubicación de la propiedad";
 
   return (
     <section className="mt-14">
