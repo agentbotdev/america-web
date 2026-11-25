@@ -301,15 +301,24 @@ export function CatalogoBrowser({
   // compartidos) se aplican acá, una sola vez tras el mount. La frase libre
   // `q` pasa por interpretarBusqueda igual que antes ("casa en venta" →
   // tipo + operación); los params explícitos tienen prioridad.
+  // Lo buscable de cada propiedad se calcula UNA vez por catálogo, y el vocabulario para
+  // corregir errores de tipeo sale de esos mismos datos (barrios, calles, títulos reales).
+  const datos = useMemo(() => new Map(propiedades.map((p) => [p, datosBuscables(p)])), [propiedades]);
+  const vocabulario = useMemo(() => crearVocabulario(Array.from(datos.values())), [datos]);
+
+  // 24/11: la frase de la URL se interpreta CON el vocabulario del stock. Sin él, la corrección
+  // de tipeo no conocía las zonas y "lote moreno" (desde el buscador de la home) se volvía
+  // "mono" + Terreno: cero resultados. Se aplica una sola vez.
+  const urlAplicada = useRef(false);
   useEffect(() => {
+    if (urlAplicada.current) return;
+    urlAplicada.current = true;
     const sp = new URLSearchParams(window.location.search);
     if ([...sp.keys()].length === 0) return;
     // Un parámetro vacío (`tipo=`) es "sin filtro", no "igual a nada": el form del
     // hero los mandaba así y el catálogo quedaba en cero resultados (08/10).
     const param = (clave: string) => sp.get(clave)?.trim() || null;
-    // Sin vocabulario del stock acá (todavía no hace falta): los tipos y operaciones del rubro
-    // se corrigen igual; el resto lo corrige el filtrado, que sí lo tiene.
-    const interpretada = interpretarBusqueda(param("q") ?? "");
+    const interpretada = interpretarBusqueda(param("q") ?? "", vocabulario);
     setF((prev) => ({
       ...prev,
       // Tipo, operación, ambientes y dormitorios pasan a sus selects (16/11: ambientes ya
@@ -329,12 +338,8 @@ export function CatalogoBrowser({
       superficie_min: param("superficie_min") ?? prev.superficie_min,
       orden: param("orden") ?? prev.orden,
     }));
-  }, []);
+  }, [vocabulario]);
 
-  // Lo buscable de cada propiedad se calcula UNA vez por catálogo, y el vocabulario para
-  // corregir errores de tipeo sale de esos mismos datos (barrios, calles, títulos reales).
-  const datos = useMemo(() => new Map(propiedades.map((p) => [p, datosBuscables(p)])), [propiedades]);
-  const vocabulario = useMemo(() => crearVocabulario(Array.from(datos.values())), [datos]);
   const filtrado = useMemo(
     () => filtrar(propiedades, f, (p) => datos.get(p) ?? datosBuscables(p), vocabulario),
     [propiedades, f, datos, vocabulario],
