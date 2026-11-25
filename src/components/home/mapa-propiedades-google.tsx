@@ -149,10 +149,10 @@ export function MapaPropiedadesGoogle({
             >
               {/* En el celu el mapa mide 340 px y Google le da a la ventanita ~175 px: la mini-card
                   vertical (200 px) salía con scroll y sin el "Ver ficha" (QA 25/11). Ahí va
-                  horizontal (~80 px); desde sm, con el mapa más alto, vertical con la foto grande. */}
+                  horizontal (~80 px de alto y 184 de ancho: Google le da ~187 px de ancho útil en ese mapa); desde sm, con el mapa más alto, vertical con la foto grande. */}
               <Link
                 href={`/propiedad/${elegidoVisible.slug}`}
-                className="flex w-[240px] items-center gap-2.5 text-[#1a1a1a] no-underline sm:block sm:w-[200px]"
+                className="flex w-[184px] items-center gap-2 text-[#1a1a1a] no-underline sm:block sm:w-[200px]"
               >
                 {elegidoVisible.fotoUrl && (
                   // eslint-disable-next-line @next/next/no-img-element -- miniatura de un popup de Google: next/image no aporta acá
@@ -160,7 +160,7 @@ export function MapaPropiedadesGoogle({
                     src={elegidoVisible.fotoUrl}
                     alt=""
                     loading="lazy"
-                    className="block size-[76px] shrink-0 rounded object-cover sm:h-[110px] sm:w-full"
+                    className="block size-16 shrink-0 rounded object-cover sm:h-[110px] sm:w-full"
                   />
                 )}
                 <div className="min-w-0">
