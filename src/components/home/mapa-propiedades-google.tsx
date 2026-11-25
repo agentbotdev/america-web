@@ -147,9 +147,12 @@ export function MapaPropiedadesGoogle({
               headerDisabled
               onClose={() => setElegido(null)}
             >
+              {/* En el celu el mapa mide 340 px y Google le da a la ventanita ~175 px: la mini-card
+                  vertical (200 px) salía con scroll y sin el "Ver ficha" (QA 25/11). Ahí va
+                  horizontal (~80 px); desde sm, con el mapa más alto, vertical con la foto grande. */}
               <Link
                 href={`/propiedad/${elegidoVisible.slug}`}
-                className="block w-[200px] text-[#1a1a1a] no-underline"
+                className="flex w-[240px] items-center gap-2.5 text-[#1a1a1a] no-underline sm:block sm:w-[200px]"
               >
                 {elegidoVisible.fotoUrl && (
                   // eslint-disable-next-line @next/next/no-img-element -- miniatura de un popup de Google: next/image no aporta acá
@@ -157,12 +160,14 @@ export function MapaPropiedadesGoogle({
                     src={elegidoVisible.fotoUrl}
                     alt=""
                     loading="lazy"
-                    className="block h-[110px] w-full rounded object-cover"
+                    className="block size-[76px] shrink-0 rounded object-cover sm:h-[110px] sm:w-full"
                   />
                 )}
-                <p className="mt-2 line-clamp-2 text-[13px] font-semibold leading-snug">{elegidoVisible.titulo}</p>
-                <p className="mt-1.5 text-[15px] font-bold tabular-nums">{elegidoVisible.precio}</p>
-                <p className="mb-0.5 mt-1.5 text-xs font-semibold text-[#c41f0d]">Ver ficha →</p>
+                <div className="min-w-0">
+                  <p className="line-clamp-2 text-[13px] font-semibold leading-snug sm:mt-2">{elegidoVisible.titulo}</p>
+                  <p className="mt-1 text-[15px] font-bold tabular-nums sm:mt-1.5">{elegidoVisible.precio}</p>
+                  <p className="mb-0.5 mt-1 text-xs font-semibold text-[#c41f0d] sm:mt-1.5">Ver ficha →</p>
+                </div>
               </Link>
             </InfoWindow>
           )}
